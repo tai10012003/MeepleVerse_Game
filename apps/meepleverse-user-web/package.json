@@ -3,19 +3,23 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3000",
+    "dev": "pnpm --filter @meepleverse/contracts build && next dev --port 3000",
     "build": "next build",
     "start": "next start --port 3000",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "typecheck": "pnpm --filter @meepleverse/contracts build && tsc --noEmit",
+    "lint": "eslint .",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@colyseus/sdk": "0.18.10",
+    "@meepleverse/contracts": "workspace:*",
     "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@meepleverse/config": "workspace:*",
+    "@playwright/test": "1.65.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

@@ -1,1 +1,5 @@
-export default function Layout({ children }: { children: React.ReactNode }) { return children; }
+import { SiteHeader } from "@/layouts/SiteHeader";
+import { SiteFooter } from "@/layouts/SiteFooter";
+export default function SiteLayout({ children }: { children: React.ReactNode }) {
+  return <><SiteHeader />{children}<SiteFooter /></>;
+}

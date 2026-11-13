@@ -18,7 +18,7 @@ Các file môi trường local được Git bỏ qua. Chỉ sao chép khi chưa 
 - API: http://localhost:5000/health
 - Admin: http://localhost:9000
 
-Hai trang gọi health check trực tiếp từ trình duyệt, có trạng thái lỗi và nút thử lại.
+Admin giữ health check. User web đã có tạo/vào phòng và lobby realtime; xem user-lobby.md.
 Backend chỉ cho phép CORS cho các origin trong CORS_ORIGINS.
 Đây chưa phải cơ chế xác thực hoặc phân quyền.
 
@@ -27,7 +27,7 @@ Kiểm tra: thay dev bằng typecheck, lint hoặc build.
 Sau build, dùng pnpm --filter <tên-app> start (hoặc npx.cmd --yes pnpm@10.34.9 --filter <tên-app> start).
 
 Đã có domain UNO và phòng Colyseus realtime trên port 5000. Chưa tích hợp MongoDB hoặc đăng nhập tài khoản. Xem realtime-uno.md.
-Kiểm thử realtime dùng SDK Node; frontend vẫn là trang health check.
+Realtime có test SDK Node và test trình duyệt cho user lobby.
 Các route phụ hiện chỉ là placeholder; các file module khác vẫn là khung rỗng.
 Không có Docker, CI/CD hoặc AI.
 
