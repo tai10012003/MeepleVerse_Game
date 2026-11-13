@@ -13,17 +13,21 @@
     "test:watch": "pnpm --filter @meepleverse/contracts build && vitest"
   },
   "dependencies": {
-    "express": "5.3.0",
+    "@colyseus/core": "0.18.28",
+    "@colyseus/schema": "5.0.48",
+    "@colyseus/ws-transport": "0.18.5",
+    "@meepleverse/contracts": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
-    "zod": "^4.1.0",
-    "@meepleverse/contracts": "workspace:*"
+    "express": "5.3.0",
+    "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@colyseus/sdk": "0.18.10",
     "@meepleverse/config": "workspace:*",
-    "@types/node": "^24.0.0",
-    "@types/express": "^5.0.0",
     "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
     "tsx": "^4.20.0",
     "vitest": "^5.1.0"
   }

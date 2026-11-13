@@ -8,3 +8,5 @@ Kiến trúc backend: Modular Layered Architecture. Hiện chỉ triển khai n�
 
 UNO basic v1: domain engine, public/private views, and tests. See [rules](docs/games/uno.md).
 Run tests: npx.cmd --yes pnpm@10.34.9 test
+
+Colyseus UNO realtime: [protocol and local tests](docs/development/realtime-uno.md).

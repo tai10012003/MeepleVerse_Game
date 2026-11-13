@@ -11,6 +11,10 @@
     "./uno": {
       "types": "./dist/games/uno/index.d.ts",
       "import": "./dist/games/uno/index.js"
+    },
+    "./room": {
+      "types": "./dist/room/index.d.ts",
+      "import": "./dist/room/index.js"
     }
   },
   "scripts": {

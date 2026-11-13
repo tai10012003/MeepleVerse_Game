@@ -26,7 +26,8 @@ Chạy riêng: thay dev bằng dev:user, dev:admin hoặc dev:api.
 Kiểm tra: thay dev bằng typecheck, lint hoặc build.
 Sau build, dùng pnpm --filter <tên-app> start (hoặc npx.cmd --yes pnpm@10.34.9 --filter <tên-app> start).
 
-Đã có domain UNO cơ bản v1 và unit test; chưa nối vào HTTP/realtime. Chưa tích hợp MongoDB, đăng nhập hoặc Colyseus.
+Đã có domain UNO và phòng Colyseus realtime trên port 5000. Chưa tích hợp MongoDB hoặc đăng nhập tài khoản. Xem realtime-uno.md.
+Kiểm thử realtime dùng SDK Node; frontend vẫn là trang health check.
 Các route phụ hiện chỉ là placeholder; các file module khác vẫn là khung rỗng.
 Không có Docker, CI/CD hoặc AI.
 
