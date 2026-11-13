@@ -1,0 +1,23 @@
+{
+  "name": "meepleverse-game",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:user": "pnpm --filter meepleverse-user-web dev",
+    "dev:admin": "pnpm --filter meepleverse-admin-portal dev",
+    "dev:api": "pnpm --filter meepleverse-api dev",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "build": "pnpm -r --if-present build"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "eslint": "9.39.5",
+    "typescript-eslint": "^8.46.0"
+  }
+}
