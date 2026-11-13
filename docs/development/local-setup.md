@@ -26,8 +26,10 @@ Chạy riêng: thay dev bằng dev:user, dev:admin hoặc dev:api.
 Kiểm tra: thay dev bằng typecheck, lint hoặc build.
 Sau build, dùng pnpm --filter <tên-app> start (hoặc npx.cmd --yes pnpm@10.34.9 --filter <tên-app> start).
 
-Chưa tích hợp MongoDB, đăng nhập, Colyseus hoặc luật game.
+Đã có domain UNO cơ bản v1 và unit test; chưa nối vào HTTP/realtime. Chưa tích hợp MongoDB, đăng nhập hoặc Colyseus.
 Các route phụ hiện chỉ là placeholder; các file module khác vẫn là khung rỗng.
 Không có Docker, CI/CD hoặc AI.
 
 ESLint được ghim ở 9.39.5 để tương thích các plugin của eslint-config-next hiện tại. npm thông báo nhánh này đã hết hỗ trợ; cần nâng đồng bộ khi plugin hỗ trợ ESLint mới.
+
+Chạy test UNO: npx.cmd --yes pnpm@10.34.9 test. Xem docs/games/uno.md.

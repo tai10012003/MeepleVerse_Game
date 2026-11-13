@@ -4,12 +4,23 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./uno": {
+      "types": "./dist/games/uno/index.d.ts",
+      "import": "./dist/games/uno/index.js"
+    }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
     "@meepleverse/config": "workspace:*"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
   }
 }
