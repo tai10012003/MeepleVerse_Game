@@ -3,7 +3,7 @@ import { applyCommand, getPlayerView } from "../../../src/modules/games/uno/inde
 import { fixture, number, wild } from "./fixtures.js";
 function pending(illegal = false) {
   return applyCommand(fixture([[wild("four", "wild-draw-four"), number("held", illegal ? "red" : "blue", 1)], [number("other")], [number("third")]]),
-    "p0", { type: "PLAY_CARD", cardId: "four", chosenColor: "green" }).state;
+    "p0", { type: "PLAY_CARD", cardId: "four", chosenColor: "green", declareUno: true }).state;
 }
 describe("Draw Four challenge", () => {
   it("accepts a bluff without leaking the legality", () => {
@@ -44,9 +44,10 @@ describe("Draw Four challenge", () => {
     expect(() => applyCommand(game, "p1", { type: "PLAY_CARD", cardId: "other" })).toThrow("INVALID_PHASE");
   });
   it("captures evidence before an UNO penalty changes the offender hand", () => {
-    const game = pending();
-    const caught = applyCommand(game, "p2", { type: "CATCH_UNO", targetId: "p0" }).state;
-    const next = applyCommand(caught, "p1", { type: "CHALLENGE_DRAW_FOUR" });
+    const game = fixture([[wild("four", "wild-draw-four"), number("held", "blue", 1)], [number("other")], [number("third")]]);
+    const penalized = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "four", chosenColor: "green" }).state;
+    expect(penalized.players[0]!.hand).toHaveLength(3);
+    const next = applyCommand(penalized, "p1", { type: "CHALLENGE_DRAW_FOUR" });
     expect(next.events.public).toContainEqual({ type: "DRAW_FOUR_RESOLVED", challenged: true, successful: false });
     expect(next.events.private[0]!.cards).toHaveLength(2);
   });

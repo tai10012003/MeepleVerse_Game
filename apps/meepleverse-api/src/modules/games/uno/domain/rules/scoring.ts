@@ -16,6 +16,5 @@ export function endGame(game: UnoGame, winnerId: string | null, events: UnoEvent
   game.pendingWinnerId = null;
   game.pendingDrawFour = null;
   game.drawnCardId = null;
-  game.unoTargetId = null;
   events.public.push({ type: "GAME_ENDED", winnerId });
 }

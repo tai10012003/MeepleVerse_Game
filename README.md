@@ -12,3 +12,7 @@ Run tests: npx.cmd --yes pnpm@10.34.9 test
 Colyseus UNO realtime: [protocol and local tests](docs/development/realtime-uno.md).
 
 User lobby: [local setup and browser tests](docs/development/user-lobby.md).
+
+Playable UNO table: [how to play and browser tests](docs/development/uno-table.md).
+
+UNO effects: [animation behavior and tests](docs/development/uno-animations.md).

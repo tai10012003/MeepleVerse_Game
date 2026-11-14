@@ -16,7 +16,6 @@ export function drawCards(game: UnoGame, playerId: string, count: number, random
     player.hand.push(card);
     drawn.push(card);
   }
-  if (player.hand.length !== 1 && game.unoTargetId === playerId) game.unoTargetId = null;
   events.public.push({ type: "CARDS_DRAWN", playerId, count: drawn.length });
   return drawn;
 }

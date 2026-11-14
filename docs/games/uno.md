@@ -1,9 +1,9 @@
-# UNO cơ bản v1
+# UNO — luật MeepleVerse v2
 
 ## Phạm vi và nguồn luật
-Mã luật: uno-basic-v1. Đây là đặc tả triển khai MeepleVerse, không phải bản sao hướng dẫn.
+Mã luật: uno-house-v2. Đây là đặc tả triển khai MeepleVerse, không phải bản sao hướng dẫn.
 Nguồn chính: [Mattel W2085](https://service.mattel.com/instruction_sheets/W2085-UNO.pdf).
-Tham khảo cơ chế hai người, bluff và cửa sổ hô UNO:
+Tham khảo cơ chế hai người và bluff; cách phạt quên UNO dưới đây là luật riêng của MeepleVerse:
 [Mattel H9022](https://service.mattel.com/instruction_sheets/h9022.pdf); không dùng lá bổ sung của bộ H9022.
 
 Bộ bài 108 lá: mỗi màu có một số 0, hai bản số 1–9, hai Skip, hai Reverse,
@@ -19,8 +19,8 @@ Với hai người, Skip/Reverse trả lượt về người đánh.
 Cho phép bluff +4. Người chịu phạt chọn chấp nhận hoặc thách thức: bắt đúng thì
 người đánh bốc bốn và người thách thức giữ lượt; bắt sai thì bốc sáu và mất lượt.
 Bằng chứng tay bài trước nước đi chỉ gửi người thách thức.
-Hô UNO khi còn một lá; quên có thể tự hô muộn hoặc bị người khác bắt bốc hai,
-trước hành động đầu tiên của lượt tiếp theo.
+Khi còn hai lá, phải bấm UNO trước khi đánh để còn một lá. Nếu quên, server tự phạt
+bốc hai ngay trong nước đánh; không có thao tác bắt lỗi hoặc hô muộn. Hiệu lực lá vừa đánh vẫn áp dụng.
 
 ## Lựa chọn sản phẩm
 - 2–4 người, một ván độc lập; chưa có giải nhiều ván đến 500 điểm, đội hoặc xếp hạng.
@@ -32,12 +32,8 @@ trước hành động đầu tiên của lượt tiếp theo.
 - Không cộng dồn phạt, đánh chen, đánh nhiều lá hoặc luật 7–0.
 - Khi đánh Wild phải gửi màu cùng command; lá màu không nhận chosenColor.
 - declareUno=true đi kèm PLAY_CARD chỉ hợp lệ khi nước đi để lại đúng một lá.
-- CALL_UNO dành cho người đang trong cửa sổ quên hô; CATCH_UNO dành cho người khác.
-  Server tuần tự hóa command: lệnh hợp lệ đến trước quyết định kết quả, không có timer.
-- Cửa sổ hô đóng khi hành động lượt kế được chấp nhận: đánh, bốc hoặc phản hồi +4.
-  Hành động sai không đóng cửa sổ. Bốc phạt tự động chưa đóng cửa sổ mới.
-  CALL/CATCH không tiêu thụ lượt. Sau Skip/Reverse hai người, hành động tiếp của chính người đánh
-  cũng đóng cửa sổ cũ.
+- Quên declareUno khi đánh từ hai xuống một lá: phát UNO_PENALTY và bốc hai ngay,
+  rồi xử lý chức năng lá bài. Không phạt khi nước đánh không hợp lệ hoặc đánh lá cuối cùng.
 - +4 cuối: chờ phản hồi rồi mới chốt kết quả. Màu đã chọn giữ nguyên dù thách thức thành công.
   Bằng chứng được chụp trước lúc đánh, không đổi theo các hình phạt xảy ra sau.
 - Nếu thực sự không đủ bài để bốc, lấy tối đa số có thể; không tạo thêm lá.
@@ -51,7 +47,7 @@ actorId phải do application lấy từ kết nối đã xác thực, không l�
 
 Phase: turn, drawn, choose-color, draw-four, ended.
 Command: PLAY_CARD, DRAW_CARD, PASS_TURN, CHOOSE_COLOR,
-ACCEPT_DRAW_FOUR, CHALLENGE_DRAW_FOUR, CALL_UNO, CATCH_UNO.
+ACCEPT_DRAW_FOUR, CHALLENGE_DRAW_FOUR. Lệnh CALL_UNO/CATCH_UNO cũ bị từ chối.
 Payload được Zod kiểm tra strict; từ chối field thừa và màu không tồn tại.
 Mỗi command thành công tăng revision. Lỗi không sửa input. Nguồn ngẫu nhiên được truyền vào
 để tái hiện test; production sử dụng mặc định Math.random ở giai đoạn hiện tại.

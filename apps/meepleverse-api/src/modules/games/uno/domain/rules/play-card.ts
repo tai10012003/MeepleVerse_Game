@@ -19,7 +19,6 @@ export function playCard(game: UnoGame, actorId: string, command: Extract<UnoCom
   requireRule(!command.declareUno || actor.hand.length === 2, "INVALID_UNO_CALL");
   const handBefore = structuredClone(actor.hand);
   const hadMatchingColor = actor.hand.some(held => held.color === game.activeColor);
-  game.unoTargetId = null;
   actor.hand.splice(index, 1);
   game.discardPile.push(card);
   game.activeColor = card.color ?? command.chosenColor!;
@@ -29,7 +28,10 @@ export function playCard(game: UnoGame, actorId: string, command: Extract<UnoCom
   events.public.push({ type: "CARD_PLAYED", playerId: actorId, card: structuredClone(card) });
   if (actor.hand.length === 1) {
     if (command.declareUno) events.public.push({ type: "UNO_CALLED", playerId: actorId });
-    else game.unoTargetId = actorId;
+    else {
+      events.public.push({ type: "UNO_PENALTY", playerId: actorId });
+      drawCards(game, actorId, 2, random, events);
+    }
   }
   const next = getNextPlayer(game.currentIndex, game.players.length, game.direction);
   if (card.kind === "wild-draw-four") {

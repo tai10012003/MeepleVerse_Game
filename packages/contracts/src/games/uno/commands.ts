@@ -8,7 +8,5 @@ export const unoCommandSchema = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("CHOOSE_COLOR"), color }),
   z.strictObject({ type: z.literal("ACCEPT_DRAW_FOUR") }),
   z.strictObject({ type: z.literal("CHALLENGE_DRAW_FOUR") }),
-  z.strictObject({ type: z.literal("CALL_UNO") }),
-  z.strictObject({ type: z.literal("CATCH_UNO"), targetId: z.string().min(1).max(100) }),
 ]);
 export type UnoCommand = z.infer<typeof unoCommandSchema>;

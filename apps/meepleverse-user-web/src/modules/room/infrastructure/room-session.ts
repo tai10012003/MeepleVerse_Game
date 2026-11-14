@@ -1,19 +1,27 @@
 import { Client, type Room } from "@colyseus/sdk";
-import type { UnoRoomView, RoomActionReply } from "@meepleverse/contracts/room";
+import type { UnoRoomView, RoomAction, RoomActionReply, RoomGameEvents } from "@meepleverse/contracts/room";
+import type { UnoCommand, UnoEvent, PrivateUnoEvent } from "@meepleverse/contracts/uno";
 import { clearSession, readSession, saveSession } from "./session-storage";
 import { roomError } from "../model/room-errors";
 
+import type { UnoVisualFrame } from "@/modules/games/uno";
+
 type Status = "idle" | "connecting" | "connected" | "reconnecting" | "disconnected";
-interface SessionState { status: Status; view: UnoRoomView | null; error: string | null; starting: boolean }
-const initial: SessionState = { status: "idle", view: null, error: null, starting: false };
+export interface Evidence { matchId: string; revision: number; event: PrivateUnoEvent }
+interface SessionState {
+  status: Status; view: UnoRoomView | null; error: string | null; starting: boolean; acting: boolean;
+  frames: UnoVisualFrame[]; events: RoomGameEvents | null; evidence: Evidence | null;
+}
+const initial: SessionState = { status: "idle", view: null, error: null, starting: false, acting: false, frames: [], events: null, evidence: null };
 class RoomSession {
   private state = initial;
   private readonly listeners = new Set<() => void>();
   private room: Room | null = null;
   private generation = 0;
+  private readonly visualPairs = new Map<number, { before: UnoRoomView; after: UnoRoomView }>();
   private pending: Promise<string | null> | null = null;
   private snapshotWaiter: (() => void) | null = null;
-  private startWaiter: { id: string; finish: (reply: RoomActionReply | null) => void } | null = null;
+  private actionWaiter: { id: string; finish: (reply: RoomActionReply | null) => void } | null = null;
   getSnapshot = () => this.state;
   getServerSnapshot = () => initial;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
@@ -21,24 +29,42 @@ class RoomSession {
     this.state = { ...this.state, ...value };
     this.listeners.forEach(listener => listener());
   }
-  private sdk() {
-    const endpoint = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
-    return new Client(endpoint);
-  }
+  private sdk() { return new Client(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"); }
   private bind(room: Room, generation: number): void {
     this.room = room;
     const current = () => this.generation === generation && this.room === room;
     saveSession(room.roomId, room.reconnectionToken);
     room.onMessage("room_view", (view: UnoRoomView) => {
       if (!current()) return;
-      this.patch({ view, status: "connected" });
+      const previous = this.state.view;
+      const newMatch = view.matchId !== previous?.matchId;
+      if (newMatch || view.paused || !view.game) this.visualPairs.clear();
+      else if (previous?.game && view.game && view.game.revision === previous.game.revision + 1) {
+        this.visualPairs.set(view.game.revision, { before: previous, after: view });
+        if (this.visualPairs.size > 8) this.visualPairs.delete(this.visualPairs.keys().next().value!);
+      }
+      this.patch({ view, status: "connected", ...(newMatch ? { events: null, evidence: null } : {}), ...((newMatch || view.paused || !view.game) ? { frames: [] } : {}) });
       this.snapshotWaiter?.();
     });
     room.onMessage("action_reply", (reply: RoomActionReply) => {
-      if (current() && reply.requestId === this.startWaiter?.id) this.startWaiter.finish(reply);
+      if (current() && reply.requestId === this.actionWaiter?.id) this.actionWaiter.finish(reply);
     });
-    room.onMessage("game_events", () => { /* Board animations are a later milestone. */ });
-    room.onDrop(() => { if (current()) { this.startWaiter?.finish(null); this.patch({ status: "reconnecting", starting: false }); } });
+    room.onMessage("game_events", (batch: RoomGameEvents) => {
+      if (!current() || batch.matchId !== this.state.view?.matchId) return;
+      const evidence = batch.events.find((event): event is PrivateUnoEvent =>
+        event.type === "CHALLENGE_HAND" && event.recipientId === this.state.view?.selfPlayerId);
+      const pair = this.visualPairs.get(batch.revision);
+      this.visualPairs.delete(batch.revision);
+      const id = batch.matchId + ":" + batch.revision;
+      const frame: UnoVisualFrame | null = pair && !this.state.view?.paused && !this.state.frames.some(frame => frame.id === id) ? {
+        id, matchId: batch.matchId, revision: batch.revision, before: pair.before, after: pair.after,
+        events: batch.events.filter((event): event is UnoEvent => event.type !== "CHALLENGE_HAND"),
+      } : null;
+      this.patch({ events: batch, ...(frame ? { frames: [...this.state.frames, frame].slice(-16) } : {}), ...(evidence ? { evidence: { matchId: batch.matchId, revision: batch.revision, event: evidence } } : {}) });
+    });
+    room.onDrop(() => {
+      if (current()) { this.actionWaiter?.finish(null); this.visualPairs.clear(); this.patch({ status: "reconnecting", starting: false, acting: false, frames: [] }); }
+    });
     room.onReconnect(() => {
       if (!current()) return;
       saveSession(room.roomId, room.reconnectionToken);
@@ -47,9 +73,9 @@ class RoomSession {
     });
     room.onLeave(() => {
       if (!current()) return;
-      this.startWaiter?.finish(null);
+      this.actionWaiter?.finish(null);
       this.room = null;
-      this.patch({ status: "disconnected", starting: false, error: "Kết nối phòng đã đóng. Bạn có thể thử kết nối lại hoặc rời phòng." });
+      this.patch({ status: "disconnected", starting: false, acting: false, error: "Kết nối phòng đã đóng. Bạn có thể thử kết nối lại hoặc rời phòng." });
     });
     room.onError((_code, message) => { if (current()) this.patch({ error: roomError(message ?? "connection failed") }); });
   }
@@ -57,8 +83,9 @@ class RoomSession {
     if (this.pending) return this.pending;
     if (this.room) return Promise.resolve(this.room.roomId);
     const generation = ++this.generation;
-    this.patch({ status: "connecting", error: null, view: null });
-    this.pending = (async () => {
+    this.visualPairs.clear();
+    this.patch({ status: "connecting", error: null, view: null, frames: [], events: null, evidence: null });
+    const task = (async () => {
       let joined: Room | null = null;
       try {
         joined = await connect();
@@ -69,7 +96,7 @@ class RoomSession {
           this.snapshotWaiter = () => { clearTimeout(timer); this.snapshotWaiter = null; resolve(); };
           joined!.send("get_view");
         });
-        return joined.roomId;
+        return generation === this.generation ? joined.roomId : null;
       } catch (error) {
         if (generation === this.generation) {
           this.room = null;
@@ -78,16 +105,13 @@ class RoomSession {
           this.patch({ status: "idle", view: null, error: roomError(error) });
         }
         return null;
-      } finally {
-        if (generation === this.generation) this.pending = null;
       }
     })();
+    this.pending = task.finally(() => { if (generation === this.generation) this.pending = null; });
     return this.pending;
   }
   create(nickname: string): Promise<string | null> { return this.connect(() => this.sdk().create("uno", { nickname })); }
-  join(roomId: string, nickname: string): Promise<string | null> {
-    return this.connect(() => this.sdk().joinById(roomId, { nickname }));
-  }
+  join(roomId: string, nickname: string): Promise<string | null> { return this.connect(() => this.sdk().joinById(roomId, { nickname })); }
   async restore(roomId?: string): Promise<string | null> {
     if (this.room) return this.room.roomId;
     if (this.pending) return this.pending;
@@ -95,30 +119,38 @@ class RoomSession {
     if (!saved || (roomId && saved.roomId !== roomId)) return null;
     return this.connect(() => this.sdk().reconnect(saved.token));
   }
-  async start(): Promise<void> {
+  private async sendAction(action: RoomAction["action"], kind: "start" | "game"): Promise<void> {
     const room = this.room;
-    const view = this.state.view;
-    if (!room || !view || this.state.status !== "connected" || this.state.starting) return;
-    this.patch({ starting: true, error: null });
-    const bytes = crypto.getRandomValues(new Uint8Array(16));
-    const requestId = Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    if (!room || this.state.status !== "connected" || this.state.view?.paused || this.state.starting || this.state.acting) return;
+    this.patch({ starting: kind === "start", acting: kind === "game", error: null });
+    const requestId = Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, "0")).join("");
     const reply = await new Promise<RoomActionReply | null>(resolve => {
-      const timer = setTimeout(() => this.startWaiter?.finish(null), 8000);
-      this.startWaiter = { id: requestId, finish: reply => {
-        clearTimeout(timer); this.startWaiter = null; resolve(reply);
-      } };
-      room.send("action", { requestId, action: { type: "START_GAME", expectedRoomRevision: view.revision } });
+      const timer = setTimeout(() => { if (this.actionWaiter?.id === requestId) this.actionWaiter.finish(null); }, 8000);
+      this.actionWaiter = { id: requestId, finish: reply => { clearTimeout(timer); this.actionWaiter = null; resolve(reply); } };
+      try { room.send("action", { requestId, action }); } catch { this.actionWaiter.finish(null); }
     });
     if (this.room !== room) return;
-    this.patch({ starting: false, error: reply?.ok ? null : reply?.code ? roomError(reply.code) : "Chưa nhận được xác nhận. Hãy kiểm tra trạng thái phòng trước khi thử lại." });
+    this.patch({ starting: false, acting: false, error: reply?.ok ? null : reply?.code ? roomError(reply.code) : "Chưa nhận được xác nhận. Hãy kiểm tra trạng thái phòng trước khi thử lại." });
     if (this.state.status === "connected") room.send("get_view");
   }
+  async start(): Promise<void> {
+    const view = this.state.view;
+    if (view) await this.sendAction({ type: "START_GAME", expectedRoomRevision: view.revision }, "start");
+  }
+  async command(command: UnoCommand): Promise<void> {
+    const view = this.state.view;
+    if (!view?.game || view.status !== "PLAYING" || !view.matchId) return;
+    await this.sendAction({ type: "GAME_COMMAND", matchId: view.matchId, expectedRevision: view.game.revision, command }, "game");
+  }
+  clearEvidence(): void { this.patch({ evidence: null }); }
   async leave(): Promise<void> {
     ++this.generation;
     const room = this.room;
     this.room = null; this.pending = null;
-    this.startWaiter?.finish(null);
+    this.actionWaiter?.finish(null);
+    this.snapshotWaiter?.();
     clearSession();
+    this.visualPairs.clear();
     this.patch(initial);
     if (room) { room.reconnection.enabled = false; await room.leave().catch(() => {}); room.removeAllListeners(); }
   }

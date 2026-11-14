@@ -56,7 +56,7 @@ test("join by lowercase code, restore after reload, and transfer host after leav
     await expect(page.getByRole("dialog")).not.toBeVisible();
     await page.getByRole("button", { name: /Rời phòng/ }).click();
     await page.getByRole("button", { name: "Xác nhận rời phòng" }).click();
-    await expect(page).toHaveURL("http://localhost:3000/");
+    await expect(page).toHaveURL("http://localhost:3100/");
     await expect(guest.getByText("Chủ phòng", { exact: true })).toBeVisible();
     expect(await page.evaluate(() => sessionStorage.getItem("meepleverse.room-session.v1"))).toBeNull();
     await expect(guest.getByRole("button", { name: "Bắt đầu ván", exact: true })).toBeDisabled();
@@ -96,11 +96,11 @@ test("leaving during a started game warns and updates the other browser", async 
     await guest.getByRole("button", { name: /Rời phòng/ }).click();
     await expect(guest.getByText("Rời phòng sẽ kết thúc ván hiện tại của nhóm.")).toBeVisible();
     await guest.getByRole("button", { name: "Xác nhận rời phòng" }).click();
-    await expect(page.getByRole("heading", { name: "Hẹn một ván nữa?" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Kết quả ván" })).toBeVisible();
   } finally { await other.close(); }
 });
 test("network failure is shown without getting stuck on submit", async ({ page }) => {
-  await page.route("http://localhost:5000/matchmake/**", route => route.abort("failed"));
+  await page.route("http://localhost:5100/matchmake/**", route => route.abort("failed"));
   await page.goto("/");
   await page.getByLabel("Mọi người gọi bạn là gì?").fill("Offline");
   await page.getByRole("button", { name: "Tạo phòng UNO" }).click();

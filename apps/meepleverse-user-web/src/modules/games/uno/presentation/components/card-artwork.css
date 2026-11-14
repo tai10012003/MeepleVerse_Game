@@ -1,0 +1,65 @@
+/* Dedicated vector artwork, shared by the hand and discard pile. */
+.uno-card-face.card-special {
+  container-type:inline-size;
+  border-color:#f7f7f0;
+  color:#fff;
+}
+.uno-card-face.color-wild.card-special {
+  background:#121212;
+}
+.card-action-art {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+  pointer-events:none;
+}
+.card-special .card-corner {
+  z-index:2;
+  font-size:.75rem;
+  font-size:20cqw;
+  font-weight:900;
+  font-style:italic;
+  color:#fff;
+  text-shadow:none;
+}
+.card-special.kind-wild .card-oval,
+.card-special.kind-wild-draw-four .card-oval {
+  display:none;
+}
+.card-special.kind-draw-two .card-oval {
+  border-color:#fff;
+  border-width:2px;
+  background:transparent;
+  inset:11% 5%;
+}
+.card-special .wild-corner {
+  width:22%;
+  aspect-ratio:5/7;
+  line-height:0;
+  margin-top:-3%;
+  margin-left:-3%;
+}
+.card-special .wild-corner.bottom {
+  margin:0 -3% -3% 0;
+}
+.wild-corner>svg {
+  display:block;
+  width:100%;
+  height:100%;
+}
+
+.reverse-mark { display:block; width:1em; height:1em; flex:none; }
+.card-symbol .reverse-mark { width:1.05em; height:1.05em; }
+
+.uno-card-face { container-type:inline-size; border-color:#fff; color:#fff; background:var(--card-color); }
+.uno-card-face .card-oval { inset:11% 5%; border:3px solid #fff; background:transparent; border-radius:50%; transform:rotate(28deg); }
+.uno-card-face .card-corner { font-family:Arial,sans-serif; font-size:20cqw; font-style:italic; font-weight:900; color:#fff; -webkit-text-stroke:.6px #111; paint-order:stroke fill; text-shadow:none; }
+.card-number-art { position:absolute; inset:0; width:100%; height:100%; }
+.uno-card-face .card-symbol { color:#fff; text-shadow:none; }
+.skip-mark { display:block; width:1em; height:1em; }
+.card-symbol .skip-mark,.card-symbol .reverse-mark { width:1.1em; height:1.1em; }
+.card-special.kind-wild .card-oval,.card-special.kind-wild-draw-four .card-oval { display:none; }
+
+.card-symbol .reverse-mark { width:.96em; height:1.2em; }

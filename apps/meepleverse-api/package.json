@@ -10,7 +10,8 @@
     "typecheck": "pnpm --filter @meepleverse/contracts build && tsc --noEmit && tsc -p tsconfig.test.json",
     "lint": "eslint .",
     "test": "pnpm --filter @meepleverse/contracts build && vitest run",
-    "test:watch": "pnpm --filter @meepleverse/contracts build && vitest"
+    "test:watch": "pnpm --filter @meepleverse/contracts build && vitest",
+    "test:browser-server": "pnpm --filter @meepleverse/contracts build && tsx tests/browser/server.ts"
   },
   "dependencies": {
     "@colyseus/core": "0.18.28",

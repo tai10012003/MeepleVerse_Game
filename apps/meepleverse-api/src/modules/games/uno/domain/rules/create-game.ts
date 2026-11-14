@@ -11,11 +11,11 @@ export function createGame(playerIds: readonly string[], random: RandomSource = 
   const dealer = dealerIndex ?? randomIndex(playerIds.length, random);
   requireRule(Number.isInteger(dealer) && dealer >= 0 && dealer < playerIds.length, "INVALID_SETUP");
   const game: UnoGame = {
-    rulesVersion: "uno-basic-v1", revision: 0, phase: "turn",
+    rulesVersion: "uno-house-v2", revision: 0, phase: "turn",
     players: playerIds.map(id => ({ id, hand: [] })), dealerIndex: dealer,
     currentIndex: getNextPlayer(dealer, playerIds.length, 1), direction: 1,
     activeColor: null, drawPile: shuffle(createDeck(), random), discardPile: [],
-    drawnCardId: null, unoTargetId: null, pendingDrawFour: null,
+    drawnCardId: null, pendingDrawFour: null,
     pendingWinnerId: null, blockedTurns: 0, result: null,
   };
   const events = { public: [], private: [] };

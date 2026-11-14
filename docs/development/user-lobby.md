@@ -14,7 +14,7 @@ Admin vẫn chạy port 9000, giữ trang health check hiện có.
 3. Mở link trong cửa sổ ẩn danh/trình duyệt khác; nhập tên và vào phòng.
    Hoặc dùng Vào bằng mã ở trang chủ; chữ thường được chuyển sang chữ hoa.
 4. Cả hai nhìn thấy danh sách cập nhật. Chỉ host có nút bắt đầu khả dụng khi đủ 2–4 ghế đã kết nối.
-5. Host bắt đầu: cả hai thấy xác nhận ván đã chạy. Bàn bài và thao tác chơi chưa có trong mốc này.
+5. Host bắt đầu: cả hai vào bàn UNO. Đã có bàn bài và thao tác chơi; xem uno-table.md.
 6. Tải lại trang phòng trong 30 giây: khôi phục cùng ghế, không tạo người chơi thứ hai.
 7. Rời phòng có xác nhận; người còn lại nhận cập nhật. Rời trong ván sẽ kết thúc ván theo luật realtime.
 
@@ -52,10 +52,9 @@ Mặc định chạy Chromium; nếu chưa có, có thể dùng Edge đã cài t
 $env:PLAYWRIGHT_CHANNEL = 'msedge'
 npx.cmd --yes pnpm@10.34.9 --filter meepleverse-user-web test:e2e
 ```
-Nếu chưa chạy server, Playwright khởi động API/web và dừng các process do test tạo.
-Nếu đã có server trên port 5000/3000, dùng lại; cần bảo đảm đúng repo và phiên bản code hiện tại.
+Playwright dùng cổng riêng 3100/5100/5101 và tự dừng process test; không dùng lại cổng dev. Xem uno-table.md.
 Artifacts trong apps/meepleverse-user-web/test-results được Git bỏ qua.
 
 Test gồm hai browser context vào/bắt đầu cùng phòng, link mời, nhập mã chữ thường,
 reload giữ ghế, chuyển host, xác nhận rời, phòng không tồn tại, lỗi mạng và responsive 375px.
-Chưa có Docker, CI/CD, MongoDB, đăng nhập hoặc board UI trong bước này.
+Chưa có Docker, CI/CD, MongoDB, đăng nhập trong bước này. Bàn chơi hiện đã có, xem uno-table.md.

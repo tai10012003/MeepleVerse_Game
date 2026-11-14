@@ -8,6 +8,7 @@
     "src/**/*.ts",
     "tests/unit/**/*.ts",
     "vitest.config.ts",
-    "tests/integration/**/*.ts"
+    "tests/integration/**/*.ts",
+    "tests/browser/**/*.ts"
   ]
 }

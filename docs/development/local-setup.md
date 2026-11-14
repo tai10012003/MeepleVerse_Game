@@ -18,7 +18,7 @@ Các file môi trường local được Git bỏ qua. Chỉ sao chép khi chưa 
 - API: http://localhost:5000/health
 - Admin: http://localhost:9000
 
-Admin giữ health check. User web đã có tạo/vào phòng và lobby realtime; xem user-lobby.md.
+Admin giữ health check. User web đã có lobby và bàn UNO chơi hoàn chỉnh; xem user-lobby.md và uno-table.md.
 Backend chỉ cho phép CORS cho các origin trong CORS_ORIGINS.
 Đây chưa phải cơ chế xác thực hoặc phân quyền.
 

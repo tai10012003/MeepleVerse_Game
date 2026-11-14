@@ -19,17 +19,7 @@ export function applyCommand(input: UnoGame, actorId: string, payload: unknown, 
   const game = structuredClone(input);
   const events: UnoEvents = { public: [], private: [] };
   const command = parsed.data;
-  if (command.type === "CALL_UNO" || command.type === "CATCH_UNO") {
-    const target = command.type === "CALL_UNO" ? actorId : command.targetId;
-    requireRule(game.unoTargetId === target && game.players.find(player => player.id === target)?.hand.length === 1, "INVALID_UNO_CALL");
-    requireRule(command.type !== "CATCH_UNO" || actorId !== target, "INVALID_UNO_CALL");
-    game.unoTargetId = null;
-    if (command.type === "CALL_UNO") events.public.push({ type: "UNO_CALLED", playerId: actorId });
-    else {
-      drawCards(game, target, 2, random, events);
-      events.public.push({ type: "UNO_CAUGHT", playerId: target, caughtBy: actorId });
-    }
-  } else {
+  {
     requireRule(game.players[game.currentIndex]!.id === actorId, "NOT_YOUR_TURN");
     switch (command.type) {
       case "PLAY_CARD": playCard(game, actorId, command, random, events); break;
@@ -43,14 +33,12 @@ export function applyCommand(input: UnoGame, actorId: string, payload: unknown, 
         break;
       case "PASS_TURN":
         requireRule(game.phase === "drawn", "INVALID_PHASE");
-        game.unoTargetId = null;
         game.drawnCardId = null;
         game.phase = "turn";
         game.currentIndex = getNextPlayer(game.currentIndex, game.players.length, game.direction);
         break;
       case "DRAW_CARD": {
         requireRule(game.phase === "turn", "INVALID_PHASE");
-        game.unoTargetId = null;
         const [card] = drawCards(game, actorId, 1, random, events);
         game.blockedTurns = card ? 0 : game.blockedTurns + 1;
         if (card && canPlayCard(card, game.discardPile.at(-1)!, game.activeColor!)) {

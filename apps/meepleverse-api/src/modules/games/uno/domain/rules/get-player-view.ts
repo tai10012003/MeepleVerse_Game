@@ -9,8 +9,8 @@ export function getPlayerView(game: UnoGame, playerId: string): UnoView {
     players: game.players.map(player => ({ playerId: player.id, handCount: player.hand.length })),
     currentPlayerId: game.phase === "ended" ? null : game.players[game.currentIndex]!.id,
     direction: game.direction, activeColor: game.activeColor, topCard: game.discardPile.at(-1)!,
+    discardCards: game.discardPile.slice(-8),
     drawPileCount: game.drawPile.length, discardPileCount: game.discardPile.length,
-    unoTargetId: game.unoTargetId,
     pendingDrawFour: game.pendingDrawFour ? {
       offenderId: game.pendingDrawFour.offenderId, challengerId: game.pendingDrawFour.challengerId,
     } : null,

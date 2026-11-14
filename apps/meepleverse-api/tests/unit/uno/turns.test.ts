@@ -26,7 +26,7 @@ describe("turns and validation", () => {
   });
   it("returns new state and increments revision", () => {
     const game = fixture([[number("a"), number("b")], [number("c")]]);
-    const next = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "a" }).state;
+    const next = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "a", declareUno: true }).state;
     expect(game.players[0]!.hand).toHaveLength(2);
     expect(next.players[0]!.hand).toHaveLength(1);
     expect(next.currentIndex).toBe(1);

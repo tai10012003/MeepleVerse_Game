@@ -6,6 +6,7 @@ import { Brand } from "@/layouts/SiteHeader";
 import { useRoomSession } from "../application/useRoomSession";
 import { RoomEntryForm } from "./RoomEntryForm";
 import { LeaveDialog } from "./LeaveDialog";
+import { UnoScreen } from "@/modules/games/uno";
 export function RoomScreen({ roomId }: { roomId: string }) {
   const router = useRouter();
   const state = useRoomSession(roomId);
@@ -29,14 +30,20 @@ export function RoomScreen({ roomId }: { roomId: string }) {
   const host = view.hostId === view.selfPlayerId;
   const canStart = host && view.members.length >= 2 && !view.paused && state.status === "connected" && !state.starting;
   const playing = view.status === "PLAYING";
+  if (view.status !== "LOBBY") return <UnoScreen view={view} connected={state.status === "connected"} reconnecting={state.status === "reconnecting"}
+    pending={state.acting || state.starting} error={state.error} frames={state.frames} events={state.events} evidence={state.evidence}
+    onHideEvidence={() => state.session.clearEvidence()} onCommand={command => void state.session.command(command)}
+    onRematch={() => void state.session.start()} onLeave={() => setConfirmLeave(true)} onReconnect={() => void state.session.restore(roomId)}>
+    {confirmLeave && <LeaveDialog playing={playing} onCancel={() => setConfirmLeave(false)} onLeave={() => void leave()} />}
+  </UnoScreen>;
   return <div className="room-shell">
     <header className="room-header shell"><Link href="/" aria-label="MeepleVerse — trang chủ"><Brand /></Link>
       <span className={"connection-pill " + (state.status === "connected" ? "is-online" : "")}><span className="status-dot" />{state.status === "connected" ? "Đã kết nối" : state.status === "reconnecting" ? "Đang kết nối lại…" : "Mất kết nối"}</span>
       <button className="text-button" onClick={() => setConfirmLeave(true)}>Rời phòng <span aria-hidden="true">↗</span></button>
     </header>
     <main className="shell lobby-main">
-      <div className="lobby-heading"><div><span className="eyebrow">Góc tụ họp của cả hội</span><h1>{playing ? "Ván chơi đã bắt đầu." : view.status === "ENDED" ? "Hẹn một ván nữa?" : "Đợi bạn, đủ vui."}</h1>
-        <p>{playing ? "Ván đã bắt đầu. Bàn chơi UNO chưa khả dụng trong bản thử nghiệm này." : view.status === "ENDED" ? "Nhóm có thể chơi lại với những người còn ở phòng." : "Mời thêm bạn vào bàn. Chủ phòng sẽ bắt đầu khi mọi người sẵn sàng."}</p></div>
+      <div className="lobby-heading"><div><span className="eyebrow">Góc tụ họp của cả hội</span><h1>Đợi bạn, đủ vui.</h1>
+        <p>Mời thêm bạn vào bàn. Chủ phòng sẽ bắt đầu khi mọi người sẵn sàng.</p></div>
         <div className="game-stamp"><span>UNO</span><small>CƠ BẢN · 2–4 NGƯỜI</small></div>
       </div>
       {view.paused && <div className="notice" role="status">Có người đang mất kết nối. Phòng giữ chỗ tối đa 30 giây; ván chơi tạm dừng trong lúc chờ.</div>}
@@ -62,8 +69,8 @@ export function RoomScreen({ roomId }: { roomId: string }) {
           {copyState === "manual" && <label className="manual-copy">Trình duyệt chưa cho phép sao chép. Hãy chọn link:<input readOnly aria-label="Link mời phòng" value={typeof window === "undefined" ? "" : window.location.origin + "/room/" + roomId} onFocus={event => event.target.select()} /></label>}
           <div className="start-section">
             {playing ? <div className="started-banner" role="status"><span aria-hidden="true">✦</span><strong>Đã bắt đầu ván UNO</strong><p>Giữ phòng mở để tiếp tục cùng nhóm.</p></div> : <>
-              <button className="button primary full" disabled={!canStart} onClick={() => void state.session.start()}>{state.starting ? "Đang bắt đầu…" : view.status === "ENDED" ? "Chơi ván mới" : host ? "Bắt đầu ván" : "Chờ chủ phòng bắt đầu"}</button>
-              <p className="form-note">{!host ? "Bạn đã có chỗ. Chờ chủ phòng mở ván nhé." : view.members.length < 2 ? view.status === "ENDED" ? "Rời phòng và tạo phòng mới để mời thêm bạn." : "Cần thêm ít nhất 1 người bạn để bắt đầu." : view.paused ? "Chờ mọi người kết nối lại." : "Đã đủ người. Bắt đầu bất cứ lúc nào!"}</p>
+              <button className="button primary full" disabled={!canStart} onClick={() => void state.session.start()}>{state.starting ? "Đang bắt đầu…" : host ? "Bắt đầu ván" : "Chờ chủ phòng bắt đầu"}</button>
+              <p className="form-note">{!host ? "Bạn đã có chỗ. Chờ chủ phòng mở ván nhé." : view.members.length < 2 ? "Cần thêm ít nhất 1 người bạn để bắt đầu." : view.paused ? "Chờ mọi người kết nối lại." : "Đã đủ người. Bắt đầu bất cứ lúc nào!"}</p>
             </>}
           </div>
         </aside>

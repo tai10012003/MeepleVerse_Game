@@ -11,7 +11,7 @@ export interface UnoPlayerView {
   handCount: number;
 }
 export interface UnoView {
-  rulesVersion: "uno-basic-v1";
+  rulesVersion: "uno-house-v2";
   revision: number;
   phase: UnoPhase;
   players: UnoPlayerView[];
@@ -19,9 +19,10 @@ export interface UnoView {
   direction: 1 | -1;
   activeColor: UnoColor | null;
   topCard: UnoCard;
+  /** Public, oldest to newest; limited to the eight most recent discards. */
+  discardCards: UnoCard[];
   drawPileCount: number;
   discardPileCount: number;
-  unoTargetId: string | null;
   pendingDrawFour: { offenderId: string; challengerId: string } | null;
   result: UnoResult | null;
   self: { playerId: string; hand: UnoCard[]; drawnCardId: string | null };

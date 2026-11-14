@@ -8,7 +8,7 @@ export interface DrawFour {
   handBefore: Card[];
 }
 export interface UnoGame {
-  rulesVersion: "uno-basic-v1";
+  rulesVersion: "uno-house-v2";
   revision: number;
   phase: UnoPhase;
   players: Player[];
@@ -19,7 +19,6 @@ export interface UnoGame {
   drawPile: Card[];
   discardPile: Card[];
   drawnCardId: string | null;
-  unoTargetId: string | null;
   pendingDrawFour: DrawFour | null;
   pendingWinnerId: string | null;
   blockedTurns: number;

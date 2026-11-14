@@ -9,7 +9,6 @@ export function resolveDrawFour(game: UnoGame, challenged: boolean, random: Rand
   requireRule(game.phase === "draw-four" && game.pendingDrawFour, "INVALID_PHASE");
   const pending = game.pendingDrawFour;
   const successful = challenged && pending.hadMatchingColor;
-  game.unoTargetId = null;
   if (challenged) events.private.push({
     type: "CHALLENGE_HAND", recipientId: pending.challengerId, offenderId: pending.offenderId,
     cards: structuredClone(pending.handBefore),
