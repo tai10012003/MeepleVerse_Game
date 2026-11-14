@@ -28,7 +28,7 @@ async function play(page: Page, id?: string) {
   const kind = await chosen.getAttribute("data-card-kind");
   await chosen.click();
   await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
-  if (kind === "wild" || kind === "wild-draw-four") {
+  if (kind === "wild") {
     await expect(page.getByRole("dialog", { name: "Đổi sang màu nào?" })).toBeVisible();
     await page.getByRole("button", { name: "Đỏ", exact: true }).click();
   }
@@ -53,10 +53,9 @@ test("two real browsers play a whole game and rematch", async ({ page, browser }
       const board = actor.getByTestId("uno-board");
       const phase = await board.getAttribute("data-phase");
       const revision = Number(await actor.getByTestId("uno-screen").getAttribute("data-revision"));
-      if (phase === "choose-color") await actor.getByRole("button", { name: "Đỏ", exact: true }).click();
-      else if (phase === "draw-four") await actor.getByRole("button", { name: "Chấp nhận +4" }).click();
+      if (phase === "choose-color" || phase === "penalty-color") await actor.getByRole("button", { name: "Đỏ", exact: true }).click();
       else if (await actor.locator(".uno-hand-card:not(:disabled)").count()) await play(actor);
-      else await actor.getByRole("button", { name: phase === "drawn" ? "Bỏ lượt" : "Bốc bài", exact: true }).click();
+      else await actor.getByRole("button", { name: phase === "draw-stack" ? /^Nhận \d+ lá$/ : phase === "drawn" ? "Bỏ lượt" : "Bốc bài", exact: true }).click();
       for (const client of group.pages) await expect(client.getByTestId("uno-screen")).toHaveAttribute("data-revision", String(revision + 1));
       await expect(actor.locator(".board-error")).toHaveCount(0);
     }
@@ -87,34 +86,93 @@ test("drawn-card-only restriction, pass, and reload preserve the real hand", asy
     expect(await page.locator(".uno-hand-card").evaluateAll(nodes => nodes.map(node => node.getAttribute("data-card-id")))).toEqual(before);
     await page.getByRole("button", { name: "Bỏ lượt", exact: true }).click();
     await expect(group.pages[1]!.getByTestId("uno-board")).toHaveAttribute("data-my-turn", "true");
-    await expect(page.getByRole("button", { name: "Bốc bài", exact: true })).toBeDisabled();
+    await expect(page.getByRole("region", { name: "Điều khiển lượt" }).getByRole("button", { name: /^(Bốc bài|Nhận \d+ lá)$/, exact: true })).toBeDisabled();
   } finally { await group.close(); }
 });
-test("Wild color picker can cancel, challenge evidence is private and persists", async ({ page, browser, request }) => {
-  await request.post("http://127.0.0.1:5101/scenario/challenge");
+test("ordinary Wild still chooses color and can cancel without losing the armed UNO declaration", async ({ page, browser, request }) => {
+  await request.post("http://127.0.0.1:5101/scenario/wild");
+  const group = await party(page, browser);
+  try {
+    const uno = page.getByRole("button", { name: "Hô UNO", exact: true });
+    await uno.click();
+    await page.locator('[data-card-id="plain-wild"]').click();
+    await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
+    await expect(page.getByRole("dialog", { name: "Đổi sang màu nào?" })).toBeVisible();
+    await page.getByRole("button", { name: "Chọn lá khác" }).click();
+    await expect(uno).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
+    await page.getByRole("button", { name: "Xanh dương", exact: true }).click();
+    await expect(page.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await expect(page.getByTestId("my-hand-count")).toHaveText("1 lá");
+    await expect(group.pages[1]!.locator('.direction-ring')).toHaveAttribute("data-color", "blue");
+  } finally { await group.close(); }
+});
+
+test("four-player +2/+4/+4 chain draws ten; only the last +4 author chooses color and reload preserves the decision", async ({ page, browser, request }, info) => {
+  await request.post("http://127.0.0.1:5101/scenario/stacking");
+  const group = await party(page, browser, 4);
+  try {
+    const [a, b, c, d] = group.pages as [Page, Page, Page, Page];
+    await play(a, "two");
+    await expect(b.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await expect(b.locator('.uno-hand')).toHaveAttribute("data-suggesting", "true");
+    await expect(b.locator('[data-card-id="four1"]')).toHaveClass(/is-suggested/);
+    await expect(b.locator('[data-card-id="four1"]')).not.toHaveClass(/is-selected/);
+    await expect(b.locator('[data-card-id="b"]')).toHaveClass(/is-blocked/);
+    await expect(b.locator('[data-card-id="b"]')).toBeDisabled();
+    await expect(a.locator('.uno-hand')).toHaveAttribute("data-suggesting", "false");
+    await b.screenshot({ path: info.outputPath("stacking-suggestions.png") });
+    await play(b, "four1"); await play(c, "four2");
+    await expect(d.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    for (const client of group.pages) {
+      await expect(client.getByTestId("uno-board")).toHaveAttribute("data-phase", "draw-stack");
+      await expect(client.getByRole("dialog")).toHaveCount(0);
+      await expect(client.getByRole("button", { name: /Thách thức|Chấp nhận/ })).toHaveCount(0);
+    }
+    await expect(d.getByTestId("draw-debt")).toHaveText("+10");
+    await expect(d.locator(".uno-hand-card:not(:disabled)")).toHaveCount(0);
+    await d.screenshot({ path: info.outputPath("stacking-debt-ten.png") });
+    await d.getByRole("button", { name: "Nhận 10 lá", exact: true }).click();
+    await expect(d.locator('[data-effect="draw"][data-card-visibility="self"]')).toHaveCount(10);
+    await expect(a.locator('[data-effect="draw"][data-card-visibility="back"]')).toHaveCount(10);
+    await expect(a.locator('[data-effect="draw"][data-card-visibility="self"]')).toHaveCount(0);
+    await d.screenshot({ path: info.outputPath("stacking-ten.png") });
+    await expect(d.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await expect(d.getByTestId("my-hand-count")).toHaveText("12 lá");
+    await c.reload();
+    await expect(c.getByRole("dialog", { name: "Đổi sang màu nào?" })).toBeVisible();
+    for (const client of [a, b, d]) await expect(client.getByRole("dialog")).toHaveCount(0);
+    await expect(d.getByTestId("uno-board")).toHaveAttribute("data-my-turn", "false");
+    await c.getByRole("button", { name: "Xanh lá", exact: true }).click();
+    for (const client of group.pages) await expect(client.getByTestId("uno-screen")).toHaveAttribute("data-revision", "5");
+    await expect(a.getByTestId("uno-board")).toHaveAttribute("data-my-turn", "true");
+    await expect(a.locator('.direction-ring')).toHaveAttribute("data-color", "green");
+  } finally { await group.close(); }
+});
+
+test("a blue +2 after +4 closes a six-card chain with blue, without a color picker", async ({ page, browser, request }) => {
+  await request.post("http://127.0.0.1:5101/scenario/stacking-two");
   const group = await party(page, browser, 3);
   try {
-    await page.getByRole("button", { name: "Hô UNO", exact: true }).click();
-    await page.locator('[data-card-id="four"]').click();
-    await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
-    await page.getByRole("button", { name: "Chọn lá khác" }).click();
-    await expect(page.getByRole("dialog")).toHaveCount(0);
-    await expect(page.locator('[data-card-id="four"]')).toBeVisible();
-    await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
-    await page.getByRole("button", { name: "Xanh lá", exact: true }).click();
-    const challenger = group.pages[1]!;
-    await challenger.getByRole("button", { name: "Thách thức +4", exact: true }).click();
-    const evidence = challenger.getByRole("complementary", { name: "Bằng chứng thách thức +4" });
-    await expect(evidence).toBeVisible();
-    await expect(evidence.getByText("Đỏ 7", { exact: true })).toBeVisible();
-    await expect(page.getByRole("complementary", { name: "Bằng chứng thách thức +4" })).toHaveCount(0);
-    await expect(group.pages[2]!.getByRole("complementary", { name: "Bằng chứng thách thức +4" })).toHaveCount(0);
-    await play(challenger, "green");
-    await expect(evidence).toBeVisible();
-    await evidence.getByRole("button", { name: "Đóng" }).click();
-    await expect(evidence).toHaveCount(0);
+    const [a, b, c] = group.pages as [Page, Page, Page];
+    await play(a, "four");
+    await expect(b.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await expect(b.locator('[data-card-id="two-blue"]')).toHaveClass(/is-suggested/);
+    await expect(b.locator('[data-card-id="two-blue"]')).not.toHaveClass(/is-selected/);
+    await expect(b.locator('[data-card-id="b"]')).toHaveClass(/is-blocked/);
+    await b.locator('[data-card-id="two-blue"]').click();
+    await expect(b.locator('[data-card-id="two-blue"]')).toHaveClass(/is-selected/);
+    await play(b, "two-blue");
+    await expect(c.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await c.getByRole("button", { name: "Nhận 6 lá", exact: true }).click();
+    await expect(c.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await expect(c.getByTestId("my-hand-count")).toHaveText("8 lá");
+    for (const client of group.pages) await expect(client.getByRole("dialog")).toHaveCount(0);
+    await expect(a.getByTestId("uno-board")).toHaveAttribute("data-my-turn", "true");
+    await expect(a.locator('.direction-ring')).toHaveAttribute("data-color", "blue");
   } finally { await group.close(); }
 });
+
 test("UNO button arms one play, stays visible and gives no automatic declaration", async ({ page, browser, request }, info) => {
   await request.post("http://127.0.0.1:5101/scenario/uno");
   const group = await party(page, browser);
@@ -170,7 +228,7 @@ test("four-player mobile table fits and controls pause while another player relo
     await guest.goto("about:blank");
     await expect(page.locator(".turn-message")).toContainText("Tạm dừng");
     await expect(page.locator(".uno-hand-card:not(:disabled)")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Bốc bài", exact: true })).toBeDisabled();
+    await expect(page.getByRole("region", { name: "Điều khiển lượt" }).getByRole("button", { name: /^(Bốc bài|Nhận \d+ lá)$/, exact: true })).toBeDisabled();
     await guest.goto(url);
     await expect(guest.getByTestId("uno-board")).toBeVisible();
     await expect(page.locator(".turn-message")).not.toContainText("Tạm dừng");

@@ -12,16 +12,15 @@ it("completes 100 seeded games, preserving every physical card after each action
     while (game.phase !== "ended" && steps++ < 5000) {
       const player = game.players[game.currentIndex]!;
       let command: UnoCommand;
-      if (game.phase === "choose-color") command = { type: "CHOOSE_COLOR", color: "red" };
-      else if (game.phase === "draw-four") command = { type: seed % 2 ? "CHALLENGE_DRAW_FOUR" : "ACCEPT_DRAW_FOUR" };
+      if (game.phase === "choose-color" || game.phase === "penalty-color") command = { type: "CHOOSE_COLOR", color: "red" };
       else {
         const card = player.hand.find(card =>
           (game.phase !== "drawn" || card.id === game.drawnCardId) &&
-          canPlayCard(card, game.discardPile.at(-1)!, game.activeColor!));
+          (game.phase === "draw-stack" ? card.kind === "draw-two" || card.kind === "wild-draw-four" : canPlayCard(card, game.discardPile.at(-1)!, game.activeColor!)));
         command = card ? { type: "PLAY_CARD", cardId: card.id,
-          ...(card.color === null ? { chosenColor: "red" as const } : {}),
+          ...(card.kind === "wild" ? { chosenColor: "red" as const } : {}),
           declareUno: player.hand.length === 2,
-        } : { type: game.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" };
+        } : { type: game.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : game.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" };
       }
       game = applyCommand(game, player.id, command, random).state;
       const cards = [...game.drawPile, ...game.discardPile, ...game.players.flatMap(p => p.hand)];

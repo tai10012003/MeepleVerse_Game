@@ -24,13 +24,12 @@ describe("player views", () => {
     expect(game.discardPile[0]!.id).toBe("top");
     expect(() => getPlayerView(game, "outsider")).toThrow("UNKNOWN_PLAYER");
   });
-  it("never includes challenge evidence in public events", () => {
+  it("never exposes another hand or stock while accepting +4", () => {
     const game = fixture([[wild("w", "wild-draw-four"), number("secret")], [number("other")]]);
-    const pending = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "w", chosenColor: "blue" }).state;
-    const next = applyCommand(pending, "p1", { type: "CHALLENGE_DRAW_FOUR" });
-    expect(JSON.stringify(next.events.public)).not.toContain("secret");
-    expect(next.events.private[0]?.cards.some(card => card.id === "secret")).toBe(true);
-    next.events.private[0]!.cards.length = 0;
-    expect(pending.pendingDrawFour!.handBefore).toHaveLength(2);
+    const pending = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "w", declareUno: true }).state;
+    const next = applyCommand(pending, "p1", { type: "ACCEPT_DRAW_PENALTY" });
+    expect(JSON.stringify(next.events.public)).not.toMatch(/secret|stock-/);
+    expect(JSON.stringify(getPlayerView(next.state, "p1"))).not.toContain("secret");
+    expect(JSON.stringify(getPlayerView(next.state, "p0"))).not.toContain("stock-");
   });
 });

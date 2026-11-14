@@ -51,9 +51,10 @@ Snapshots là nguồn dữ liệu chính; events phục vụ hiệu ứng, khôn
 
 ## Đồng bộ và quyền riêng tư
 Public Colyseus schema dùng binary patches cho trạng thái phòng, lượt, màu và số bài.
-Không chứa tay bài, chồng bốc hoặc bằng chứng +4.
+Không chứa tay bài hoặc chồng bốc.
 Snapshot đầy đủ theo người được gửi riêng qua room_view sau thay đổi và khi reconnect.
-Bằng chứng +4 chỉ có trong game_events riêng của challenger; không broadcast.
+game_events chỉ chứa public events; không còn thách thức hoặc bằng chứng +4.
+Tổng phạt và bước chọn màu của người đánh +4 cuối được giữ trong room_view riêng từng người.
 Không xuất UnoGame hoặc service trực tiếp qua transport.
 CORS HTTP và Origin WebSocket dùng cùng allowlist trong CORS_ORIGINS.
 SDK native không gửi Origin vẫn được dùng; Origin không thay thế xác thực.
@@ -75,6 +76,6 @@ Thông tin kết thúc này nằm ở outcome, game=null khi ván bị ngắt; c
 Integration test dùng cổng ngẫu nhiên, reconnect 0.5 giây để không đợi 30 giây mỗi lần.
 Game factory/timeout test là cấu hình server qua closure, client không thay được.
 Test chơi thật 2/3/4 client đến hết ván và rematch; kiểm tra lỗi, dedup, bài riêng,
-evidence, reconnect, hết hạn và chuyển host.
+cộng dồn, chọn màu sau phạt, reconnect, hết hạn và chuyển host.
 Chưa có MongoDB, phục hồi server crash, turn timer, bot, UI hoặc lưu replay.
 Restart server làm mất phòng/ghế/receipts; client cần tạo/vào phòng mới.

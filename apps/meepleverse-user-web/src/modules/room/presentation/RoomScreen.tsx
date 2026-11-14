@@ -31,8 +31,8 @@ export function RoomScreen({ roomId }: { roomId: string }) {
   const canStart = host && view.members.length >= 2 && !view.paused && state.status === "connected" && !state.starting;
   const playing = view.status === "PLAYING";
   if (view.status !== "LOBBY") return <UnoScreen view={view} connected={state.status === "connected"} reconnecting={state.status === "reconnecting"}
-    pending={state.acting || state.starting} error={state.error} frames={state.frames} events={state.events} evidence={state.evidence}
-    onHideEvidence={() => state.session.clearEvidence()} onCommand={command => void state.session.command(command)}
+    pending={state.acting || state.starting} error={state.error} frames={state.frames} events={state.events}
+    onCommand={command => void state.session.command(command)}
     onRematch={() => void state.session.start()} onLeave={() => setConfirmLeave(true)} onReconnect={() => void state.session.restore(roomId)}>
     {confirmLeave && <LeaveDialog playing={playing} onCancel={() => setConfirmLeave(false)} onLeave={() => void leave()} />}
   </UnoScreen>;

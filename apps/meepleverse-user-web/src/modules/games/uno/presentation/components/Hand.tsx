@@ -6,7 +6,7 @@ export function Hand({ game, selectedId, enabled, onSelect, newCardIds }: {
   newCardIds: string[]; game: UnoView; selectedId: string | null; enabled: boolean; onSelect: (id: string) => void;
 }) {
   const handRef = useRef<HTMLDivElement>(null);
-  const suggesting = enabled && (game.phase === "turn" || game.phase === "drawn");
+  const suggesting = enabled && (game.phase === "turn" || game.phase === "drawn" || game.phase === "draw-stack");
   const newest = newCardIds.filter(id => game.self.hand.some(card => card.id === id)).at(-1) ?? (suggesting ? game.self.hand.find(card => isPlayable(card, game))?.id : undefined);
   useEffect(() => {
     const card = Array.from(handRef.current?.querySelectorAll<HTMLElement>("[data-card-id]") ?? []).find(element => element.dataset.cardId === newest);

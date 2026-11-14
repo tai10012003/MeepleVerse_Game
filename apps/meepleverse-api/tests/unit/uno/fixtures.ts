@@ -5,11 +5,11 @@ export function number(id: string, color: Color = "red", value = 7): Card { retu
 export function action(id: string, kind: "skip" | "reverse" | "draw-two", color: Color = "red"): Card { return { id, kind, color }; }
 export function wild(id: string, kind: "wild" | "wild-draw-four" = "wild"): Card { return { id, kind, color: null }; }
 export function fixture(hands: Card[][], stock: Card[] = [number("stock-1"), number("stock-2"), number("stock-3"), number("stock-4"), number("stock-5"), number("stock-6")]): UnoGame {
-  return { rulesVersion: "uno-house-v2", revision: 0, phase: "turn",
+  return { rulesVersion: "uno-house-v3", revision: 0, phase: "turn",
     players: hands.map((hand, i) => ({ id: "p" + i, hand })),
     dealerIndex: hands.length - 1, currentIndex: 0, direction: 1, activeColor: "red",
     drawPile: stock, discardPile: [number("top")], drawnCardId: null,
-    pendingDrawFour: null, pendingWinnerId: null, blockedTurns: 0, result: null };
+    pendingDraw: 0, blockedTurns: 0, result: null };
 }
 export function seeded(seed: number) {
   let value = seed >>> 0;

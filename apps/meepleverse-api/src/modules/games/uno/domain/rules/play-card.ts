@@ -8,20 +8,19 @@ import { drawCards } from "./draw-cards.js";
 import { endGame } from "./scoring.js";
 import type { RandomSource } from "./shuffle.js";
 export function playCard(game: UnoGame, actorId: string, command: Extract<UnoCommand, { type: "PLAY_CARD" }>, random: RandomSource, events: UnoEvents): void {
-  requireRule(game.phase === "turn" || game.phase === "drawn", "INVALID_PHASE");
+  requireRule(game.phase === "turn" || game.phase === "drawn" || game.phase === "draw-stack", "INVALID_PHASE");
   const actor = game.players[game.currentIndex]!;
   const index = actor.hand.findIndex(card => card.id === command.cardId);
   requireRule(index !== -1, "CARD_NOT_OWNED");
   const card = actor.hand[index]!;
   requireRule(game.phase !== "drawn" || game.drawnCardId === card.id, "DRAWN_CARD_ONLY");
-  requireRule(canPlayCard(card, game.discardPile.at(-1)!, game.activeColor!), "CARD_NOT_PLAYABLE");
-  requireRule(card.color === null ? command.chosenColor !== undefined : command.chosenColor === undefined, "INVALID_COLOR");
+  const penaltyCard = card.kind === "draw-two" || card.kind === "wild-draw-four";
+  requireRule(game.phase === "draw-stack" ? penaltyCard : canPlayCard(card, game.discardPile.at(-1)!, game.activeColor!), "CARD_NOT_PLAYABLE");
+  requireRule(card.kind === "wild" ? command.chosenColor !== undefined : command.chosenColor === undefined, "INVALID_COLOR");
   requireRule(!command.declareUno || actor.hand.length === 2, "INVALID_UNO_CALL");
-  const handBefore = structuredClone(actor.hand);
-  const hadMatchingColor = actor.hand.some(held => held.color === game.activeColor);
   actor.hand.splice(index, 1);
   game.discardPile.push(card);
-  game.activeColor = card.color ?? command.chosenColor!;
+  game.activeColor = card.kind === "wild-draw-four" ? null : card.color ?? command.chosenColor!;
   game.drawnCardId = null;
   game.phase = "turn";
   game.blockedTurns = 0;
@@ -34,11 +33,14 @@ export function playCard(game: UnoGame, actorId: string, command: Extract<UnoCom
     }
   }
   const next = getNextPlayer(game.currentIndex, game.players.length, game.direction);
-  if (card.kind === "wild-draw-four") {
-    game.pendingDrawFour = { offenderId: actorId, challengerId: game.players[next]!.id, hadMatchingColor, handBefore };
-    game.pendingWinnerId = actor.hand.length === 0 ? actorId : null;
+  if (penaltyCard) {
+    game.pendingDraw += card.kind === "draw-two" ? 2 : 4;
     game.currentIndex = next;
-    game.phase = "draw-four";
+    game.phase = "draw-stack";
+    if (actor.hand.length === 0) {
+      drawCards(game, game.players[next]!.id, game.pendingDraw, random, events);
+      endGame(game, actorId, events);
+    }
     return;
   }
   let steps = 1;
@@ -47,10 +49,6 @@ export function playCard(game: UnoGame, actorId: string, command: Extract<UnoCom
     if (game.players.length === 2) steps = 2;
   }
   if (card.kind === "skip") steps = 2;
-  if (card.kind === "draw-two") {
-    drawCards(game, game.players[next]!.id, 2, random, events);
-    steps = 2;
-  }
   game.currentIndex = getNextPlayer(game.currentIndex, game.players.length, game.direction, steps);
   if (actor.hand.length === 0) endGame(game, actorId, events);
 }

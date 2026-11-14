@@ -32,11 +32,11 @@ describe("UNO declaration and results", () => {
   it.each(["skip", "reverse", "draw-two", "wild", "wild-draw-four"] as const)("keeps %s effects when the offender also receives an UNO penalty", kind => {
     const card = kind === "wild" || kind === "wild-draw-four" ? wild("special", kind) : action("special", kind);
     const game = fixture([[card, number("stay")], [number("other")], [number("third")]]);
-    const next = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "special", ...(card.color === null ? { chosenColor: "green" } : {}) });
+    const next = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "special", ...(card.kind === "wild" ? { chosenColor: "green" } : {}) });
     expect(next.state.players[0]!.hand).toHaveLength(3);
     expect(next.state.discardPile.at(-1)?.id).toBe("special");
-    if (kind === "draw-two") expect(next.state.players[1]!.hand).toHaveLength(3);
-    if (kind === "wild-draw-four") { expect(next.state.phase).toBe("draw-four"); expect(next.state.pendingDrawFour!.handBefore).toHaveLength(2); }
+    if (kind === "draw-two") { expect(next.state.players[1]!.hand).toHaveLength(1); expect(next.state.pendingDraw).toBe(2); }
+    if (kind === "wild-draw-four") { expect(next.state.phase).toBe("draw-stack"); expect(next.state.pendingDraw).toBe(4); }
     if (kind === "reverse") expect(next.state.direction).toBe(-1);
   });
   it("scores remaining cards and rejects actions after a win", () => {
@@ -51,13 +51,10 @@ describe("UNO declaration and results", () => {
     expect(next.players[1]!.hand).toHaveLength(3);
     expect(next.result?.winnerScore).toBe(12);
   });
-  it.each(["ACCEPT_DRAW_FOUR", "CHALLENGE_DRAW_FOUR"] as const)("defers a final Draw Four until %s", type => {
+  it("settles a final Draw Four immediately before scoring", () => {
     const game = fixture([[wild("last", "wild-draw-four")], [number("other")]]);
-    const pending = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "last", chosenColor: "red" }).state;
-    expect(pending.result).toBeNull();
-    expect(pending.phase).toBe("draw-four");
-    const next = applyCommand(pending, "p1", { type }).state;
-    expect(next.result?.winnerId).toBe("p0");
-    expect(next.players[1]!.hand).toHaveLength(type === "ACCEPT_DRAW_FOUR" ? 5 : 7);
+    const next = applyCommand(game, "p0", { type: "PLAY_CARD", cardId: "last" }).state;
+    expect(next.phase).toBe("ended"); expect(next.result?.winnerId).toBe("p0");
+    expect(next.players[1]!.hand).toHaveLength(5);
   });
 });

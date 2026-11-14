@@ -24,7 +24,7 @@ async function play(page: Page, id: string, wild = false) {
   if (await uno.getAttribute("aria-disabled") === "false") await uno.click();
   await page.locator('[data-card-id="' + id + '"]').click();
   await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
-  if (wild) await page.getByRole("button", { name: "Xanh lá", exact: true }).click();
+  if (wild && await page.getByRole("dialog").count()) await page.getByRole("button", { name: "Xanh lá", exact: true }).click();
 }
 async function expectSlowDraw(pages: Page[], recipient: Page, count: number) {
   for (const page of pages) {
@@ -101,13 +101,14 @@ test("effects: Draw Two sends two cards, shows their faces only to the recipient
   try {
     const recipient = group.pages[1]!;
     await play(page, "special");
+    await expect(recipient.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await recipient.getByRole("button", { name: "Nhận 2 lá", exact: true }).click();
     await expect(recipient.locator('[data-effect="draw"]')).toHaveCount(2);
     await expect(recipient.locator('[data-effect="draw"][data-card-visibility="self"]')).toHaveCount(2);
     await expect(page.locator('[data-effect="draw"][data-card-visibility="back"]')).toHaveCount(2);
     await expect(recipient.locator('.effect-badge.tone-draw')).toHaveCount(0);
     await expect(recipient.locator('.draw-reveal-caption')).toHaveCount(1);
-    await expect(recipient.locator('.effect-badge')).toHaveCount(1);
-    await expect(recipient.locator('.effect-badge')).toContainText("+2");
+    await expect(recipient.locator('.effect-badge')).toHaveCount(0);
     await expect(recipient.locator('[data-effect="turn"]')).toHaveCSS("opacity", "0");
     await expectSlowDraw(group.pages, recipient, 2);
     await recipient.screenshot({ path: info.outputPath("draw-two-effect.png"), fullPage: true });
@@ -126,31 +127,37 @@ test("effects: Draw Four waits for acceptance before four cards fly to the targe
     await play(page, "special", true);
     await expect(recipient.locator('[data-effect="badge"][data-symbol="+4"]')).toHaveCount(1);
     await expect(recipient.locator('[data-effect="draw"]')).toHaveCount(0);
-    await recipient.getByRole("button", { name: "Chấp nhận +4" }).click();
+    await expect(recipient.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await recipient.getByRole("button", { name: "Nhận 4 lá", exact: true }).click();
     await expect(recipient.locator('[data-effect="draw"]')).toHaveCount(4);
     await expect(recipient.locator('[data-effect="draw"][data-card-visibility="self"]')).toHaveCount(4);
     await expect(page.locator('[data-effect="draw"][data-card-visibility="back"]')).toHaveCount(4);
     await expectSlowDraw(group.pages, recipient, 4);
     await expect(recipient.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
     await expect(recipient.getByTestId("my-hand-count")).toHaveText("6 lá");
+    await expect(recipient.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Đổi sang màu nào?" })).toBeVisible();
+    await page.getByRole("button", { name: "Xanh lá", exact: true }).click();
   } finally { await group.close(); }
 });
-test("effects: failed Draw Four challenge animates six cards to the challenger", async ({ page, browser, request }) => {
+test("effects: a voluntary +4 acceptance returns the color picker to the +4 author after the reveal", async ({ page, browser, request }) => {
   await request.post("http://127.0.0.1:5101/scenario/effect-four");
   const group = await setup(page, browser);
   try {
-    const challenger = group.pages[1]!;
+    const recipient = group.pages[1]!;
     await play(page, "special", true);
-    await challenger.getByRole("button", { name: "Thách thức +4" }).click();
-    await expect(challenger.locator('[data-effect="draw"]')).toHaveCount(6);
-    await expect(challenger.locator(".draw-reveal-caption")).toContainText("Thách thức thất bại");
-    await expect(challenger.locator(".effect-badge")).toHaveCount(0);
-    const self = await challenger.getByTestId("uno-screen").getAttribute("data-self-player-id");
-    await expect(challenger.locator('[data-effect="draw"]').first()).toHaveAttribute("data-player-id", self!);
-    await expect(challenger.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
-    await expect(challenger.getByTestId("my-hand-count")).toHaveText("8 lá");
+    await expect(recipient.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await recipient.getByRole("button", { name: "Nhận 4 lá", exact: true }).click();
+    await expect(recipient.locator('[data-effect="draw"]')).toHaveCount(4);
+    await expect(recipient.getByRole("dialog")).toHaveCount(0);
+    await expect(recipient.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(recipient.getByRole("dialog")).toHaveCount(0);
+    await page.getByRole("button", { name: "Đỏ", exact: true }).click();
+    await expect(page.getByTestId("uno-board")).toHaveAttribute("data-my-turn", "true");
   } finally { await group.close(); }
 });
+
 test("effects: two-player Reverse has its own symbol and explains playing again", async ({ page, browser, request }) => {
   await request.post("http://127.0.0.1:5101/scenario/effect-reverse");
   const group = await setup(page, browser);

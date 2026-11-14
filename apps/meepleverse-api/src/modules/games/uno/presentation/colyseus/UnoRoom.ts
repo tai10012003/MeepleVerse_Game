@@ -116,7 +116,7 @@ export class UnoRoom extends Room<{ state: UnoRoomSchema }> {
           if (!recipientId || this.dropped.has(recipient.sessionId)) continue;
           recipient.send("game_events", {
             matchId: this.service.matchId, revision: transition.state.revision,
-            events: [...transition.events.public, ...transition.events.private.filter(event => event.recipientId === recipientId)],
+            events: transition.events.public,
           });
         }
       }

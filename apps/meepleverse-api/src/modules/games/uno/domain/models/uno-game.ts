@@ -1,14 +1,8 @@
 import type { UnoPhase, UnoResult } from "@meepleverse/contracts/uno";
 import type { Card, Color } from "./card.js";
 export interface Player { id: string; hand: Card[] }
-export interface DrawFour {
-  offenderId: string;
-  challengerId: string;
-  hadMatchingColor: boolean;
-  handBefore: Card[];
-}
 export interface UnoGame {
-  rulesVersion: "uno-house-v2";
+  rulesVersion: "uno-house-v3";
   revision: number;
   phase: UnoPhase;
   players: Player[];
@@ -19,8 +13,7 @@ export interface UnoGame {
   drawPile: Card[];
   discardPile: Card[];
   drawnCardId: string | null;
-  pendingDrawFour: DrawFour | null;
-  pendingWinnerId: string | null;
+  pendingDraw: number;
   blockedTurns: number;
   result: UnoResult | null;
 }

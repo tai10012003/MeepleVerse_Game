@@ -30,4 +30,4 @@ export interface RoomActionReply {
   roomRevision: number; matchId: string | null; gameRevision: number | null;
 }
 
-export interface RoomGameEvents { matchId: string; revision: number; events: Array<import("../games/uno/events.js").UnoEvent | import("../games/uno/events.js").PrivateUnoEvent> }
+export interface RoomGameEvents { matchId: string; revision: number; events: Array<import("../games/uno/events.js").UnoEvent> }

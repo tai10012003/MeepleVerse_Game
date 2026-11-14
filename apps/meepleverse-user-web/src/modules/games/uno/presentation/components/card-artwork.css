@@ -63,3 +63,12 @@
 .card-special.kind-wild .card-oval,.card-special.kind-wild-draw-four .card-oval { display:none; }
 
 .card-symbol .reverse-mark { width:.96em; height:1.2em; }
+
+/* Leave more space inside the oval on played cards and their landing animation. */
+.discard-pile .card-symbol > .reverse-mark,
+.discard-pile .card-symbol > .skip-mark,
+.played-flight .card-symbol > .reverse-mark,
+.played-flight .card-symbol > .skip-mark {
+  transform:scale(.78);
+  transform-origin:center;
+}

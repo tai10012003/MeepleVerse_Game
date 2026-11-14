@@ -1,18 +1,17 @@
 import { Client, type Room } from "@colyseus/sdk";
 import type { UnoRoomView, RoomAction, RoomActionReply, RoomGameEvents } from "@meepleverse/contracts/room";
-import type { UnoCommand, UnoEvent, PrivateUnoEvent } from "@meepleverse/contracts/uno";
+import type { UnoCommand } from "@meepleverse/contracts/uno";
 import { clearSession, readSession, saveSession } from "./session-storage";
 import { roomError } from "../model/room-errors";
 
 import type { UnoVisualFrame } from "@/modules/games/uno";
 
 type Status = "idle" | "connecting" | "connected" | "reconnecting" | "disconnected";
-export interface Evidence { matchId: string; revision: number; event: PrivateUnoEvent }
 interface SessionState {
   status: Status; view: UnoRoomView | null; error: string | null; starting: boolean; acting: boolean;
-  frames: UnoVisualFrame[]; events: RoomGameEvents | null; evidence: Evidence | null;
+  frames: UnoVisualFrame[]; events: RoomGameEvents | null;
 }
-const initial: SessionState = { status: "idle", view: null, error: null, starting: false, acting: false, frames: [], events: null, evidence: null };
+const initial: SessionState = { status: "idle", view: null, error: null, starting: false, acting: false, frames: [], events: null };
 class RoomSession {
   private state = initial;
   private readonly listeners = new Set<() => void>();
@@ -43,7 +42,7 @@ class RoomSession {
         this.visualPairs.set(view.game.revision, { before: previous, after: view });
         if (this.visualPairs.size > 8) this.visualPairs.delete(this.visualPairs.keys().next().value!);
       }
-      this.patch({ view, status: "connected", ...(newMatch ? { events: null, evidence: null } : {}), ...((newMatch || view.paused || !view.game) ? { frames: [] } : {}) });
+      this.patch({ view, status: "connected", ...(newMatch ? { events: null } : {}), ...((newMatch || view.paused || !view.game) ? { frames: [] } : {}) });
       this.snapshotWaiter?.();
     });
     room.onMessage("action_reply", (reply: RoomActionReply) => {
@@ -51,16 +50,14 @@ class RoomSession {
     });
     room.onMessage("game_events", (batch: RoomGameEvents) => {
       if (!current() || batch.matchId !== this.state.view?.matchId) return;
-      const evidence = batch.events.find((event): event is PrivateUnoEvent =>
-        event.type === "CHALLENGE_HAND" && event.recipientId === this.state.view?.selfPlayerId);
       const pair = this.visualPairs.get(batch.revision);
       this.visualPairs.delete(batch.revision);
       const id = batch.matchId + ":" + batch.revision;
       const frame: UnoVisualFrame | null = pair && !this.state.view?.paused && !this.state.frames.some(frame => frame.id === id) ? {
         id, matchId: batch.matchId, revision: batch.revision, before: pair.before, after: pair.after,
-        events: batch.events.filter((event): event is UnoEvent => event.type !== "CHALLENGE_HAND"),
+        events: batch.events,
       } : null;
-      this.patch({ events: batch, ...(frame ? { frames: [...this.state.frames, frame].slice(-16) } : {}), ...(evidence ? { evidence: { matchId: batch.matchId, revision: batch.revision, event: evidence } } : {}) });
+      this.patch({ events: batch, ...(frame ? { frames: [...this.state.frames, frame].slice(-16) } : {}) });
     });
     room.onDrop(() => {
       if (current()) { this.actionWaiter?.finish(null); this.visualPairs.clear(); this.patch({ status: "reconnecting", starting: false, acting: false, frames: [] }); }
@@ -84,7 +81,7 @@ class RoomSession {
     if (this.room) return Promise.resolve(this.room.roomId);
     const generation = ++this.generation;
     this.visualPairs.clear();
-    this.patch({ status: "connecting", error: null, view: null, frames: [], events: null, evidence: null });
+    this.patch({ status: "connecting", error: null, view: null, frames: [], events: null });
     const task = (async () => {
       let joined: Room | null = null;
       try {
@@ -142,7 +139,6 @@ class RoomSession {
     if (!view?.game || view.status !== "PLAYING" || !view.matchId) return;
     await this.sendAction({ type: "GAME_COMMAND", matchId: view.matchId, expectedRevision: view.game.revision, command }, "game");
   }
-  clearEvidence(): void { this.patch({ evidence: null }); }
   async leave(): Promise<void> {
     ++this.generation;
     const room = this.room;

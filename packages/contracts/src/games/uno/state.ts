@@ -1,5 +1,5 @@
 import type { UnoCard, UnoColor } from "./card.js";
-export type UnoPhase = "turn" | "drawn" | "choose-color" | "draw-four" | "ended";
+export type UnoPhase = "turn" | "drawn" | "choose-color" | "draw-stack" | "penalty-color" | "ended";
 export interface UnoResult {
   winnerId: string | null;
   reason: "empty-hand" | "blocked";
@@ -11,7 +11,7 @@ export interface UnoPlayerView {
   handCount: number;
 }
 export interface UnoView {
-  rulesVersion: "uno-house-v2";
+  rulesVersion: "uno-house-v3";
   revision: number;
   phase: UnoPhase;
   players: UnoPlayerView[];
@@ -23,7 +23,7 @@ export interface UnoView {
   discardCards: UnoCard[];
   drawPileCount: number;
   discardPileCount: number;
-  pendingDrawFour: { offenderId: string; challengerId: string } | null;
+  pendingDraw: number;
   result: UnoResult | null;
   self: { playerId: string; hand: UnoCard[]; drawnCardId: string | null };
 }

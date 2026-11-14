@@ -1,70 +1,62 @@
-# UNO — luật MeepleVerse v2
+# UNO — luật MeepleVerse v3
 
-## Phạm vi và nguồn luật
-Mã luật: uno-house-v2. Đây là đặc tả triển khai MeepleVerse, không phải bản sao hướng dẫn.
-Nguồn chính: [Mattel W2085](https://service.mattel.com/instruction_sheets/W2085-UNO.pdf).
-Tham khảo cơ chế hai người và bluff; cách phạt quên UNO dưới đây là luật riêng của MeepleVerse:
-[Mattel H9022](https://service.mattel.com/instruction_sheets/h9022.pdf); không dùng lá bổ sung của bộ H9022.
+Mã luật: `uno-house-v3`. Bộ bài 108 lá, 2–4 người, chia 7 lá mỗi người.
+Tham khảo bộ bài cổ điển [Mattel W2085](https://service.mattel.com/instruction_sheets/W2085-UNO.pdf).
+Cộng dồn và phạt UNO dưới đây là luật riêng MeepleVerse.
 
-Bộ bài 108 lá: mỗi màu có một số 0, hai bản số 1–9, hai Skip, hai Reverse,
-hai Draw Two; thêm bốn Wild và bốn Wild Draw Four. Chia bảy lá mỗi người.
-Đánh cùng màu, số hoặc biểu tượng; Wild chọn màu. Được chủ động bốc một lá,
-sau đó chỉ đánh lá vừa bốc hoặc bỏ lượt. Lá không hợp lệ tự chuyển lượt.
-Skip bỏ người kế; Reverse đảo chiều; Draw Two bắt người kế bốc hai và mất lượt.
-Wild Draw Four yêu cầu không có màu hiện hành trên tay. Hết chồng bốc thì xào bài bỏ,
-giữ lá trên cùng. Điểm bài: số theo giá trị, lá chức năng màu 20, Wild 50.
-Hết bài kết thúc ván; bài phạt cuối vẫn được xử lý trước tính điểm.
+## Bộ bài và lượt thường
+- Mỗi màu: một số 0, hai bản số 1–9, hai Skip, hai Reverse, hai Draw Two.
+  Thêm bốn Wild và bốn Wild Draw Four.
+- Đánh cùng màu, số hoặc biểu tượng; Wild thường chọn màu khi đánh.
+- +4 được đánh tự do trong lượt thường, không phải chọn màu và không có thách thức.
+- Được chủ động bốc 1 lá; sau đó chỉ đánh lá vừa bốc hoặc bỏ lượt.
+  Nếu lá vừa bốc không đánh được thì tự chuyển lượt.
+- Skip bỏ người kế; Reverse đổi chiều. Hai người: Skip/Reverse trả lượt về người đánh.
+- Hết chồng bốc thì xào lại chồng bỏ, giữ lá trên cùng. Nếu không đủ bài thì bốc tối đa
+  số có thể, không tạo thêm lá. Một vòng bốc thường không lấy được lá nào thì kết thúc blocked.
 
-Với hai người, Skip/Reverse trả lượt về người đánh.
-Cho phép bluff +4. Người chịu phạt chọn chấp nhận hoặc thách thức: bắt đúng thì
-người đánh bốc bốn và người thách thức giữ lượt; bắt sai thì bốc sáu và mất lượt.
-Bằng chứng tay bài trước nước đi chỉ gửi người thách thức.
-Khi còn hai lá, phải bấm UNO trước khi đánh để còn một lá. Nếu quên, server tự phạt
-bốc hai ngay trong nước đánh; không có thao tác bắt lỗi hoặc hô muộn. Hiệu lực lá vừa đánh vẫn áp dụng.
+## Chuỗi cộng dồn +2/+4
+- Đánh +2 hoặc +4 mở phase draw-stack, pendingDraw tăng 2 hoặc 4, chuyển sang người kế.
+- Người kế được nối bất kỳ +2/+4, bất kể màu và giá trị; hoặc chọn nhận toàn bộ phạt.
+  Không được đánh số, Wild thường, Skip, Reverse, bốc một lá hay bỏ lượt trong chuỗi.
+- Nhận phạt qua ACCEPT_DRAW_PENALTY: bốc một lần toàn bộ tổng phạt và đặt pendingDraw=0.
+- Lá cuối là +2: giữ màu của lá đó, người nhận mất lượt, chuyển người kế.
+- Lá cuối là +4: người nhận bốc toàn bộ tổng phạt; chuyển quyền CHOOSE_COLOR về người
+  đánh +4 cuối cùng ở phase penalty-color, rồi chuyển tới người sau người nhận phạt
+  theo chiều hiện hành. Người nhận không được chọn màu hoặc dùng bài mới để nối lại chuỗi.
+- Ví dụ A +2, B +4, C +4, D nhận 10 lá: C chọn màu, rồi tới A.
+- Ví dụ A +4, B +2 đỏ, C nhận 6 lá: màu đỏ, rồi tới A.
+- Quy tắc chọn màu này áp dụng cả +4 đơn lẻ và chuỗi cộng. Chuỗi và bước chọn màu nằm trong state server, được phục hồi sau reload/reconnect.
+- Lá mở đầu luôn là số 0–9 để xác định màu và số. Sau khi chia 7 lá mỗi người,
+  rút cho tới khi gặp lá số; các lá chức năng gặp trước đó được để riêng và trộn lại
+  vào chồng bốc. Không áp dụng hiệu lực chức năng lúc mở ván, không tạo tổng phạt.
+  Ghế sau dealer đi đầu, chiều mặc định +1, phase turn và pendingDraw=0.
 
-## Lựa chọn sản phẩm
-- 2–4 người, một ván độc lập; chưa có giải nhiều ván đến 500 điểm, đội hoặc xếp hạng.
-- Server chọn dealer ngẫu nhiên; application có thể cấp dealerIndex hợp lệ.
-- Theo thứ tự ghế: hướng +1 là chiều mặc định. Chia từng vòng từ ghế sau dealer.
-- Lá mở: số => ghế sau dealer; Skip/Draw Two áp dụng lên ghế đó; Reverse => dealer đi,
-  hướng -1 (cả khi hai người); Wild => ghế sau dealer chọn màu rồi đi.
-  Draw Four mở đầu được đặt sang bên, rút lá khác, sau đó trộn trở lại.
-- Không cộng dồn phạt, đánh chen, đánh nhiều lá hoặc luật 7–0.
-- Khi đánh Wild phải gửi màu cùng command; lá màu không nhận chosenColor.
-- declareUno=true đi kèm PLAY_CARD chỉ hợp lệ khi nước đi để lại đúng một lá.
-- Quên declareUno khi đánh từ hai xuống một lá: phát UNO_PENALTY và bốc hai ngay,
-  rồi xử lý chức năng lá bài. Không phạt khi nước đánh không hợp lệ hoặc đánh lá cuối cùng.
-- +4 cuối: chờ phản hồi rồi mới chốt kết quả. Màu đã chọn giữ nguyên dù thách thức thành công.
-  Bằng chứng được chụp trước lúc đánh, không đổi theo các hình phạt xảy ra sau.
-- Nếu thực sự không đủ bài để bốc, lấy tối đa số có thể; không tạo thêm lá.
-  Sau một vòng toàn bộ người chơi bốc được 0 lá và không có nước đánh xen giữa, kết thúc blocked,
-  không có người thắng. Đây là quy tắc chống kẹt riêng cho bản web.
+## UNO và kết quả
+- Còn hai lá: bấm UNO trước khi đánh, gửi declareUno=true cùng PLAY_CARD.
+  Quên khi đánh xuống một lá: tự bốc 2 ngay, không cần người khác bắt, không cho hô muộn.
+- Phạt UNO là riêng: không cộng vào pendingDraw; tác dụng lá vừa đánh vẫn áp dụng.
+  Nước sai không bị phạt, đánh lá cuối cùng không cần declareUno.
+- Người đánh hết bài thắng. Nếu lá cuối là +2/+4, người kế tự nhận toàn bộ tổng phạt
+  trước tính điểm, không được nối tiếp và không phải chọn màu sau khi ván đã kết thúc.
+- Điểm bài số theo giá trị; Skip/Reverse/+2 là 20, Wild/+4 là 50.
+  Điểm thắng bằng tổng điểm còn lại của đối phương. Chưa có giải đến 500 điểm, đội hay xếp hạng.
 
-## Hợp đồng thực thi
-createGame(playerIds, random?, dealerIndex?) tạo trạng thái server.
-applyCommand(state, actorId, payload, random?) trả state mới và events, hoặc UnoRuleError.
-actorId phải do application lấy từ kết nối đã xác thực, không lấy từ payload.
+## Hợp đồng và quyền riêng tư
+createGame(playerIds, random?, dealerIndex?) tạo state. applyCommand trả state mới và public events.
+Lỗi không sửa input; mỗi command hợp lệ tăng revision. Actor lấy từ kết nối đã xác thực.
+Phases: turn, drawn, choose-color, draw-stack, penalty-color, ended.
+Commands: PLAY_CARD, DRAW_CARD, PASS_TURN, CHOOSE_COLOR, ACCEPT_DRAW_PENALTY.
+chosenColor chỉ dành cho Wild thường; +4 không nhận chosenColor.
+Các lệnh thách thức, chấp nhận +4 cũ, CALL_UNO/CATCH_UNO bị từ chối.
 
-Phase: turn, drawn, choose-color, draw-four, ended.
-Command: PLAY_CARD, DRAW_CARD, PASS_TURN, CHOOSE_COLOR,
-ACCEPT_DRAW_FOUR, CHALLENGE_DRAW_FOUR. Lệnh CALL_UNO/CATCH_UNO cũ bị từ chối.
-Payload được Zod kiểm tra strict; từ chối field thừa và màu không tồn tại.
-Mỗi command thành công tăng revision. Lỗi không sửa input. Nguồn ngẫu nhiên được truyền vào
-để tái hiện test; production sử dụng mặc định Math.random ở giai đoạn hiện tại.
+Domain giữ toàn bộ bài nhưng không broadcast UnoGame. getPlayerView chỉ gửi tay bài của
+người nhận, số bài đối phương, tối đa 8 lá bỏ gần nhất, tổng phạt và trạng thái lượt.
+Public events bốc bài chỉ chứa playerId và số lượng, không chứa mặt bài, ID bài bốc hoặc bằng chứng.
+Không còn dữ liệu bằng chứng +4 hay event thách thức. View là bản sao, không sửa được domain qua tham chiếu.
 
-Domain giữ đủ tay bài, chồng bốc và bằng chứng +4; tuyệt đối không broadcast UnoGame.
-getPlayerView chỉ trả bài của người nhận, lá trên bàn, số lượng, lượt và kết quả.
-View được sao chép để người dùng hàm không sửa state qua tham chiếu.
-Events chia public/private; tầng giao tiếp tương lai phải lọc private theo recipientId.
-Số lá và id trong event bốc bài không bao giờ bao gồm nội dung lá bốc.
-
-## Ngoài bước triển khai này
-Chưa có endpoint chơi, Colyseus, lưu MongoDB, UI, reconnect, timeout hoặc bỏ cuộc.
-Chúng thuộc application/presentation ở bước sau, không được tự gán thành luật đã triển khai.
-Mọi replay sau này phải lưu command, phiên bản và nguồn ngẫu nhiên/trạng thái ban đầu phù hợp;
-revision hiện tại chưa phải cơ chế chống gửi trùng trên mạng.
-
-## Kiểm tra local
-Từ root: npx.cmd --yes pnpm@10.34.9 test
-Test bao gồm setup, nước đi sai, luật chức năng, UNO, thách thức, scoring,
-quyền riêng tư và 100 ván seed kiểm tra bảo toàn đủ 108 lá sau mỗi lệnh.
+## Kiểm thử
+Từ root: `npx.cmd --yes pnpm@10.34.9 test`.
+Bao gồm setup, validation, chức năng, cộng dồn, chọn màu sau phạt, UNO, scoring,
+quyền riêng tư, realtime và 100 ván seed bảo toàn đủ 108 lá sau mỗi lệnh.
+MongoDB, phục hồi server crash, bot và timer lượt chưa được triển khai.

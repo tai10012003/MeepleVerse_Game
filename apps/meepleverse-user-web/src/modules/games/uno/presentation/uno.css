@@ -65,10 +65,6 @@
 .color-choice { background:var(--card-color); color:#fff; border:2px solid #fff7; border-radius:10px; padding:20px 10px; font-weight:700; }
 .color-choice:hover { filter:brightness(1.15); }
 .color-dialog>.text-button { margin-top:12px; }
-.challenge-evidence { position:absolute; z-index:30; top:45px; right:15px; width:min(330px,calc(100% - 30px)); padding:18px; background:#21342c; border:1px solid var(--accent); border-radius:12px; box-shadow:0 12px 40px #0008; max-height:50%; overflow:auto; }
-.challenge-evidence>div { display:flex; align-items:center; gap:10px; justify-content:space-between; font-size:.8rem; }
-.challenge-evidence p,.challenge-evidence li { font-size:.7rem; }
-.challenge-evidence ul { padding-left:18px; line-height:1.8; }
 .uno-result-main { flex:1; min-height:0; overflow:auto; padding:24px 20px; }
 .uno-results { width:min(560px,100%); margin:0 auto; text-align:center; padding:20px; }
 .result-spark { font-size:3.5rem; color:var(--accent); display:block; margin-bottom:15px; }
@@ -121,7 +117,6 @@
   .uno-result-main { padding:15px; }
   .uno-results { padding:15px 5px; }
   .result-spark { font-size:2.4rem; }
-  .challenge-evidence { top:42px; max-height:47%; }
 }
 @media (max-height:620px) {
   .uno-page .room-header { min-height:50px; padding-block:8px; }
@@ -326,3 +321,7 @@
 @media(max-width:640px) { .uno-button { width:60px; height:60px; right:10px; bottom:12px; border-width:2px; padding:6px; } .uno-button>strong { font-size:1.05rem; } .uno-controls .action-row { padding-right:72px; } .uno-controls .action-row>.button { min-width:0; flex:1; } }
 @media(max-height:500px) { .uno-button { width:48px; height:48px; bottom:6px; right:12px; } .uno-button>strong { font-size:.8rem; } .uno-button>span { font-size:.46rem; } .uno-controls .action-row { padding-right:62px; } }
 @media(prefers-reduced-motion:reduce) { .uno-button.is-ready { animation:none; box-shadow:0 0 0 4px #ffe85d55,0 0 24px #ffd54a99; } }
+
+.draw-debt { position:absolute; top:0; left:50%; transform:translate(-50%,-90%); z-index:12; border:1px solid #ffe085; border-radius:16px; background:#182c23ed; color:#ffe085; padding:3px 12px; font-size:1rem; font-weight:900; pointer-events:none; }
+
+.direction-ring.color-wild { color:#c1cfac; }

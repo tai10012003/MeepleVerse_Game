@@ -11,37 +11,28 @@ export function createGame(playerIds: readonly string[], random: RandomSource = 
   const dealer = dealerIndex ?? randomIndex(playerIds.length, random);
   requireRule(Number.isInteger(dealer) && dealer >= 0 && dealer < playerIds.length, "INVALID_SETUP");
   const game: UnoGame = {
-    rulesVersion: "uno-house-v2", revision: 0, phase: "turn",
+    rulesVersion: "uno-house-v3", revision: 0, phase: "turn",
     players: playerIds.map(id => ({ id, hand: [] })), dealerIndex: dealer,
     currentIndex: getNextPlayer(dealer, playerIds.length, 1), direction: 1,
     activeColor: null, drawPile: shuffle(createDeck(), random), discardPile: [],
-    drawnCardId: null, pendingDrawFour: null,
-    pendingWinnerId: null, blockedTurns: 0, result: null,
+    drawnCardId: null, pendingDraw: 0,
+    blockedTurns: 0, result: null,
   };
-  const events = { public: [], private: [] };
+  const events = { public: [] };
   for (let round = 0; round < 7; round++) {
     for (let seat = 1; seat <= playerIds.length; seat++) {
       drawCards(game, game.players[getNextPlayer(dealer, playerIds.length, 1, seat)]!.id, 1, random, events);
     }
   }
-  // Set aside initial Draw Fours, then return them to the shuffled stock.
+  // Open with a number only; return all skipped action cards to the shuffled stock.
   const returned = [];
   let opening = game.drawPile.pop()!;
-  while (opening.kind === "wild-draw-four") {
+  while (opening.kind !== "number") {
     returned.push(opening);
     opening = game.drawPile.pop()!;
   }
   if (returned.length) game.drawPile = shuffle([...game.drawPile, ...returned], random);
   game.discardPile = [opening];
   game.activeColor = opening.color;
-  if (opening.kind === "wild") game.phase = "choose-color";
-  if (opening.kind === "reverse") {
-    game.direction = -1;
-    game.currentIndex = dealer;
-  }
-  if (opening.kind === "skip" || opening.kind === "draw-two") {
-    if (opening.kind === "draw-two") drawCards(game, game.players[game.currentIndex]!.id, 2, random, events);
-    game.currentIndex = getNextPlayer(game.currentIndex, playerIds.length, 1);
-  }
   return game;
 }

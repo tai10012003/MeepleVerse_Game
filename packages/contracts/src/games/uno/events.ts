@@ -4,8 +4,6 @@ export type UnoEvent =
   | { type: "CARDS_DRAWN"; playerId: string; count: number }
   | { type: "UNO_CALLED"; playerId: string }
   | { type: "UNO_PENALTY"; playerId: string }
-  | { type: "DRAW_FOUR_RESOLVED"; challenged: boolean; successful: boolean }
+  | { type: "DRAW_PENALTY_ACCEPTED"; playerId: string; count: number }
+  | { type: "COLOR_CHOSEN"; playerId: string; color: import("./card.js").UnoColor }
   | { type: "GAME_ENDED"; winnerId: string | null };
-export interface PrivateUnoEvent {
-  type: "CHALLENGE_HAND"; recipientId: string; offenderId: string; cards: UnoCard[];
-}

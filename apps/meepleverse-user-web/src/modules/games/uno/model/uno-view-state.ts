@@ -7,8 +7,9 @@ export function cardName(card: UnoCard): string {
   const label = card.kind === "number" ? String(card.value) : ({ skip: "Bỏ lượt", reverse: "Đảo chiều", "draw-two": "Rút hai", wild: "Đổi màu", "wild-draw-four": "Đổi màu rút bốn" })[card.kind];
   return card.color ? colorNames[card.color] + " " + label : label;
 }
-// Visual hints only. Draw Four bluffs remain possible; the server resolves challenges.
+// Visual hints only; the authoritative server validates all commands.
 export function isPlayable(card: UnoCard, game: UnoView): boolean {
+  if (game.phase === "draw-stack") return card.kind === "draw-two" || card.kind === "wild-draw-four";
   if (game.phase !== "turn" && game.phase !== "drawn") return false;
   if (game.phase === "drawn" && game.self.drawnCardId !== card.id) return false;
   if (card.color === null || card.color === game.activeColor) return true;

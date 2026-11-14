@@ -13,8 +13,7 @@ export function endGame(game: UnoGame, winnerId: string | null, events: UnoEvent
     handPoints,
   };
   game.phase = "ended";
-  game.pendingWinnerId = null;
-  game.pendingDrawFour = null;
+  game.pendingDraw = 0;
   game.drawnCardId = null;
   events.public.push({ type: "GAME_ENDED", winnerId });
 }

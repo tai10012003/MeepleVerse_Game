@@ -7,10 +7,10 @@ Motion được dùng cho lớp hiệu ứng riêng, dựa trên các event đã
 - Skip: dấu cấm xuất hiện trên ghế người kế tiếp theo chiều đang chơi.
 - Reverse: biểu tượng SVG hai mũi tên đối hướng riêng, dùng cùng hình trên thẻ và hiệu ứng. Không hiện dấu cấm. Ván hai người hiện thông báo người đánh được chơi tiếp, giữ nguyên luật server.
 - Wild: hiệu ứng đổi màu.
-- +2: hiện nhãn trên người chịu phạt và hai lá bay từ chồng bốc về tay.
-- +4: hiện chỉ định chờ phản hồi; chỉ bay bài sau chấp nhận hoặc kết quả thách thức.
-- Thách thức +4: bốc 4 hay 6 theo CARDS_DRAWN thực tế, không suy đoán từ lá đã đánh.
-- Mọi CARDS_DRAWN dùng chung nhịp trên mọi góc nhìn: 1,85 giây mỗi lá, lệch nhịp 0,12 giây. Bốc thường, +2, +4 và phạt 6 lá đều đi qua cùng DrawSequence.
+- +2/+4: hiển thị lá đánh và tổng +N, chưa bốc khi vẫn còn quyền cộng tiếp.
+- Nhận phạt: CARDS_DRAWN phát toàn bộ số lá thực bốc, dùng chung hiệu ứng bay và nhận diện riêng tư.
+- Lá cuối +4: hộp chọn màu chỉ hiện cho người đánh +4 cuối sau khi đối phương nhận phạt và kết thúc hiệu ứng bốc; không có thách thức.
+- Mọi CARDS_DRAWN dùng chung nhịp trên mọi góc nhìn: 1,85 giây mỗi lá, lệch nhịp 0,12 giây. Bốc thường, +2, +4 và chuỗi phạt nhiều lá đều đi qua cùng DrawSequence.
 - Lá bốc bay ra giữa màn hình, dừng khoảng 0,9 giây rồi về tay; nhiều lá xòe thành quạt trong viewport. Người nhận thấy mặt và tên lá đơn, người khác chỉ thấy lưng và số lượng. Thời lượng không phụ thuộc việc client có mặt bài hay không.
 - Trong lúc bốc, các lá đang bay chưa có trong tay. Từng lá được thêm vào tay và số lượng của đối thủ tăng khi lá đó đến đích; sau đó tay bài cuộn tới lá mới và đánh dấu Vừa bốc. Resize, tab ẩn hoặc reduced motion đưa giao diện về snapshot chuẩn, không thay đổi luật server.
 - Chồng bỏ giữ tối đa 8 lá gần nhất, xếp lệch và xoay theo ID ổn định. Dữ liệu lấy từ discardCards của server, giữ sau reload và tự thu lại khi bộ bài được tái chế.
@@ -43,7 +43,7 @@ Motion được dùng cho lớp hiệu ứng riêng, dựa trên các event đã
 
 ## Đồng bộ và vòng đời
 RoomSession ghép snapshot trước/sau theo matchId và revision, lưu tối đa 16 frame gần nhất.
-Chỉ public events đi vào frame hiệu ứng; bằng chứng +4 vẫn dùng luồng riêng của người thách thức.
+Public events đi vào frame hiệu ứng; không còn luồng bằng chứng +4.
 Frame không thay đổi state server, không quyết định luật hoặc kết quả.
 Snapshot server vẫn là dữ liệu chuẩn. UnoPresentation giữ tiến độ hạ bài và số lá đã đến đích để dựng tay bài/số lượng hiển thị trong lúc chạy hiệu ứng. Các timer tiến độ được hủy cùng scene; hoàn tất hoặc bỏ qua hiệu ứng trả ngay về snapshot hiện hành.
 
@@ -81,7 +81,7 @@ Test chạy ở cổng riêng như mô tả trong uno-table.md.
 ## Giảm thông báo trùng
 - CARDS_DRAWN chỉ dùng một caption trong DrawSequence, bỏ badge bốc bài cạnh người nhận. Reduced motion giữ caption và bỏ các lá bay.
 - +2 viết ngắn theo màu + ký hiệu, ví dụ Đỏ +2. +4 gộp người đánh, màu đã chọn và người cần phản hồi vào một badge.
-- Đánh bài + hô UNO cùng hành động được gộp; Skip gộp lá đánh, người mất lượt và UNO nếu có. Kết quả thách thức/phạt quên UNO đưa vào caption bốc, không tạo thêm ô báo.
-- Báo lượt sau khi caption bốc và thông báo hành động đã xong; không lặp toast cho phase drawn/draw-four hoặc Reverse hai người đã có câu được chơi tiếp. Trạng thái lượt và avatar sáng luôn còn trên bàn.
+- Đánh bài + hô UNO cùng hành động được gộp; Skip gộp lá đánh, người mất lượt và UNO nếu có. Phạt quên UNO đưa vào caption bốc, không tạo thêm ô báo.
+- Báo lượt sau khi caption bốc và thông báo hành động đã xong; không lặp toast cho phase drawn/penalty-color hoặc Reverse hai người đã có câu được chơi tiếp. Trạng thái lượt và avatar sáng luôn còn trên bàn.
 
-- Caption “vừa bốc” chỉ hiển thị cho người nhận bài. Người đánh/quan sát chỉ thấy lưng bài bay và số lượng cập nhật, không hiện thêm tên người khác vừa bốc. Nếu có ngữ cảnh quan trọng như kết quả thách thức, người quan sát chỉ nhận phần kết quả, không lặp câu bốc bài.
+- Caption “vừa bốc” chỉ hiển thị cho người nhận bài. Người đánh/quan sát chỉ thấy lưng bài bay và số lượng cập nhật, không hiện thêm tên người khác vừa bốc. Nếu có ngữ cảnh quan trọng như phạt quên UNO, người quan sát chỉ nhận phần kết quả, không lặp câu bốc bài.

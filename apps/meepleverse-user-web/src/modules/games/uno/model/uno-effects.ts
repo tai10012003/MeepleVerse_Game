@@ -20,7 +20,7 @@ export function planEffects(frame: UnoVisualFrame): EffectPlan {
   const after = frame.after.game;
   const name = (id: string) => frame.after.members.find(member => member.playerId === id)?.nickname ?? "Người chơi";
   const played = frame.events.find((event): event is Extract<UnoEvent, { type: "CARD_PLAYED" }> => event.type === "CARD_PLAYED");
-  const playedLabel = played ? played.card.kind === "draw-two" ? colorNames[played.card.color!] + " +2" : played.card.kind === "wild-draw-four" ? "+4 · " + (after?.activeColor ? colorNames[after.activeColor] : "Đổi màu") : cardName(played.card) : "";
+  const playedLabel = played ? played.card.kind === "draw-two" ? colorNames[played.card.color!] + " +2" : played.card.kind === "wild-draw-four" ? "+4" : cardName(played.card) : "";
   const badges: EffectBadge[] = [];
   const base = played ? .46 : .04;
   if (played && before) {
@@ -32,10 +32,7 @@ export function planEffects(frame: UnoVisualFrame): EffectPlan {
     }
     if (played.card.kind === "reverse") badges.push({ playerId: played.playerId, symbol: "⇄", label: before.players.length === 2 ? "Đảo chiều · " + name(played.playerId) + " được chơi tiếp" : name(played.playerId) + " · Đảo chiều!", tone: "reverse", delay: base });
     if (played.card.kind === "wild") badges.push({ playerId: played.playerId, symbol: "✦", label: name(played.playerId) + " · Chọn " + (after?.activeColor ? colorNames[after.activeColor] : "màu mới"), tone: "wild", delay: base });
-    if (played.card.kind === "wild-draw-four" && after?.pendingDrawFour) badges.push({
-      playerId: played.playerId, symbol: "+4", label: name(played.playerId) + " đánh " + playedLabel + " · " + name(after.pendingDrawFour.challengerId) + " phản hồi",
-      tone: "draw", delay: base,
-    });
+    if (played.card.kind === "wild-draw-four") badges.push({ playerId: played.playerId, symbol: "+4", label: name(played.playerId) + " đánh +4" + (after?.pendingDraw ? " · Tổng +" + after.pendingDraw : ""), tone: "draw", delay: base });
   }
   for (const badge of badges) badge.color = played?.card.color ?? after?.activeColor;
   const draws: DrawFlight[] = [];
@@ -45,14 +42,13 @@ export function planEffects(frame: UnoVisualFrame): EffectPlan {
       const cards = event.playerId === after?.self.playerId ? after.self.hand.filter(card => !oldIds.has(card.id)).slice(0, event.count) : [];
       draws.push({ playerId: event.playerId, count: event.count, cards, delay: base + .12 });
     }
+    if (event.type === "COLOR_CHOSEN") badges.push({ playerId: event.playerId, symbol: "✦", label: name(event.playerId) + " · Chọn " + colorNames[event.color], color: event.color, tone: "wild", delay: base });
     if (event.type === "UNO_CALLED") {
       const skip = played?.card.kind === "skip" && played.playerId === event.playerId ? badges.find(badge => badge.tone === "skip") : undefined;
       if (skip) skip.label += " · UNO!";
       else badges.push({ playerId: event.playerId, symbol: "UNO!", label: played?.playerId === event.playerId ? name(event.playerId) + " đánh " + playedLabel + " · UNO!" : name(event.playerId) + " hô UNO!", tone: "uno", delay: base });
     }
   }
-  const challenge = frame.events.find(event => event.type === "DRAW_FOUR_RESOLVED" && event.challenged);
-  if (challenge?.type === "DRAW_FOUR_RESOLVED" && draws[0]) draws[0].context = challenge.successful ? "Thách thức thành công" : "Thách thức thất bại";
   for (const draw of draws) if (frame.events.some(event => event.type === "UNO_PENALTY" && event.playerId === draw.playerId)) draw.context = "Quên hô UNO";
   // A card effect and an UNO declaration from the same player share one bubble.
   for (let index = badges.length - 1; index >= 0; index--) {
@@ -64,12 +60,12 @@ export function planEffects(frame: UnoVisualFrame): EffectPlan {
   const drawEnd = draws.reduce((end, draw) => Math.max(end, draw.delay + DRAW_DURATION + Math.max(0, draw.count - 1) * DRAW_STAGGER), 0);
   const actionEnd = Math.max(played ? .68 : 0, badges.length ? base + NOTICE_DURATION : 0, drawEnd);
   const turnId = after?.phase === "ended" ? null : after?.currentPlayerId ?? null;
-  const announce = !!turnId && after?.phase !== "drawn" && after?.phase !== "draw-four" && !(played?.card.kind === "reverse" && before?.players.length === 2) && (frame.id.startsWith("intro:") || played || draws.length || before?.currentPlayerId !== turnId || before?.phase !== after?.phase);
+  const announce = !!turnId && after?.phase !== "drawn" && after?.phase !== "penalty-color" && !(played?.card.kind === "reverse" && before?.players.length === 2) && (frame.id.startsWith("intro:") || played || draws.length || before?.currentPlayerId !== turnId || before?.phase !== after?.phase);
   const badgeEnd = badges.length ? Math.max(...badges.map(badge => badge.delay + NOTICE_DURATION)) : 0;
   const turnDelay = draws.length ? Math.max(drawEnd, badgeEnd) + .2 : played ? .58 : 0;
   return {
     played, draws, badges, turnId: announce ? turnId : null,
-    turnLabel: turnId ? after?.phase === "draw-four" ? name(turnId) + " · Phản hồi +4" : after?.phase === "drawn" ? name(turnId) + " · Đánh lá vừa bốc?" : "Đến lượt " + name(turnId) : "",
+    turnLabel: turnId ? after?.phase === "draw-stack" ? name(turnId) + " · Cộng tiếp hoặc nhận " + after.pendingDraw + " lá" : after?.phase === "drawn" ? name(turnId) + " · Đánh lá vừa bốc?" : "Đến lượt " + name(turnId) : "",
     turnDelay, duration: Math.max(actionEnd, announce ? turnDelay + NOTICE_DURATION : 0, .15),
   };
 }

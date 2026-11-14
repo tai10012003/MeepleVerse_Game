@@ -11,9 +11,7 @@ export function getPlayerView(game: UnoGame, playerId: string): UnoView {
     direction: game.direction, activeColor: game.activeColor, topCard: game.discardPile.at(-1)!,
     discardCards: game.discardPile.slice(-8),
     drawPileCount: game.drawPile.length, discardPileCount: game.discardPile.length,
-    pendingDrawFour: game.pendingDrawFour ? {
-      offenderId: game.pendingDrawFour.offenderId, challengerId: game.pendingDrawFour.challengerId,
-    } : null,
+    pendingDraw: game.pendingDraw,
     result: game.result,
     self: { playerId, hand: player.hand, drawnCardId: game.players[game.currentIndex]!.id === playerId ? game.drawnCardId : null },
   });

@@ -6,7 +6,7 @@ export const MemberSchema = schema({
   handCount: t.number().default(0),
 }, "MemberSchema");
 export type MemberSchema = SchemaType<typeof MemberSchema>;
-// Deliberately contains no hands, stock, or challenge evidence.
+// Deliberately contains no hands or stock.
 export const UnoRoomSchema = schema({
   roomId: t.string().default(""),
   revision: t.number().default(0),

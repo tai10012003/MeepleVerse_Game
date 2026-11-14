@@ -1,5 +1,5 @@
 import type { Card, Color } from "../models/card.js";
-// Draw Four bluffs are accepted; legality is resolved only if challenged.
+// Wild Draw Four is unrestricted under MeepleVerse stacking rules.
 export function canPlayCard(card: Card, top: Card, activeColor: Color): boolean {
   if (card.color === null) return true;
   if (card.color === activeColor) return true;

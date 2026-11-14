@@ -154,22 +154,21 @@ describe("real WebSocket UNO rooms", () => {
     expect((await start(a)).ok).toBe(true);
     expect(a.view!.game!.players).toHaveLength(2);
   });
-  it("delivers challenge evidence to exactly the challenger", async () => {
+  it("accepts +4 debt and returns color choice to the +4 author without exposing hands", async () => {
     scenario = "challenge";
-    const [a, b] = await pair(); const c = await join(a.room.roomId); await fresh(a);
-    await start(a);
+    const [a, b] = await pair(); const c = await join(a.room.roomId); await fresh(a); await start(a);
     const av = await fresh(a);
-    await send(a, { type: "GAME_COMMAND", matchId: av.matchId!, expectedRevision: 0, command: {
-      type: "PLAY_CARD", cardId: "four", chosenColor: "green", declareUno: true,
-    } });
+    expect((await send(a, { type: "GAME_COMMAND", matchId: av.matchId!, expectedRevision: 0, command: { type: "PLAY_CARD", cardId: "four", declareUno: true } })).ok).toBe(true);
     await fresh(b);
-    const reply = await send(b, { type: "GAME_COMMAND", matchId: b.view!.matchId!, expectedRevision: 1, command: { type: "CHALLENGE_DRAW_FOUR" } });
-    expect(reply.ok).toBe(true);
-    await waitFor(() => b.events.some(batch => JSON.stringify(batch).includes("CHALLENGE_HAND")));
-    await fresh(c);
-    expect(JSON.stringify(a.events)).not.toContain("secret-red");
-    expect(JSON.stringify(c.events)).not.toContain("secret-red");
-    expect(JSON.stringify(b.events)).toContain("secret-red");
+    expect(b.view!.game!.pendingDraw).toBe(4);
+    expect((await send(b, { type: "GAME_COMMAND", matchId: b.view!.matchId!, expectedRevision: 1, command: { type: "ACCEPT_DRAW_PENALTY" } })).ok).toBe(true);
+    await fresh(b);
+    expect(b.view!.game!.phase).toBe("penalty-color");
+    await fresh(a);
+    expect(a.view!.game!.currentPlayerId).toBe(a.view!.selfPlayerId);
+    expect((await send(a, { type: "GAME_COMMAND", matchId: a.view!.matchId!, expectedRevision: 2, command: { type: "CHOOSE_COLOR", color: "green" } })).ok).toBe(true);
+    await fresh(c); expect(c.view!.game!.currentPlayerId).toBe(c.view!.selfPlayerId); expect(c.view!.game!.activeColor).toBe("green");
+    for (const client of [a, b, c]) expect(JSON.stringify(client.events)).not.toContain("secret-red");
   });
   it.each([2, 3, 4])("completes a full %i-client game over WebSockets, then plays again", async count => {
     const a = await host();
@@ -184,16 +183,15 @@ describe("real WebSocket UNO rooms", () => {
       const actor = group.find(guest => guest.view!.selfPlayerId === actorId)!;
       const view = actor.view!.game!;
       let command: UnoCommand;
-      if (view.phase === "choose-color") command = { type: "CHOOSE_COLOR", color: "red" };
-      else if (view.phase === "draw-four") command = { type: "ACCEPT_DRAW_FOUR" };
+      if (view.phase === "choose-color" || view.phase === "penalty-color") command = { type: "CHOOSE_COLOR", color: "red" };
       else {
         const card = view.self.hand.find(card => (view.phase !== "drawn" || card.id === view.self.drawnCardId) &&
-          (card.color === null || card.color === view.activeColor ||
+          (view.phase === "draw-stack" ? card.kind === "draw-two" || card.kind === "wild-draw-four" : card.color === null || card.color === view.activeColor ||
             (card.kind === "number" && view.topCard.kind === "number" ? card.value === view.topCard.value :
               card.kind !== "number" && card.kind === view.topCard.kind)));
         command = card ? { type: "PLAY_CARD", cardId: card.id,
-          ...(card.color === null ? { chosenColor: "red" as const } : {}), declareUno: view.self.hand.length === 2,
-        } : { type: view.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" };
+          ...(card.kind === "wild" ? { chosenColor: "red" as const } : {}), declareUno: view.self.hand.length === 2,
+        } : { type: view.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : view.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" };
       }
       const action: RoomAction["action"] = {
         type: "GAME_COMMAND", matchId: actor.view!.matchId!, expectedRevision: view.revision, command,

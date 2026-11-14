@@ -1,6 +1,6 @@
 "use client";
 import { useState, type ReactNode, type CSSProperties } from "react";
-import type { UnoCard, UnoCommand, PrivateUnoEvent } from "@meepleverse/contracts/uno";
+import type { UnoCard, UnoCommand } from "@meepleverse/contracts/uno";
 import type { RoomGameEvents, UnoRoomView } from "@meepleverse/contracts/room";
 import { RoomToolbar } from "@/layouts/RoomToolbar";
 import { cardName, isPlayable } from "../model/uno-view-state";
@@ -18,7 +18,7 @@ import "./table-seating.css";
 
 interface Props {
   view: UnoRoomView; connected: boolean; reconnecting: boolean; pending: boolean; error: string | null;
-  frames: UnoVisualFrame[]; events: RoomGameEvents | null; evidence: { matchId: string; revision: number; event: PrivateUnoEvent } | null; onHideEvidence: () => void; onCommand: (command: UnoCommand) => void; onRematch: () => void;
+  frames: UnoVisualFrame[]; events: RoomGameEvents | null; onCommand: (command: UnoCommand) => void; onRematch: () => void;
   onLeave: () => void; onReconnect: () => void; children?: ReactNode;
 }
 export function UnoScreen(props: Props) {
@@ -53,18 +53,16 @@ export function UnoScreen(props: Props) {
   const turn = game?.currentPlayerId === view.selfPlayerId;
   const selected: UnoCard | undefined = game && selection?.revision === game.revision && selection.matchId === view.matchId ? game.self.hand.find(card => card.id === selection.id) : undefined;
   const wildSelection = game && picker?.revision === game.revision && picker.matchId === view.matchId ? game.self.hand.find(card => card.id === picker.cardId) : undefined;
-  const openingColor = game?.phase === "choose-color" && turn;
-  const evidence = props.evidence?.matchId === view.matchId ? props.evidence.event : null;
-  const showEvidence = evidence !== null;
+  const choosingColor = (game?.phase === "choose-color" || game?.phase === "penalty-color") && turn;
   function playSelected() {
     if (!selected || !game || !active || !turn) return;
-    if (selected.color === null) setPicker({ cardId: selected.id, revision: game.revision, matchId: view.matchId! });
+    if (selected.kind === "wild") setPicker({ cardId: selected.id, revision: game.revision, matchId: view.matchId! });
     else onCommand({ type: "PLAY_CARD", cardId: selected.id, declareUno: game.self.hand.length === 2 && declareUno });
   }
   const nameOf = (id: string | null | undefined) => view.members.find(member => member.playerId === id)?.nickname ?? "Người chơi";
   const selfIndex = game?.players.findIndex(player => player.playerId === view.selfPlayerId) ?? 0;
   const opponents = displayGame ? [...displayGame.players.slice(selfIndex + 1), ...displayGame.players.slice(0, selfIndex)] : [];
-  const turnText = animating ? "Đang diễn biến…" : !connected ? reconnecting ? "Đang kết nối lại…" : "Kết nối đã đóng." : view.paused ? "Tạm dừng — chờ mọi người kết nối lại." : pending ? "Đang chờ xác nhận…" : game?.phase === "draw-four" ? turn ? "Bạn quyết định có thách thức +4 không." : "Chờ " + nameOf(game?.currentPlayerId) + " phản hồi +4." : turn ? game?.phase === "choose-color" ? "Bạn chọn màu mở đầu." : game?.phase === "drawn" ? "Đánh lá vừa bốc hoặc bỏ lượt." : "Đến lượt bạn." : "Đến lượt " + nameOf(game?.currentPlayerId) + ".";
+  const turnText = animating ? "Đang diễn biến…" : !connected ? reconnecting ? "Đang kết nối lại…" : "Kết nối đã đóng." : view.paused ? "Tạm dừng — chờ mọi người kết nối lại." : pending ? "Đang chờ xác nhận…" : game?.phase === "penalty-color" ? turn ? "Bạn chọn màu tiếp theo." : "Chờ " + nameOf(game.currentPlayerId) + " chọn màu." : game?.phase === "draw-stack" ? turn ? "Cộng tiếp hoặc nhận " + game.pendingDraw + " lá." : nameOf(game.currentPlayerId) + " đang chịu +" + game.pendingDraw + "." : turn ? choosingColor ? "Bạn chọn màu tiếp theo." : game?.phase === "drawn" ? "Đánh lá vừa bốc hoặc bỏ lượt." : "Đến lượt bạn." : "Đến lượt " + nameOf(game?.currentPlayerId) + ".";
   return <div className="uno-page" data-testid="uno-screen" data-match-id={view.matchId ?? ""} data-revision={game?.revision ?? -1} data-status={view.status} data-animating={animating ? "true" : "false"} data-self-player-id={view.selfPlayerId}>
     <RoomToolbar roomId={view.roomId} connected={connected} reconnecting={reconnecting} onLeave={props.onLeave} />
     {view.status === "ENDED" && !animating ? <main className="uno-result-main">
@@ -83,9 +81,9 @@ export function UnoScreen(props: Props) {
           <strong>{nameOf(opponent.playerId)}</strong><span className="opponent-count" aria-label={opponent.handCount + " lá"}>{opponent.handCount}</span>{!view.members.find(member => member.playerId === opponent.playerId)?.connected && <span className="opponent-offline">Mất mạng</span>}
           </div><OpponentHand count={opponent.handCount} />
         </div>)}
-        <div className="draw-dock" data-testid="draw-dock"><button type="button" className="draw-pile" aria-label="Bốc một lá" disabled={!active || !turn || game.phase !== "turn"} onClick={() => onCommand({ type: "DRAW_CARD" })}><span aria-hidden="true">✦</span></button><small>{displayGame!.drawPileCount} lá bốc</small></div>
+        <div className="draw-dock" data-testid="draw-dock"><button type="button" className="draw-pile" aria-label={game.phase === "draw-stack" ? "Bốc chồng bài phạt " + game.pendingDraw + " lá" : "Bốc một lá"} disabled={!active || !turn || (game.phase !== "turn" && game.phase !== "draw-stack")} onClick={() => onCommand({ type: game.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : "DRAW_CARD" })}><span aria-hidden="true">✦</span></button><small>{displayGame!.drawPileCount} lá bốc</small></div>
         <div className="table-center"><div className="table-title">MEEPLEVERSE <span>UNO</span></div>
-          <div className="pile-area"><DirectionRing color={pileGame!.activeColor} direction={pileGame!.direction} /><div className="piles">
+          <div className="pile-area">{pileGame!.pendingDraw > 0 && <span className="draw-debt" role="status" data-testid="draw-debt">+{pileGame!.pendingDraw}</span>}<DirectionRing color={pileGame!.activeColor} direction={pileGame!.direction} /><div className="piles">
             <div className="discard-pile" aria-label={"Lá trên bàn: " + cardName(pileGame!.topCard)}>
               <div className="discard-stack" data-testid="discard-stack">{(pileGame!.discardCards ?? [pileGame!.topCard]).map((card, index) => {
                 const placement = discardPlacement(card.id);
@@ -96,26 +94,20 @@ export function UnoScreen(props: Props) {
       <p className="sr-only" aria-live="polite">{newestFrame?.matchId === view.matchId ? [...planEffects(newestFrame).badges.map(badge => badge.label), ...planEffects(newestFrame).draws.map(draw => (draw.context ? draw.context + " · " : "") + nameOf(draw.playerId) + " bốc " + draw.count + " lá")].join(". ") : ""}</p>
       <Hand newCardIds={drawnIds} game={displayGame!} enabled={active && turn} selectedId={selected?.id ?? null} onSelect={id => setSelection({ id, revision: game.revision, matchId: view.matchId! })} />
       <section className="uno-controls" aria-label="Điều khiển lượt">
-        {game.phase === "draw-four" && turn ? <div className="action-row"><button className="button secondary" disabled={!active} onClick={() => onCommand({ type: "ACCEPT_DRAW_FOUR" })}>Chấp nhận +4</button><button className="button primary" disabled={!active} onClick={() => onCommand({ type: "CHALLENGE_DRAW_FOUR" })}>Thách thức +4</button></div>
-          : <><div className="action-row"><button className="button secondary" disabled={!active || !turn || (game.phase !== "turn" && game.phase !== "drawn")} onClick={() => onCommand({ type: game.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" })}>{game.phase === "drawn" ? "Bỏ lượt" : "Bốc bài"}</button>
-            <button className="button primary" disabled={!active || !turn || !selected || !isPlayable(selected, game)} onClick={playSelected}>Đánh lá bài</button></div>
-            </>}
+        <div className="action-row"><button className="button secondary" disabled={!active || !turn || (game.phase !== "turn" && game.phase !== "drawn" && game.phase !== "draw-stack")} onClick={() => onCommand({ type: game.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : game.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" })}>{game.phase === "draw-stack" ? "Nhận " + game.pendingDraw + " lá" : game.phase === "drawn" ? "Bỏ lượt" : "Bốc bài"}</button>
+          <button className="button primary" disabled={!active || !turn || !selected || !isPlayable(selected, game)} onClick={playSelected}>Đánh lá bài</button></div>
         <button type="button" className={"uno-button" + (game.self.hand.length === 2 ? " is-ready" : "") + (declareUno ? " is-armed" : "")} aria-label="Hô UNO" aria-pressed={declareUno}
-          aria-disabled={!active || !turn || game.self.hand.length !== 2 || (game.phase !== "turn" && game.phase !== "drawn")}
+          aria-disabled={!active || !turn || game.self.hand.length !== 2 || (game.phase !== "turn" && game.phase !== "drawn" && game.phase !== "draw-stack")}
           title={declareUno ? "Đã hô UNO cho nước đánh này" : "Bấm UNO trước khi đánh từ 2 lá xuống 1 lá"}
-          onClick={() => { if (active && turn && game.self.hand.length === 2 && (game.phase === "turn" || game.phase === "drawn")) setUnoArmed({ matchId: view.matchId!, revision: game.revision }); }}>
+          onClick={() => { if (active && turn && game.self.hand.length === 2 && (game.phase === "turn" || game.phase === "drawn" || game.phase === "draw-stack")) setUnoArmed({ matchId: view.matchId!, revision: game.revision }); }}>
           <strong>UNO!</strong>{declareUno && <span>Đã hô</span>}
         </button>
       </section>
-      {(openingColor || wildSelection) && connected && !view.paused && <ColorPicker key={view.matchId! + game.revision} disabled={!active}
-        onCancel={openingColor ? undefined : () => setPicker(null)}
-        onChoose={color => openingColor ? onCommand({ type: "CHOOSE_COLOR", color }) : wildSelection && onCommand({
+      {(choosingColor || wildSelection) && connected && !view.paused && (game.phase !== "penalty-color" || !animating) && <ColorPicker key={view.matchId! + game.revision} disabled={!active}
+        onCancel={choosingColor ? undefined : () => setPicker(null)}
+        onChoose={color => choosingColor ? onCommand({ type: "CHOOSE_COLOR", color }) : wildSelection && onCommand({
           type: "PLAY_CARD", cardId: wildSelection.id, chosenColor: color, declareUno: game.self.hand.length === 2 && declareUno,
         })} />}
-      {showEvidence && <aside className="challenge-evidence" aria-label="Bằng chứng thách thức +4">
-        <div><strong>Bài của {nameOf(evidence.offenderId)} lúc đánh +4</strong><button className="text-button" onClick={props.onHideEvidence}>Đóng</button></div>
-        <p>Chỉ bạn được xem bằng chứng này.</p><ul>{evidence.cards.map(card => <li key={card.id}>{cardName(card)}</li>)}</ul>
-      </aside>}
     </main>}
     {connected && !view.paused && view.game && <UnoEffects key={view.matchId} frames={props.frames} view={view} onComplete={setCompletedFrameId} onPresent={setPresentation} />}
     {props.children}
