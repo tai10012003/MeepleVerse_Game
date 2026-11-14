@@ -1,6 +1,6 @@
 import { expect, test, type Page, type Browser, type BrowserContext } from "@playwright/test";
 async function setup(page: Page, browser: Browser, count = 2) {
-  await page.goto("/");
+  await page.goto("/games/uno-basic");
   await page.getByLabel("Mọi người gọi bạn là gì?").fill("Tai");
   await page.getByRole("button", { name: "Tạo phòng UNO" }).click();
   await expect(page).toHaveURL(/\/room\/[A-Z0-9]{4}$/);

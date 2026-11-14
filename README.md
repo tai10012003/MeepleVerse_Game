@@ -16,3 +16,5 @@ User lobby: [local setup and browser tests](docs/development/user-lobby.md).
 Playable UNO table: [how to play and browser tests](docs/development/uno-table.md).
 
 UNO effects: [animation behavior and tests](docs/development/uno-animations.md).
+
+Sảnh MeepleVerse và hai phiên bản UNO: [giao diện danh mục game](docs/development/game-catalog.md).

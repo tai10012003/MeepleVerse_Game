@@ -65,7 +65,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
         <aside className="invite-panel">
           <span className="eyebrow">Mời bạn vào hội</span><h2>Mã phòng của bạn</h2><div className="room-code" aria-label={"Mã phòng " + roomId}>{roomId}</div>
           <button className="button secondary full" onClick={copyInvite} disabled={view.status !== "LOBBY"}>{copyState === "copied" ? "Đã sao chép link" : "Sao chép link mời"} <span aria-hidden="true">↗</span></button>
-          <p className="form-note" role="status">{view.status !== "LOBBY" ? "Phòng đã bắt đầu và không nhận người mới." : copyState === "copied" ? "Gửi link này cho bạn bè nhé." : "Bạn bè cũng có thể nhập mã này ở trang chủ."}</p>
+          <p className="form-note" role="status">{view.status !== "LOBBY" ? "Phòng đã bắt đầu và không nhận người mới." : copyState === "copied" ? "Gửi link này cho bạn bè nhé." : "Bạn bè cũng có thể nhập mã này ở trang UNO Cơ bản."}</p>
           {copyState === "manual" && <label className="manual-copy">Trình duyệt chưa cho phép sao chép. Hãy chọn link:<input readOnly aria-label="Link mời phòng" value={typeof window === "undefined" ? "" : window.location.origin + "/room/" + roomId} onFocus={event => event.target.select()} /></label>}
           <div className="start-section">
             {playing ? <div className="started-banner" role="status"><span aria-hidden="true">✦</span><strong>Đã bắt đầu ván UNO</strong><p>Giữ phòng mở để tiếp tục cùng nhóm.</p></div> : <>

@@ -7,7 +7,7 @@ npx.cmd --yes pnpm@10.34.9 dev:api
 npx.cmd --yes pnpm@10.34.9 dev:user
 ```
 Nếu các ứng dụng đang chạy thì dùng lại.
-Mở http://localhost:3000, tạo phòng và gửi link sang cửa sổ ẩn danh/trình duyệt khác.
+Mở http://localhost:3000, chọn UNO Cơ bản → Chơi ngay, tạo phòng và gửi link sang cửa sổ ẩn danh/trình duyệt khác.
 Sau khi đủ 2–4 người, chủ phòng bắt đầu; cả nhóm vào bàn chơi.
 
 - Chọn một lá trên tay, rồi bấm Đánh lá bài.

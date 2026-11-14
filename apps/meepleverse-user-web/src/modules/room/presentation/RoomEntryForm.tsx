@@ -19,7 +19,7 @@ export function RoomEntryForm({ inviteCode }: { inviteCode?: string }) {
     if (roomId) router.push("/room/" + roomId);
   }
   if (state.view && state.status !== "idle") {
-    return <section className="entry-panel"><span className="eyebrow">Cuộc hẹn đang chờ</span><h2>Bạn đã có phòng.</h2>
+    return <section className="entry-panel" id="play" aria-label="Phòng hiện tại"><span className="eyebrow">Cuộc hẹn đang chờ</span><h2>Bạn đã có phòng.</h2>
       <p>Quay lại phòng <strong>{state.view.roomId}</strong> để tiếp tục cùng mọi người.</p>
       <Link className="button primary full" href={"/room/" + state.view.roomId}>Trở lại phòng <span aria-hidden="true">↗</span></Link>
     </section>;

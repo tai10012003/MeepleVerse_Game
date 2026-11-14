@@ -1,2 +1,2 @@
-import { HomeScreen } from "@/modules/room/presentation/HomeScreen";
+import { HomeScreen } from "@/modules/game-catalog/presentation/HomeScreen";
 export default function HomePage() { return <HomeScreen />; }

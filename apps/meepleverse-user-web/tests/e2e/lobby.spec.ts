@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 async function create(page: Page, name = "Tai") {
-  await page.goto("/");
+  await page.goto("/games/uno-basic");
   await page.getByLabel("Mọi người gọi bạn là gì?").fill(name);
   await page.getByRole("button", { name: "Tạo phòng UNO" }).click();
   await expect(page).toHaveURL(/\/room\/[A-Z0-9]{4}$/);
@@ -43,7 +43,7 @@ test("join by lowercase code, restore after reload, and transfer host after leav
   const other = await browser.newContext();
   try {
     const guest = await other.newPage();
-    await guest.goto("/");
+    await guest.goto("/games/uno-basic");
     await guest.getByRole("button", { name: "Vào bằng mã", exact: true }).click();
     await guest.getByLabel("Mọi người gọi bạn là gì?").fill("Mai");
     await guest.getByLabel("Mã phòng", { exact: true }).fill(code.toLowerCase());
@@ -71,7 +71,7 @@ test("a nonexistent room gives an error and allows another attempt", async ({ pa
 });
 test("mobile entry and lobby fit a narrow viewport", async ({ page }, info) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto("/");
+  await page.goto("/games/uno-basic");
   await page.getByRole("button", { name: "Vào bằng mã", exact: true }).click();
   await expect(page.getByLabel("Mã phòng", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Tạo phòng", exact: true }).click();
@@ -101,7 +101,7 @@ test("leaving during a started game warns and updates the other browser", async 
 });
 test("network failure is shown without getting stuck on submit", async ({ page }) => {
   await page.route("http://localhost:5100/matchmake/**", route => route.abort("failed"));
-  await page.goto("/");
+  await page.goto("/games/uno-basic");
   await page.getByLabel("Mọi người gọi bạn là gì?").fill("Offline");
   await page.getByRole("button", { name: "Tạo phòng UNO" }).click();
   await expect(page.locator(".error-message[role=alert]")).toBeVisible();
