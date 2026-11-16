@@ -6,6 +6,8 @@ import { RoomToolbar } from "@/layouts/RoomToolbar";
 import { cardName, isPlayable } from "../model/uno-view-state";
 import { discardPlacement } from "../model/discard-layout";
 import { CardFace } from "./components/Card";
+import { CardBack } from "./components/CardBack";
+import { DrawDebt } from "./components/DrawDebt";
 import { OpponentHand } from "./components/OpponentHand";
 import { DirectionRing } from "./components/DirectionRing";
 import { Hand } from "./components/Hand";
@@ -53,6 +55,7 @@ export function UnoScreen(props: Props) {
   const turn = game?.currentPlayerId === view.selfPlayerId;
   const selected: UnoCard | undefined = game && selection?.revision === game.revision && selection.matchId === view.matchId ? game.self.hand.find(card => card.id === selection.id) : undefined;
   const wildSelection = game && picker?.revision === game.revision && picker.matchId === view.matchId ? game.self.hand.find(card => card.id === picker.cardId) : undefined;
+  const debtTargetId = game?.phase === "draw-stack" && game.pendingDraw > 0 ? game.currentPlayerId : null;
   const choosingColor = (game?.phase === "choose-color" || game?.phase === "penalty-color") && turn;
   function playSelected() {
     if (!selected || !game || !active || !turn) return;
@@ -79,11 +82,11 @@ export function UnoScreen(props: Props) {
         {opponents.map((opponent, index) => <div className={"opponent opponent-" + (opponents.length === 1 ? "top" : opponents.length === 2 ? index === 0 ? "left" : "right" : ["left", "top", "right"][index]) + (game.currentPlayerId === opponent.playerId ? " current" : "")} key={opponent.playerId} data-player-id={opponent.playerId}>
           <div className="opponent-identity"><span className="opponent-avatar">{Array.from(nameOf(opponent.playerId))[0]}</span>
           <strong>{nameOf(opponent.playerId)}</strong><span className="opponent-count" aria-label={opponent.handCount + " lá"}>{opponent.handCount}</span>{!view.members.find(member => member.playerId === opponent.playerId)?.connected && <span className="opponent-offline">Mất mạng</span>}
-          </div><OpponentHand count={opponent.handCount} />
+          </div><div className="opponent-cards"><OpponentHand count={opponent.handCount} />{debtTargetId === opponent.playerId && <DrawDebt count={game.pendingDraw} playerId={opponent.playerId} />}</div>
         </div>)}
-        <div className="draw-dock" data-testid="draw-dock"><button type="button" className="draw-pile" aria-label={game.phase === "draw-stack" ? "Bốc chồng bài phạt " + game.pendingDraw + " lá" : "Bốc một lá"} disabled={!active || !turn || (game.phase !== "turn" && game.phase !== "draw-stack")} onClick={() => onCommand({ type: game.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : "DRAW_CARD" })}><span aria-hidden="true">✦</span></button><small>{displayGame!.drawPileCount} lá bốc</small></div>
+        <div className="draw-dock" data-testid="draw-dock"><button type="button" className="draw-pile" aria-label={game.phase === "draw-stack" ? "Bốc chồng bài phạt " + game.pendingDraw + " lá" : "Bốc một lá"} disabled={!active || !turn || (game.phase !== "turn" && game.phase !== "draw-stack")} onClick={() => onCommand({ type: game.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : "DRAW_CARD" })}><CardBack /></button><small>{displayGame!.drawPileCount} lá bốc</small></div>
         <div className="table-center"><div className="table-title">MEEPLEVERSE <span>UNO</span></div>
-          <div className="pile-area">{pileGame!.pendingDraw > 0 && <span className="draw-debt" role="status" data-testid="draw-debt">+{pileGame!.pendingDraw}</span>}<DirectionRing color={pileGame!.activeColor} direction={pileGame!.direction} /><div className="piles">
+          <div className="pile-area"><DirectionRing color={pileGame!.activeColor} direction={pileGame!.direction} /><div className="piles">
             <div className="discard-pile" aria-label={"Lá trên bàn: " + cardName(pileGame!.topCard)}>
               <div className="discard-stack" data-testid="discard-stack">{(pileGame!.discardCards ?? [pileGame!.topCard]).map((card, index) => {
                 const placement = discardPlacement(card.id);
@@ -92,7 +95,7 @@ export function UnoScreen(props: Props) {
         </div>
       </section>
       <p className="sr-only" aria-live="polite">{newestFrame?.matchId === view.matchId ? [...planEffects(newestFrame).badges.map(badge => badge.label), ...planEffects(newestFrame).draws.map(draw => (draw.context ? draw.context + " · " : "") + nameOf(draw.playerId) + " bốc " + draw.count + " lá")].join(". ") : ""}</p>
-      <Hand newCardIds={drawnIds} game={displayGame!} enabled={active && turn} selectedId={selected?.id ?? null} onSelect={id => setSelection({ id, revision: game.revision, matchId: view.matchId! })} />
+      <Hand pendingDraw={debtTargetId === view.selfPlayerId ? game.pendingDraw : 0} newCardIds={drawnIds} game={displayGame!} enabled={active && turn} selectedId={selected?.id ?? null} onSelect={id => setSelection({ id, revision: game.revision, matchId: view.matchId! })} />
       <section className="uno-controls" aria-label="Điều khiển lượt">
         <div className="action-row"><button className="button secondary" disabled={!active || !turn || (game.phase !== "turn" && game.phase !== "drawn" && game.phase !== "draw-stack")} onClick={() => onCommand({ type: game.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : game.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" })}>{game.phase === "draw-stack" ? "Nhận " + game.pendingDraw + " lá" : game.phase === "drawn" ? "Bỏ lượt" : "Bốc bài"}</button>
           <button className="button primary" disabled={!active || !turn || !selected || !isPlayable(selected, game)} onClick={playSelected}>Đánh lá bài</button></div>

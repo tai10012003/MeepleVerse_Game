@@ -27,26 +27,41 @@ async function play(page: Page, id: string, wild = false) {
   if (wild && await page.getByRole("dialog").count()) await page.getByRole("button", { name: "Xanh lá", exact: true }).click();
 }
 async function expectSlowDraw(pages: Page[], recipient: Page, count: number) {
-  for (const page of pages) {
-    const cards = page.locator('[data-effect="draw"]');
-    await expect(cards).toHaveCount(count);
-    await expect(cards.first()).toHaveAttribute("data-draw-duration", "1.85");
-    if (page === recipient) await expect(page.locator(".draw-reveal-caption")).toContainText(count === 1 ? "Vừa bốc" : "vừa bốc " + count + " lá");
-    else await expect(page.locator(".draw-reveal-caption")).toHaveCount(0);
-    await expect(page.locator('[data-effect="draw"][data-card-visibility="self"]')).toHaveCount(page === recipient ? count : 0);
-    await expect(page.locator('[data-effect="draw"][data-card-visibility="back"]')).toHaveCount(page === recipient ? 0 : count);
-    await expect(recipient.locator(".uno-hand-card.is-new")).toHaveCount(0);
-  }
+  // Synchronize with the reveal before collecting assertions, rather than spending its dwell time on round trips.
+  await expect(recipient.locator('[data-effect="draw"]')).toHaveCount(count);
   await expect.poll(() => recipient.locator('[data-effect="draw"]').first().evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [30, 50] }).toBeGreaterThan(.95);
-  await recipient.waitForTimeout(650);
-  for (const page of pages) {
-    await expect(page.getByTestId("uno-screen")).toHaveAttribute("data-animating", "true");
-    await expect(page.locator('[data-effect="draw"]')).toHaveCount(count);
-    if (page === recipient) await expect(page.locator(".draw-reveal-caption")).toBeVisible();
-    else await expect(page.locator(".draw-reveal-caption")).toHaveCount(0);
+  const check = async () => {
+    for (const page of pages) {
+      const state = await page.evaluate(() => {
+        const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-effect="draw"]'));
+        return {
+          count:cards.length, durations:cards.map(card => card.dataset.drawDuration),
+          faces:cards.filter(card => card.dataset.cardVisibility === "self").length,
+          backs:cards.filter(card => card.dataset.cardVisibility === "back").length,
+          sharedBacks:document.querySelectorAll('[data-effect="draw"] > .uno-card-back').length,
+          deckBacks:document.querySelectorAll('.draw-pile > .uno-card-back').length,
+          opponents:document.querySelectorAll('.opponent-card-back').length,
+          opponentBacks:document.querySelectorAll('.opponent-card-back > .uno-card-back').length,
+          captions:Array.from(document.querySelectorAll('.draw-reveal-caption')).map(element => element.textContent),
+          animating:document.querySelector('[data-testid="uno-screen"]')?.getAttribute('data-animating'),
+        };
+      });
+      expect(state.count).toBe(count); expect(state.durations).toEqual(Array(count).fill("1.85"));
+      expect(state.faces).toBe(page === recipient ? count : 0);
+      expect(state.backs).toBe(page === recipient ? 0 : count);
+      expect(state.sharedBacks).toBe(page === recipient ? 0 : count);
+      expect(state.deckBacks).toBe(1); expect(state.opponents).toBeGreaterThan(0);
+      expect(state.opponentBacks).toBe(state.opponents); expect(state.animating).toBe("true");
+      if (page === recipient) expect(state.captions.join(" ")).toContain(count === 1 ? "Vừa bốc" : "vừa bốc " + count + " lá");
+      else expect(state.captions).toEqual([]);
+    }
     await expect(recipient.locator(".uno-hand-card.is-new")).toHaveCount(0);
-  }
+  };
+  await check();
+  await recipient.waitForTimeout(650);
+  await check();
 }
+
 test.afterEach(async ({ request }) => { await request.post("http://127.0.0.1:5101/scenario/normal"); });
 test("effects: number card flies, lands, announces the next player and never replays on reload", async ({ page, browser, request }, info) => {
   await request.post("http://127.0.0.1:5101/scenario/uno");
@@ -57,6 +72,9 @@ test("effects: number card flies, lands, announces the next player and never rep
     const actor = await page.getByTestId("uno-screen").getAttribute("data-self-player-id");
     await expect(group.pages[1]!.locator('[data-effect="badge"][data-player-id="' + actor + '"]')).toContainText("Tai đánh Đỏ 5");
     await expect(page.locator('[data-effect="play"]')).toHaveCount(1);
+    const landingHeight = await page.locator('.discard-stack').evaluate(element => element.getBoundingClientRect().height);
+    const flightHeight = await page.locator('[data-effect="play"]').evaluate(element => Number.parseFloat(getComputedStyle(element).height));
+    expect(Math.abs(flightHeight - landingHeight)).toBeLessThan(1);
     await expect(group.pages[1]!.locator('[data-effect="play"]')).toHaveCount(1);
     await expect(page.getByRole("button", { name: "Đánh lá bài", exact: true })).toBeDisabled();
     await expect(page.locator('[data-effect="impact"]')).toHaveCount(1);
@@ -103,6 +121,7 @@ test("effects: Draw Two sends two cards, shows their faces only to the recipient
     await play(page, "special");
     await expect(recipient.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
     await recipient.getByRole("button", { name: "Nhận 2 lá", exact: true }).click();
+    await expectSlowDraw(group.pages, recipient, 2);
     await expect(recipient.locator('[data-effect="draw"]')).toHaveCount(2);
     await expect(recipient.locator('[data-effect="draw"][data-card-visibility="self"]')).toHaveCount(2);
     await expect(page.locator('[data-effect="draw"][data-card-visibility="back"]')).toHaveCount(2);
@@ -110,7 +129,6 @@ test("effects: Draw Two sends two cards, shows their faces only to the recipient
     await expect(recipient.locator('.draw-reveal-caption')).toHaveCount(1);
     await expect(recipient.locator('.effect-badge')).toHaveCount(0);
     await expect(recipient.locator('[data-effect="turn"]')).toHaveCSS("opacity", "0");
-    await expectSlowDraw(group.pages, recipient, 2);
     await recipient.screenshot({ path: info.outputPath("draw-two-effect.png"), fullPage: true });
     await page.screenshot({ path: info.outputPath("draw-two-observer.png"), fullPage: true });
     await expect.poll(() => recipient.locator('[data-effect="turn"]').evaluate(element => Number(getComputedStyle(element).opacity)), { timeout: 6000 }).toBeGreaterThan(.9);
@@ -240,19 +258,36 @@ test("effects: three-player Reverse changes direction without a Skip badge", asy
 });
 
 
+for (const viewport of [{ width:1920, height:1080 }, { width:1366, height:768 }, { width:375, height:812 }]) {
 for (const kind of ["skip", "reverse"] as const) {
-  test("green " + kind + " matches its card, badge and direction ring", async ({ page, browser, request }, info) => {
-    await page.setViewportSize({ width: 375, height: 812 });
+  test("green " + kind + " matches its card, badge and direction ring at " + viewport.width, async ({ page, browser, request }, info) => {
+    await page.setViewportSize(viewport);
     await request.post("http://127.0.0.1:5101/scenario/effect-" + kind + "-green");
     const group = await setup(page, browser, 3);
     try {
+      const measure = (svg: Element) => {
+        const face = svg.closest(".uno-card-face")!.getBoundingClientRect();
+        const shape = svg.querySelector("[data-symbol-shape]")!.getBoundingClientRect();
+        return { width:shape.width / face.width, height:shape.height / face.height, dx:Math.abs(shape.x + shape.width / 2 - face.x - face.width / 2), dy:Math.abs(shape.y + shape.height / 2 - face.y - face.height / 2) };
+      };
+      const handSymbol = page.locator('[data-card-id="special"] .card-symbol-art');
+      const handRatio = await handSymbol.evaluate(measure);
+      expect(handRatio.width).toBeGreaterThan(.35); expect(handRatio.width).toBeLessThan(.8);
+      expect(handRatio.dx).toBeLessThan(3); expect(handRatio.dy).toBeLessThan(3);
       await play(page, "special");
+      await expect(page.locator('.played-flight .card-symbol-art')).toHaveCount(1);
       for (const client of group.pages) {
         const badge = client.locator(".effect-badge.tone-" + kind);
         await expect(badge).toHaveAttribute("data-effect-color", "green");
         await expect(badge.locator("strong")).toHaveCSS("background-color", "rgb(53, 170, 54)");
       }
       await expect(page.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+      const symbol = page.locator('[data-discard-card-id="special"] .card-symbol-art');
+      const pileRatio = await symbol.evaluate(measure);
+      expect(pileRatio.width).toBeGreaterThan(.35); expect(pileRatio.width).toBeLessThan(.8);
+      expect(pileRatio.height).toBeGreaterThan(.25); expect(pileRatio.height).toBeLessThan(.7);
+      expect(Math.abs(pileRatio.width - handRatio.width)).toBeLessThan(.2);
+      expect(pileRatio.dx).toBeLessThan(3); expect(pileRatio.dy).toBeLessThan(3);
       const ring = page.getByTestId("direction-ring");
       await expect(ring).toHaveAttribute("data-color", "green");
       await expect(ring).toHaveAttribute("data-direction", kind === "reverse" ? "-1" : "1");
@@ -261,6 +296,7 @@ for (const kind of ["skip", "reverse"] as const) {
       await page.screenshot({ path: info.outputPath("green-" + kind + ".png") });
     } finally { await group.close(); }
   });
+}
 }
 
 
@@ -341,9 +377,14 @@ test("table: draw stock stays outside the center, discards stay scattered and ar
         const pile = mid(pileElement);
         const pileHeight = pileElement.getBoundingClientRect().height;
         const seats = Array.from(document.querySelectorAll(".opponent")).map(seat => ({ identity: mid(seat.querySelector(".opponent-identity")!), hand: mid(seat.querySelector(".opponent-hand")!), identityBounds: seat.querySelector(".opponent-identity")!.getBoundingClientRect().toJSON(), handStyle: { translate: getComputedStyle(seat.querySelector(".opponent-hand")!).translate, transform: getComputedStyle(seat.querySelector(".opponent-hand")!).transform, position: getComputedStyle(seat.querySelector(".opponent-hand")!).position }, cardBounds: Array.from(seat.querySelectorAll(".opponent-card-back")).map(card => card.getBoundingClientRect().toJSON()) }));
-        return { felt, orbit, pile, pileHeight, seats };
+        const handStyle = getComputedStyle(document.querySelector(".uno-hand-card")!);
+        const handHeight = Number.parseFloat(handStyle.height);
+        const handWidth = Number.parseFloat(handStyle.width);
+        const pileWidth = pileElement.getBoundingClientRect().width;
+        return { felt, orbit, pile, pileHeight, pileWidth, handHeight, handWidth, seats };
       });
-      expect(layout.pileHeight).toBeGreaterThanOrEqual((page.viewportSize()?.height ?? 0) <= 500 ? 48 : 80);
+      expect(Math.abs(layout.pileHeight - layout.handHeight)).toBeLessThan(.5);
+      expect(Math.abs(layout.pileWidth - layout.handWidth)).toBeLessThan(.5);
       for (const center of [layout.orbit, layout.pile]) {
         expect(Math.abs(center.x - layout.felt.x)).toBeLessThan(1);
         expect(Math.abs(center.y - layout.felt.y)).toBeLessThan(1);
@@ -356,16 +397,11 @@ test("table: draw stock stays outside the center, discards stay scattered and ar
         }
       }
     };
-    await verifySeating();
-    await page.screenshot({ path: info.outputPath("table-mobile.png") });
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await verifySeating();
-    await page.screenshot({ path: info.outputPath("table-desktop.png") });
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await verifySeating();
-    await page.setViewportSize({ width: 812, height: 375 });
-    await verifySeating();
-    await page.screenshot({ path: info.outputPath("table-landscape.png") });
+    for (const viewport of [{ width:1920, height:1080 }, { width:1366, height:768 }, { width:1024, height:1366 }, { width:768, height:1024 }, { width:375, height:812 }, { width:375, height:667 }, { width:812, height:375 }]) {
+      await page.setViewportSize(viewport);
+      await verifySeating();
+      await page.screenshot({ path: info.outputPath("compact-table-" + viewport.width + "x" + viewport.height + ".png") });
+    }
     await page.reload();
     await expect(page.locator(".discard-layer")).toHaveCount(8);
   } finally { await group.close(); }

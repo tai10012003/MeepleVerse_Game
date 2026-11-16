@@ -51,24 +51,11 @@
 }
 
 .reverse-mark { display:block; width:1em; height:1em; flex:none; }
-.card-symbol .reverse-mark { width:1.05em; height:1.05em; }
 
 .uno-card-face { container-type:inline-size; border-color:#fff; color:#fff; background:var(--card-color); }
 .uno-card-face .card-oval { inset:11% 5%; border:3px solid #fff; background:transparent; border-radius:50%; transform:rotate(28deg); }
 .uno-card-face .card-corner { font-family:Arial,sans-serif; font-size:20cqw; font-style:italic; font-weight:900; color:#fff; -webkit-text-stroke:.6px #111; paint-order:stroke fill; text-shadow:none; }
 .card-number-art { position:absolute; inset:0; width:100%; height:100%; }
-.uno-card-face .card-symbol { color:#fff; text-shadow:none; }
 .skip-mark { display:block; width:1em; height:1em; }
-.card-symbol .skip-mark,.card-symbol .reverse-mark { width:1.1em; height:1.1em; }
 .card-special.kind-wild .card-oval,.card-special.kind-wild-draw-four .card-oval { display:none; }
-
-.card-symbol .reverse-mark { width:.96em; height:1.2em; }
-
-/* Leave more space inside the oval on played cards and their landing animation. */
-.discard-pile .card-symbol > .reverse-mark,
-.discard-pile .card-symbol > .skip-mark,
-.played-flight .card-symbol > .reverse-mark,
-.played-flight .card-symbol > .skip-mark {
-  transform:scale(.78);
-  transform-origin:center;
-}
+.card-symbol-art { color:#fff; }

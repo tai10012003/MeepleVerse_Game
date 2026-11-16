@@ -9,7 +9,7 @@ export function CardFace({ card }: { card: UnoCard }) {
   return <span className={"uno-card-face color-" + (card.color ?? "wild") + (special ? " card-special kind-" + card.kind : "")} aria-hidden="true">
     <span className={"card-corner" + (card.kind === "wild" ? " wild-corner" : "")}>{corner}</span>
     <span className="card-oval" />
-    {special ? <ActionArtwork kind={card.kind} /> : card.kind === "number" ? <NumberArtwork value={card.value} /> : <strong className="card-symbol">{card.kind === "reverse" ? <ReverseMark /> : card.kind === "skip" ? <SkipMark /> : cardSymbol(card)}</strong>}
+    {card.kind === "number" ? <NumberArtwork value={card.value} /> : <ActionArtwork kind={card.kind} />}
     <span className={"card-corner bottom" + (card.kind === "wild" ? " wild-corner" : "")}>{corner}</span>
   </span>;
 }

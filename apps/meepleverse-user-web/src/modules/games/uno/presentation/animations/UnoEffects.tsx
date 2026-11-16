@@ -1,4 +1,5 @@
 "use client";
+import { scheduleUnoAudio } from "./uno-audio";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { UnoRoomView } from "@meepleverse/contracts/room";
@@ -8,6 +9,7 @@ import { discardPlacement } from "../../model/discard-layout";
 import { cardName } from "../../model/uno-view-state";
 import { ReverseMark, SkipMark } from "../components/CardArtwork";
 import { CardFace } from "../components/Card";
+import { CardBack } from "../components/CardBack";
 import "./uno-effects.css";
 
 interface Scene { frame: UnoVisualFrame; plan: EffectPlan; geometry: EffectGeometry; speed: number; reduced: boolean }
@@ -81,7 +83,7 @@ function DrawSequence({ draw, scene }: { draw: EffectPlan["draws"][number]; scen
           y: [geo.deck.y - height / 2, fanY - height / 2, fanY - height / 2, destination.y - height / 2],
           rotate: [-7, offset * 5, offset * 5, 0], opacity: [0, 1, 1, 0], scale: [.9, 1, 1, .6] }}
         transition={{ delay: (draw.delay + index * DRAW_STAGGER) * speed, duration: DRAW_DURATION * speed, times: [0, .28, .78, 1], ease: "easeInOut" }}>
-        {card ? <CardFace card={card} /> : <span className="flight-back">✦</span>}
+        {card ? <CardFace card={card} /> : <CardBack />}
       </motion.div>;
     })}
     {caption && <motion.div className="draw-reveal-caption" data-player-id={draw.playerId}
@@ -124,6 +126,7 @@ export function UnoEffects({ frames, view, onComplete, onPresent }: { frames: Un
         const publish = () => onPresent({ ...progress, arrived: { ...progress.arrived } });
         publish();
         setScene({ frame, plan, geometry: effectGeometry(cache.current, frame), speed, reduced: minimize });
+        const stopAudio = scheduleUnoAudio(frame, plan, speed, minimize);
         await new Promise<void>(resolve => {
           const arrivals = plan.draws.flatMap(draw => Array.from({ length: draw.count }, (_, index) => setTimeout(() => {
             progress.arrived[draw.playerId] = index + 1; publish();
@@ -132,8 +135,8 @@ export function UnoEffects({ frames, view, onComplete, onPresent }: { frames: Un
           const landing = setTimeout(() => { progress.landed = true; publish(); }, minimize ? 0 : Math.ceil(.48 * speed * 1000));
           const noticeEnd = Math.max(0, ...(minimize && plan.draws.length ? [NOTICE_DURATION] : []), ...plan.badges.map(badge => (minimize ? 0 : badge.delay * speed) + NOTICE_DURATION), plan.turnId ? (minimize ? (plan.draws.length ? NOTICE_DURATION + .2 : 0) : plan.turnDelay * speed) + NOTICE_DURATION : 0);
           const sceneDuration = Math.max(minimize ? .125 : plan.duration * speed, noticeEnd);
-          const timer = setTimeout(() => { clearTimeout(landing); clearArrivals(); resolve(); }, Math.ceil(sceneDuration * 1000) + 45);
-          cancelScene.current = () => { clearTimeout(timer); clearTimeout(landing); clearArrivals(); resolve(); };
+          const timer = setTimeout(() => { clearTimeout(landing); clearArrivals(); stopAudio(); resolve(); }, Math.ceil(sceneDuration * 1000) + 45);
+          cancelScene.current = () => { clearTimeout(timer); clearTimeout(landing); clearArrivals(); stopAudio(); resolve(); };
         });
         if (token !== life.current) return;
         setScene(null);

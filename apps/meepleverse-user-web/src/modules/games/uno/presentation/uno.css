@@ -1,6 +1,6 @@
 
 .sr-only { position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-.uno-page { height:100dvh; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at center,#243e2c,#101a17 75%); }
+.uno-page { --uno-card-width:86px; --uno-card-height:124px; height:100dvh; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at center,#243e2c,#101a17 75%); }
 .uno-page .room-header { flex-shrink:0; min-height:70px; }
 .toolbar-code { color:var(--muted); font: .75rem monospace; }
 .uno-board { flex:1; min-height:0; width:min(1180px,100%); margin:0 auto; display:flex; flex-direction:column; position:relative; }
@@ -39,7 +39,7 @@
 .hand-label>span:last-child { color:var(--green); font-weight:700; letter-spacing:0; }
 .hand-scroll { width:100%; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; scrollbar-color:#587446 transparent; }
 .hand-list { display:flex; width:max-content; min-width:100%; justify-content:center; align-items:center; padding:38px 35px 13px; min-height:184px; }
-.uno-hand-card { display:block; position:relative; flex:0 0 auto; width:86px; height:124px; border:0; padding:0; margin-left:-17px; border-radius:9px; background:transparent; transform:rotate(var(--angle)); transition:transform .16s,opacity .16s; }
+.uno-hand-card { display:block; position:relative; flex:0 0 auto; width:var(--uno-card-width); height:var(--uno-card-height); border:0; padding:0; margin-left:-17px; border-radius:9px; background:transparent; transform:rotate(var(--angle)); transition:transform .16s,opacity .16s; }
 .uno-hand-card:first-child { margin-left:0; }
 .uno-hand-card:disabled { opacity:1; filter:none; cursor:default; }
 .uno-hand-card:not(:disabled):hover,.uno-hand-card:focus-visible,.uno-hand-card.is-selected { z-index:10; transform:translateY(-28px) rotate(0deg); }
@@ -49,7 +49,6 @@
 .card-oval { position:absolute; inset:15px 5px; border:2px solid #fff7; border-radius:50%; transform:rotate(25deg); background:#0001; }
 .card-corner { align-self:flex-start; font-size:.75rem; font-weight:800; line-height:1; z-index:1; }
 .card-corner.bottom { align-self:flex-end; transform:rotate(180deg); }
-.card-symbol { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2.65rem; font-weight:800; font-style:italic; text-shadow:2px 3px #0003; }
 .uno-controls { flex-shrink:0; padding:2px 20px max(16px,env(safe-area-inset-bottom)); min-height:74px; }
 .action-row { display:flex; gap:12px; justify-content:center; }
 .action-row>.button { min-width:140px; min-height:44px; padding-block:11px; }
@@ -101,12 +100,12 @@
   .draw-pile,.discard-stack { width:62px; height:91px; border-width:3px; }
   .table-title { letter-spacing:.12em; font-size:.4rem; gap:7px; }
   .table-title>span { font-size:.75rem; }
-  .card-symbol { font-size:2rem; }
   .card-corner { font-size:.65rem; }
   .game-announcement { font-size:.6rem; min-height:28px; max-height:42px; padding-inline:18px; }
   .hand-label { font-size:.55rem; margin-top:5px; }
   .hand-list { padding:33px 25px 10px; min-height:142px; }
-  .uno-hand-card { width:63px; height:93px; margin-left:-12px; }
+  .uno-page { --uno-card-width:63px; --uno-card-height:93px; }
+  .uno-hand-card { margin-left:-12px; }
   .uno-hand-card:not(:disabled):hover,.uno-hand-card:focus-visible,.uno-hand-card.is-selected { transform:translateY(-23px); }
   .uno-controls { padding-inline:12px; min-height:66px; }
   .action-row { gap:10px; }
@@ -125,7 +124,7 @@
   .opponent-top { top:0; }.opponent { padding:5px; }.opponent-avatar { display:none; }
   .draw-pile,.discard-stack { width:49px; height:69px; }
   .game-announcement { min-height:24px; max-height:24px; }
-  .hand-list { min-height:115px; padding-top:28px; }.uno-hand-card { width:53px; height:77px; }
+  .hand-list { min-height:115px; padding-top:28px; }.uno-page { --uno-card-width:53px; --uno-card-height:77px; }
   .uno-controls { min-height:49px; padding-bottom:8px; }.action-row>.button { min-height:36px; padding-block:8px; }.uno-checkbox { margin-top:4px; }
 }
 .hand-scroll-hint { display:none; }
@@ -141,16 +140,15 @@
   .draw-pile,.discard-stack { width:33px; height:47px; border-width:2px; border-radius:5px; }
   .draw-pile { font-size:1.5rem; }
   .discard-pile .card-corner { font-size:.4rem; }
-  .discard-pile .card-symbol { font-size:1.2rem; }
   .opponent { width:100px; padding:4px; gap:2px; }
   .opponent-top { left:10%; top:0; transform:none; }
   .opponent-avatar,.card-backs { display:none; }
   .game-announcement { min-height:18px; max-height:18px; font-size:.5rem; padding-top:2px; }
   .hand-label { margin-top:2px; font-size:.5rem; }
   .hand-list { min-height:76px; padding:15px 30px 4px; }
-  .uno-hand-card { width:40px; height:57px; margin-left:-8px; }
+  .uno-page { --uno-card-width:40px; --uno-card-height:57px; }
+  .uno-hand-card { margin-left:-8px; }
   .uno-hand-card .card-corner { font-size:.45rem; }
-  .uno-hand-card .card-symbol { font-size:1.4rem; }
   .uno-hand-card:not(:disabled):hover,.uno-hand-card:focus-visible,.uno-hand-card.is-selected { transform:translateY(-10px); }
   .uno-controls { min-height:40px; padding-block:0 6px; }
   .action-row>.button { min-height:30px; padding-block:6px; font-size:.65rem; }
@@ -172,9 +170,9 @@
 
 /* Draw stock stays at the outer edge; discards own the center of the table. */
 .draw-dock { position:absolute; left:12%; top:5px; z-index:3; display:flex; flex-direction:column; align-items:center; gap:10px; }
-.draw-dock .draw-pile { width:55px; height:79px; transform:rotate(-12deg); font-size:1.8rem; border-width:3px; }
+.draw-dock .draw-pile { width:68px; height:95px; transform:rotate(-12deg); font-size:1.8rem; border-width:3px; }
 .draw-dock .draw-pile:not(:disabled):hover { transform:translateY(-4px) rotate(-12deg); }
-.draw-dock small { font-size:.6rem; color:var(--muted); padding:3px 6px; border-radius:5px; background:#14251fd9; }
+.draw-dock small { font-size:.72rem; color:var(--muted); padding:3px 6px; border-radius:5px; background:#14251fd9; }
 .table-center { padding-top:80px; gap:5px; }
 .table-center .table-title { display:none; }
 .pile-area { position:relative; isolation:isolate; width:320px; height:240px; display:grid; place-items:center; }
@@ -186,15 +184,15 @@
 @media(min-height:850px) and (min-width:700px) { .pile-area { width:360px; height:280px; } }
 @media(max-width:640px) {
   .draw-dock { left:12%; top:8px; gap:8px; }
-  .draw-dock .draw-pile { width:43px; height:62px; font-size:1.4rem; }
-  .draw-dock small { font-size:.5rem; }
+  .draw-dock .draw-pile { width:48px; height:69px; font-size:1.4rem; }
+  .draw-dock small { font-size:.62rem; }
   .pile-area { width:270px; height:200px; }
   .table-center { padding-top:85px; }
 }
 @media(max-height:620px) {
   .pile-area { width:200px; height:146px; }
   .table-center { padding-top:24px; gap:3px; }
-  .draw-dock .draw-pile { width:36px; height:52px; }
+  .draw-dock .draw-pile { width:40px; height:58px; }
   .draw-dock { top:0; }
 }
 @media(max-height:500px) {
@@ -202,7 +200,7 @@
   .table-center { padding-top:0; flex-direction:row; gap:5px; }
   .discard-count { display:none; }
   .draw-dock { left:27%; top:0; gap:4px; }
-  .draw-dock .draw-pile { width:29px; height:42px; font-size:1rem; }
+  .draw-dock .draw-pile { width:32px; height:46px; font-size:1rem; }
   .draw-dock small { display:none; }
 }
 @media(prefers-reduced-motion:reduce) { .direction-ring-orbit { animation:none; } }
@@ -230,7 +228,6 @@
 .opponent-offline { font-size:.5rem; color:#f3bda0; }
 .opponent-hand { position:absolute; top:78px; left:50%; translate:-50% 0; display:grid; grid-template-columns:repeat(var(--back-count),minmax(0,1fr)); width:170px; height:54px; padding-right:34px; pointer-events:none; }
 .opponent-card-back { display:grid; place-items:center; width:34px; height:49px; border:2px solid #f7f3e9; border-radius:5px; background:repeating-linear-gradient(45deg,#203f2b 0 5px,#2c5339 5px 7px); box-shadow:1px 2px 3px #0006; color:#e1c68a; font-style:normal; transform:translateY(var(--back-rise)) rotate(var(--back-angle)); }
-.opponent-card-back>span { font-size:1rem; padding:2px; border:1px solid #c8b27b88; border-radius:50%; }
 .opponent-left .opponent-hand { left:65%; translate:0 0; transform:rotate(23deg); transform-origin:left top; }
 .opponent-right .opponent-hand { left:auto; right:65%; translate:0 0; transform:rotate(-23deg); transform-origin:right top; }
 .opponent-hand[data-count="0"] { visibility:hidden; }
@@ -246,7 +243,6 @@
   .opponent-count { min-width:19px; height:22px; font-size:.65rem!important; }
   .opponent-hand { width:104px; height:40px; padding-right:25px; top:65px; }
   .opponent-card-back { width:25px; height:36px; border-width:1.5px; }
-  .opponent-card-back>span { font-size:.7rem; }
   .opponent-left,.opponent-right { top:24%; }
   .opponent-left .opponent-hand { left:40%; }
   .opponent-right .opponent-hand { right:40%; }
@@ -265,7 +261,6 @@
 @media(max-height:620px) {
   .opponent-hand { top:47px; width:100px; height:30px; padding-right:21px; }
   .opponent-card-back { width:21px; height:29px; }
-  .opponent-card-back>span { font-size:.55rem; }
   .opponent { width:76px; }
   .pile-area { width:190px; height:135px; }
   .discard-stack { width:45px; height:64px; }
@@ -322,6 +317,15 @@
 @media(max-height:500px) { .uno-button { width:48px; height:48px; bottom:6px; right:12px; } .uno-button>strong { font-size:.8rem; } .uno-button>span { font-size:.46rem; } .uno-controls .action-row { padding-right:62px; } }
 @media(prefers-reduced-motion:reduce) { .uno-button.is-ready { animation:none; box-shadow:0 0 0 4px #ffe85d55,0 0 24px #ffd54a99; } }
 
-.draw-debt { position:absolute; top:0; left:50%; transform:translate(-50%,-90%); z-index:12; border:1px solid #ffe085; border-radius:16px; background:#182c23ed; color:#ffe085; padding:3px 12px; font-size:1rem; font-weight:900; pointer-events:none; }
 
 .direction-ring.color-wild { color:#c1cfac; }
+
+/* Keep the card count and penalty amount distinct beside the local hand. */
+.uno-hand > .hand-status { position:absolute; left:15px; top:24px; z-index:12; display:flex; align-items:center; gap:9px; }
+.hand-status > .hand-count { position:static; }
+.draw-debt { display:inline-flex; align-items:center; justify-content:center; min-width:36px; min-height:28px; padding:3px 9px; border:1px solid #ffe085; border-radius:16px; background:#182c23fa; color:#ffe085; font-size:.85rem; line-height:1.2; font-weight:900; white-space:nowrap; pointer-events:none; box-shadow:0 2px 8px #0004; }
+@media(max-width:640px) { .uno-hand > .hand-status { left:8px; top:22px; gap:7px; } .draw-debt { min-width:30px; min-height:24px; font-size:.72rem; padding:3px 7px; } }
+@media(max-height:500px) { .uno-hand > .hand-status { top:5px; } }
+
+.uno-hand.has-draw-debt { padding-top:30px; }
+.uno-hand.has-draw-debt > .hand-status { top:0; }

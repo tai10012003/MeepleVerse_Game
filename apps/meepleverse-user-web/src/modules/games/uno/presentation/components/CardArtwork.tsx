@@ -23,6 +23,11 @@ function MiniCard({ x, y, fill }: { x: number; y: number; fill: string }) {
 
 export function ActionArtwork({ kind }: { kind: UnoCard["kind"] }) {
   if (kind === "wild") return <WildMark className="card-action-art" />;
+  if (kind === "skip" || kind === "reverse") return <svg className="card-action-art card-symbol-art" data-symbol-kind={kind} viewBox="0 0 100 140" aria-hidden="true" focusable="false">
+    <g data-symbol-shape="true" transform={kind === "reverse" ? "translate(23 35.44) scale(.54)" : "translate(16 36) scale(1.4166667)"}>
+      {kind === "reverse" ? <ReverseShape /> : <SkipShape />}
+    </g>
+  </svg>;
   if (kind !== "draw-two" && kind !== "wild-draw-four") return null;
   return <svg className="card-action-art" viewBox="0 0 100 140" aria-hidden="true" focusable="false">
     {kind === "draw-two" ? <>
@@ -38,20 +43,23 @@ export function ActionArtwork({ kind }: { kind: UnoCard["kind"] }) {
   </svg>;
 }
 
-export function ReverseMark() {
-  return <svg className="reverse-mark" viewBox="0 0 100 128" aria-hidden="true" focusable="false">
-    <g transform="translate(2.5 1)" fill="currentColor" stroke="#111" strokeWidth="2.2" strokeLinejoin="round">
-      <path d="M41 3H95L89 50L76 37C62 50 49 62 38 68C31 71 24 65 25 57C26 48 37 36 54 18Z" />
-      <path transform="rotate(180 47.5 63)" d="M41 3H95L89 50L76 37C62 50 49 62 38 68C31 71 24 65 25 57C26 48 37 36 54 18Z" />
-    </g>
-  </svg>;
+function ReverseShape() {
+  return <g transform="translate(2.5 1)" fill="currentColor" stroke="#111" strokeWidth="2.2" strokeLinejoin="round">
+    <path d="M41 3H95L89 50L76 37C62 50 49 62 38 68C31 71 24 65 25 57C26 48 37 36 54 18Z" />
+    <path transform="rotate(180 47.5 63)" d="M41 3H95L89 50L76 37C62 50 49 62 38 68C31 71 24 65 25 57C26 48 37 36 54 18Z" />
+  </g>;
 }
-
-export function SkipMark() {
-  return <svg className="skip-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+export function ReverseMark() {
+  return <svg className="reverse-mark" viewBox="0 0 100 128" aria-hidden="true" focusable="false"><ReverseShape /></svg>;
+}
+function SkipShape() {
+  return <>
     <g fill="none" stroke="#111" strokeWidth="6.2"><circle cx="24" cy="24" r="17" /><path d="M12 36L36 12" /></g>
     <g fill="none" stroke="currentColor" strokeWidth="5"><circle cx="24" cy="24" r="17" /><path d="M12 36L36 12" /></g>
-  </svg>;
+  </>;
+}
+export function SkipMark() {
+  return <svg className="skip-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><SkipShape /></svg>;
 }
 export function NumberArtwork({ value }: { value: number }) {
   return <svg className="card-number-art" viewBox="0 0 100 140" aria-hidden="true" focusable="false">

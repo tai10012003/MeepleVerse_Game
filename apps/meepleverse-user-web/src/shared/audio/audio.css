@@ -1,0 +1,21 @@
+.audio-trigger { display:grid; place-items:center; flex-shrink:0; width:36px; height:36px; padding:0; color:var(--muted); border:1px solid var(--line); border-radius:50%; background:transparent; cursor:pointer; }
+.audio-trigger:hover,.audio-trigger:focus-visible { color:var(--text); border-color:var(--accent); }
+.audio-dialog { width:min(380px,calc(100vw - 32px)); max-height:calc(100dvh - 24px); overflow:auto; margin:auto; padding:24px; border:1px solid #647a51; border-radius:20px; background:#15271f; color:#f5f0df; box-shadow:0 24px 80px #0009; }
+.audio-dialog::backdrop { background:#07130dbb; backdrop-filter:blur(4px); }
+.audio-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.audio-heading h2 { margin:0; font-size:1.35rem; }
+.audio-heading button { background:none; border:0; color:inherit; font-size:1.7rem; cursor:pointer; }
+.audio-description,.audio-note { color:#b3c2ad; font-size:.82rem; line-height:1.6; margin:12px 0; }
+.audio-channel { padding:17px 0; border-top:1px solid #ffffff15; }
+.audio-switch { display:flex; align-items:center; justify-content:space-between; font-weight:600; gap:16px; }
+.audio-switch input { width:20px; height:20px; accent-color:#e9b46c; cursor:pointer; }
+.audio-range { display:flex; align-items:center; gap:15px; margin-top:16px; }
+.audio-range input { appearance:none; -webkit-appearance:none; flex:1; min-width:0; height:22px; padding:0; margin:0; border:0; border-radius:0; background:transparent; cursor:pointer; }
+.audio-range input::-webkit-slider-runnable-track { height:6px; border-radius:999px; background:linear-gradient(to right,#e9b46c 0%,#e9b46c var(--audio-level),#48594b var(--audio-level),#48594b 100%); }
+.audio-range input::-webkit-slider-thumb { appearance:none; -webkit-appearance:none; width:18px; height:18px; margin-top:-6px; border:0; border-radius:50%; background:#e9b46c; }
+.audio-range input::-moz-range-track { height:6px; border:0; border-radius:999px; background:linear-gradient(to right,#e9b46c 0%,#e9b46c var(--audio-level),#48594b var(--audio-level),#48594b 100%); }
+.audio-range input::-moz-range-thumb { width:18px; height:18px; border:0; border-radius:50%; background:#e9b46c; }
+.audio-range input:focus-visible { outline:2px solid #e9b46c; outline-offset:4px; border-radius:6px; }
+.audio-range output { min-width:42px; text-align:right; font-variant-numeric:tabular-nums; font-size:.85rem; }
+.audio-preview { width:100%; margin-block:8px; }
+@media(max-width:640px) { .room-header { gap:10px; } .audio-trigger { width:30px; height:30px; } .room-header .connection-label { display:none; } .room-header .connection-pill { padding:9px; } }

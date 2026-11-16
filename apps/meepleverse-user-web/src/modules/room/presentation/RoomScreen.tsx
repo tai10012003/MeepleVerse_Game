@@ -1,4 +1,5 @@
 "use client";
+import { AudioControls, useRoomAudio } from "@/shared/audio/AudioControls";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -13,6 +14,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">("idle");
   const [confirmLeave, setConfirmLeave] = useState(false);
   const view = state.view;
+  useRoomAudio(view?.roomId === roomId ? roomId : null);
   const validCode = /^[A-Z0-9]{4}$/.test(roomId);
   const busy = state.status === "connecting" || state.status === "reconnecting";
   async function copyInvite() {
@@ -38,7 +40,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
   </UnoScreen>;
   return <div className="room-shell">
     <header className="room-header shell"><Link href="/" aria-label="MeepleVerse — trang chủ"><Brand /></Link>
-      <span className={"connection-pill " + (state.status === "connected" ? "is-online" : "")}><span className="status-dot" />{state.status === "connected" ? "Đã kết nối" : state.status === "reconnecting" ? "Đang kết nối lại…" : "Mất kết nối"}</span>
+      <span className={"connection-pill " + (state.status === "connected" ? "is-online" : "")}><span className="status-dot" /><span className="connection-label">{state.status === "connected" ? "Đã kết nối" : state.status === "reconnecting" ? "Đang kết nối lại…" : "Mất kết nối"}</span></span><AudioControls />
       <button className="text-button" onClick={() => setConfirmLeave(true)}>Rời phòng <span aria-hidden="true">↗</span></button>
     </header>
     <main className="shell lobby-main">

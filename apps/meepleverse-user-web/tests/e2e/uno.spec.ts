@@ -33,6 +33,28 @@ async function play(page: Page, id?: string) {
     await page.getByRole("button", { name: "Đỏ", exact: true }).click();
   }
 }
+async function expectDebt(pages: Page[], target: Page, amount: number) {
+  const targetId = await target.getByTestId("uno-screen").getAttribute("data-self-player-id");
+  for (const client of pages) {
+    await expect(client.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
+    const debt = client.getByTestId("draw-debt");
+    await expect(debt).toHaveText("+" + amount);
+    await expect(debt).toHaveAttribute("data-player-id", targetId!);
+    const owner = client === target ? client.locator(".hand-status") : client.locator('.opponent[data-player-id="' + targetId + '"] .opponent-cards');
+    await expect(owner.getByTestId("draw-debt")).toHaveCount(1);
+    await expect(client.locator(".pile-area .draw-debt")).toHaveCount(0);
+    const visibility = await debt.evaluate(element => {
+      const box = element.getBoundingClientRect();
+      const collisions = Array.from(document.querySelectorAll(".opponent-card-back,.opponent-identity,.uno-hand-card,.hand-count")).filter(other => {
+        const rect = other.getBoundingClientRect();
+        return box.left < rect.right && box.right > rect.left && box.top < rect.bottom && box.bottom > rect.top;
+      });
+      return { inside:box.left >= 0 && box.right <= innerWidth && box.top >= 0 && box.bottom <= innerHeight, collisions:collisions.map(other => other.className) };
+    });
+    expect(visibility.inside).toBe(true); expect(visibility.collisions).toEqual([]);
+  }
+}
+
 test("two real browsers play a whole game and rematch", async ({ page, browser }, info) => {
   test.setTimeout(180000);
   const group = await party(page, browser);
@@ -109,11 +131,13 @@ test("ordinary Wild still chooses color and can cancel without losing the armed 
 });
 
 test("four-player +2/+4/+4 chain draws ten; only the last +4 author chooses color and reload preserves the decision", async ({ page, browser, request }, info) => {
+  test.setTimeout(90000);
   await request.post("http://127.0.0.1:5101/scenario/stacking");
   const group = await party(page, browser, 4);
   try {
     const [a, b, c, d] = group.pages as [Page, Page, Page, Page];
     await play(a, "two");
+    await expectDebt(group.pages, b, 2);
     await expect(b.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
     await expect(b.locator('.uno-hand')).toHaveAttribute("data-suggesting", "true");
     await expect(b.locator('[data-card-id="four1"]')).toHaveClass(/is-suggested/);
@@ -122,7 +146,16 @@ test("four-player +2/+4/+4 chain draws ten; only the last +4 author chooses colo
     await expect(b.locator('[data-card-id="b"]')).toBeDisabled();
     await expect(a.locator('.uno-hand')).toHaveAttribute("data-suggesting", "false");
     await b.screenshot({ path: info.outputPath("stacking-suggestions.png") });
-    await play(b, "four1"); await play(c, "four2");
+    await play(b, "four1");
+    await expectDebt(group.pages, c, 6);
+    await play(c, "four2");
+    await expectDebt(group.pages, d, 10);
+    for (const viewport of [{ width:1920, height:1080 }, { width:1366, height:768 }, { width:375, height:812 }, { width:812, height:375 }]) {
+      for (const client of group.pages) await client.setViewportSize(viewport);
+      await expectDebt(group.pages, d, 10);
+      await a.screenshot({ path: info.outputPath("debt-opponent-" + viewport.width + ".png") });
+      await d.screenshot({ path: info.outputPath("debt-self-" + viewport.width + ".png") });
+    }
     await expect(d.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
     for (const client of group.pages) {
       await expect(client.getByTestId("uno-board")).toHaveAttribute("data-phase", "draw-stack");
@@ -139,6 +172,7 @@ test("four-player +2/+4/+4 chain draws ten; only the last +4 author chooses colo
     await d.screenshot({ path: info.outputPath("stacking-ten.png") });
     await expect(d.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
     await expect(d.getByTestId("my-hand-count")).toHaveText("12 lá");
+    for (const client of group.pages) await expect(client.getByTestId("draw-debt")).toHaveCount(0);
     await c.reload();
     await expect(c.getByRole("dialog", { name: "Đổi sang màu nào?" })).toBeVisible();
     for (const client of [a, b, d]) await expect(client.getByRole("dialog")).toHaveCount(0);

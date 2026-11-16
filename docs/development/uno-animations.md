@@ -85,3 +85,26 @@ Test chạy ở cổng riêng như mô tả trong uno-table.md.
 - Báo lượt sau khi caption bốc và thông báo hành động đã xong; không lặp toast cho phase drawn/penalty-color hoặc Reverse hai người đã có câu được chơi tiếp. Trạng thái lượt và avatar sáng luôn còn trên bàn.
 
 - Caption “vừa bốc” chỉ hiển thị cho người nhận bài. Người đánh/quan sát chỉ thấy lưng bài bay và số lượng cập nhật, không hiện thêm tên người khác vừa bốc. Nếu có ngữ cảnh quan trọng như phạt quên UNO, người quan sát chỉ nhận phần kết quả, không lặp câu bốc bài.
+
+## Chuẩn hóa hình thẻ và nhãn phạt
+- Cấm/Đảo chiều dùng artwork SVG toàn lá với viewBox 100×140. Tỷ lệ biểu tượng giữ
+  nguyên trên tay, lúc bay và chồng bỏ; không phụ thuộc rem hoặc media query của từng vị trí.
+  Biểu tượng góc và thông báo vẫn dùng cùng đường vector, với kích thước riêng theo ngữ cảnh.
+- CardBack là mặt sau duy nhất: nền xanh sọc chéo, viền sáng, elip và dấu hình thoi.
+  Chồng bốc, tay đối thủ và hiệu ứng bốc úp cùng dùng component này; pattern có ID riêng
+  cho từng SVG để không trùng tham chiếu. Người nhận vẫn chỉ thấy mặt bài của mình.
+- DrawDebt hiển thị một tổng phạt cạnh tay bài của đúng currentPlayerId trong draw-stack.
+  Với bản thân, nhãn nằm cạnh số lá trên tay, có khoảng riêng để không chồng lên thẻ.
+  Với đối thủ, nhãn theo cụm bài úp; mobile nhiều ghế đặt sát quạt bài; ghế trên cùng đặt nhãn phía trên để tránh hàng bên dưới.
+  Khi cộng tiếp, nhãn đổi người nhận và tổng số; sau nhận phạt thì biến mất.
+- Browser tests đo tỷ lệ/căn giữa biểu tượng tại 1920×1080, 1366×768, 375×812;
+  kiểm tra nhãn phạt không chồng lên bài/avatar và vẫn trong viewport ở cả 812×375.
+
+## Kích thước bài đã đánh
+Bài trên tay và chồng bỏ dùng chung --uno-card-width / --uno-card-height trên uno-page.
+Mặc định 86×124 px; viewport rộng tối đa 640 px dùng 63×93 px; màn hình cao tối đa
+620 px dùng 53×77 px; cao tối đa 500 px dùng 40×57 px. Điều kiện chiều cao ưu tiên
+sau điều kiện chiều rộng để màn hình ngang vẫn đủ chỗ.
+Không còn kích thước riêng theo diện tích bàn: mỗi lá đã đánh có cùng chiều rộng và
+chiều cao với một lá trên tay, ở mọi breakpoint. Góc xoay và độ xòe không đổi.
+Hiệu ứng đánh đọc kích thước từ discard-stack nên hạ bài đúng kích thước chung.

@@ -2,7 +2,6 @@
 .flying-card { position:absolute; left:0; top:0; will-change:transform; filter:drop-shadow(0 14px 10px #0006); }
 .flying-card .uno-card-face,.impact-card .uno-card-face { width:100%; height:100%; }
 .impact-card { position:absolute; filter:drop-shadow(0 0 16px #f4daa866); }
-.flight-back { display:flex; width:100%; height:100%; align-items:center; justify-content:center; border:3px solid #eee9d8; border-radius:8px; color:var(--accent); font-size:2rem; background:repeating-linear-gradient(45deg,#1f3728 0 8px,#2d4732 8px 10px); }
 .impact-ring { position:absolute; width:100px; height:100px; margin:-50px; border-radius:50%; border:3px solid #eecb85; box-shadow:0 0 15px #eecb8566,inset 0 0 15px #eecb8533; }
 .effect-badge { position:absolute; display:flex; flex-direction:column; align-items:center; gap:5px; margin-left:-88px; width:176px; text-align:center; }
 .effect-badge>strong { display:flex; align-items:center; justify-content:center; min-width:68px; height:68px; border-radius:50%; color:#fff6eb; font-size:2.8rem; font-weight:900; background:#b54236; border:3px solid #ffd3b3; box-shadow:0 5px 28px #0007,0 0 28px #b5423666; text-shadow:2px 3px #0005; }

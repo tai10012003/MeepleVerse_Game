@@ -11,10 +11,9 @@
 .opponent-left,.opponent-right { top:calc(50% + 39px); }
 .opponent-right { flex-direction:row-reverse; }
 .opponent-count { top:4px; right:-6px; color:#172b20; }
-.opponent-hand { --back-size:52px; --fan-step:22px; --fan-max:190px; position:relative; flex:none; top:auto; right:auto; left:auto; translate:initial; transform:none; display:block; width:min(var(--fan-max),calc((var(--back-count) - 1)*var(--fan-step) + var(--back-size))); height:calc(var(--back-size)*1.44 + 8px); padding:0; }
+.opponent-hand { --back-size:64px; --fan-step:24px; --fan-max:210px; position:relative; flex:none; top:auto; right:auto; left:auto; translate:initial; transform:none; display:block; width:min(var(--fan-max),calc((var(--back-count) - 1)*var(--fan-step) + var(--back-size))); height:calc(var(--back-size)*1.44 + 8px); padding:0; }
 .opponent-left .opponent-hand,.opponent-right .opponent-hand { left:auto; right:auto; top:auto; transform:none; translate:initial; }
 .opponent-card-back { width:var(--back-size); height:calc(var(--back-size)*1.44); border-radius:6px; }
-.opponent-card-back>span { font-size:1.4rem; padding:4px; }
 .opponent-hand[data-count="0"] { width:0; }
 .draw-dock { left:10%; }
 @media(max-width:900px) {
@@ -25,8 +24,7 @@
   .opponent-identity>strong { font-size:.6rem; }
   .opponent-avatar { width:27px; height:27px; }
   .opponent-count { min-width:19px; height:22px; font-size:.65rem; }
-  .opponent-hand { --back-size:36px; --fan-step:14px; --fan-max:min(130px,calc((100cqw - 150px)/2)); }
-  .opponent-card-back>span { font-size:1rem; padding:2px; }
+  .opponent-hand { --back-size:40px; --fan-step:16px; --fan-max:min(130px,calc((100cqw - 150px)/2)); }
   .opponent-left,.opponent-right { top:78px; transform:none; }
   .uno-table[data-opponents="2"] .opponent-left,.uno-table[data-opponents="2"] .opponent-right { top:4px; }
   .pile-area { width:min(280px,calc(100cqw - 48px)); height:min(270px,calc(100cqh - var(--felt-top) - var(--felt-bottom) - 16px)); }
@@ -35,7 +33,7 @@
 @container(max-height:330px) { .discard-stack { width:49px; height:71px; } }
 @media(max-height:620px) {
   .opponent-identity { min-height:42px; }
-  .opponent-hand { --back-size:30px; --fan-step:12px; }
+  .opponent-hand { --back-size:34px; --fan-step:13px; }
   .discard-stack { width:45px; height:64px; }
 }
 @media(max-height:500px) {
@@ -43,7 +41,7 @@
   .opponent { gap:6px; }
   .opponent-identity { width:46px; min-height:30px; padding:4px; }
   .opponent-identity>strong { font-size:.5rem; }
-  .opponent-hand { --back-size:26px; --fan-step:10px; --fan-max:80px; }
+  .opponent-hand { --back-size:29px; --fan-step:11px; --fan-max:80px; }
   .opponent-top { left:50%; top:0; transform:translateX(-50%); }
   .opponent-left,.opponent-right,.uno-table[data-opponents="2"] .opponent-left,.uno-table[data-opponents="2"] .opponent-right { top:0; transform:none; }
   .pile-area { width:min(180px,calc(100cqw - 180px)); height:calc(100cqh - 58px); }
@@ -58,19 +56,34 @@
 @media(max-width:900px) { .uno-table .opponent { gap:12px; } }
 @media(max-height:500px) { .uno-table .opponent { gap:8px; } }
 
-/* Scale the played cards with the available felt, retaining orbit clearance. */
-.uno-table { --discard-height:clamp(100px,calc((100cqh - var(--felt-top) - var(--felt-bottom))*.47),162px); }
-.uno-table .discard-stack { width:calc(var(--discard-height)*.69); height:var(--discard-height); }
+/* A played card has exactly the same base dimensions as a card in hand. */
+.uno-table .discard-stack { width:var(--uno-card-width); height:var(--uno-card-height); }
 .uno-table .pile-area { width:min(440px,calc(100cqw - 360px)); height:min(360px,calc(100cqh - var(--felt-top) - var(--felt-bottom) - 16px)); }
 .uno-table .opponent { gap:30px; }
 @media(max-width:900px) {
-  .uno-table { --discard-height:clamp(80px,calc((100cqh - var(--felt-top) - var(--felt-bottom))*.45),124px); }
   .uno-table .pile-area { width:min(300px,calc(100cqw - 38px)); height:min(300px,calc(100cqh - var(--felt-top) - var(--felt-bottom) - 14px)); }
   .uno-table .opponent { gap:20px; }
   .opponent-hand { --fan-max:min(124px,calc((100cqw - 174px)/2)); }
 }
 @media(max-height:500px) {
-  .uno-table { --discard-height:clamp(48px,calc((100cqh - var(--felt-top) - var(--felt-bottom))*.44),80px); }
   .uno-table .pile-area { width:min(210px,calc(100cqw - 180px)); height:calc(100cqh - 58px); }
   .uno-table .opponent { gap:14px; }
+}
+
+/* The penalty follows its target, with clear space outside the fan. */
+.opponent-cards { position:relative; flex:none; }
+.opponent-cards > .draw-debt { position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); z-index:4; }
+.opponent-right .opponent-cards > .draw-debt { left:auto; right:calc(100% + 10px); }
+@media(max-width:900px) {
+  .opponent-cards > .draw-debt,.opponent-right .opponent-cards > .draw-debt { left:auto; right:0; top:calc(100% + 6px); transform:none; }
+  .uno-table[data-opponents="1"] .opponent-cards > .draw-debt { left:calc(100% + 8px); right:auto; top:50%; transform:translateY(-50%); }
+}
+@media(max-height:500px) { .opponent-cards > .draw-debt,.opponent-right .opponent-cards > .draw-debt { left:auto; right:0; top:calc(100% + 4px); transform:none; } }
+
+/* The top seat's larger fan needs its penalty above, away from the second row. */
+@media(max-width:900px) {
+  .uno-table[data-opponents="3"] .opponent-top .opponent-cards > .draw-debt { left:auto; right:0; top:auto; bottom:calc(100% + 6px); transform:none; }
+}
+@media(max-width:900px) and (min-height:501px) {
+  .uno-table[data-opponents="3"] .draw-dock { top:-8px; }
 }
