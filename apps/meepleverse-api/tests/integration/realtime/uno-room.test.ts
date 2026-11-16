@@ -4,13 +4,13 @@ import type { UnoCommand } from "@meepleverse/contracts/uno";
 import type { RoomAction } from "@meepleverse/contracts/room";
 import { createRealtimeServer } from "../../../src/bootstrap/create-realtime-server.js";
 import { createGame } from "../../../src/modules/games/uno/domain/rules/create-game.js";
-import { seeded, fixture, number, wild } from "../../unit/uno/fixtures.js";
+import { seeded, fixture, number, wild, action } from "../../unit/uno/fixtures.js";
 import { createGuest, joinGuest, attach, fresh, send, start, waitFor, type Guest } from "./helpers.js";
 
 const guests: Guest[] = [];
 let endpoint = "";
 let runtime: ReturnType<typeof createRealtimeServer>;
-let scenario: "normal" | "challenge" = "normal";
+let scenario: "normal" | "challenge" | "stacking" = "normal";
 async function host() { const guest = await createGuest(endpoint); guests.push(guest); return guest; }
 async function join(code: string, name = "Guest") { const guest = await joinGuest(endpoint, code, name); guests.push(guest); return guest; }
 async function pair() {
@@ -20,6 +20,11 @@ async function pair() {
 }
 beforeAll(async () => {
   runtime = createRealtimeServer({ reconnectSeconds: 0.5, gameFactory: ids => {
+    if (scenario === "stacking") {
+      const game = fixture([[action("two", "draw-two"), number("keep-a")], [wild("four-b", "wild-draw-four"), number("keep-b")], [wild("four-c", "wild-draw-four"), number("keep-c")], [number("keep-d"), number("keep-e")]], Array.from({ length: 20 }, (_, i) => number("stack-stock-" + i, "yellow", i % 10)));
+      game.players.forEach((player, i) => { player.id = ids[i]!; });
+      return game;
+    }
     if (scenario === "challenge") {
       const game = fixture([[wild("four", "wild-draw-four"), number("secret-red")], [number("other")], [number("third")]]);
       game.players.forEach((player, i) => { player.id = ids[i]!; });
@@ -207,4 +212,90 @@ describe("real WebSocket UNO rooms", () => {
     expect(a.view!.matchId).not.toBe(previous);
     expect(a.view!.game!.revision).toBe(0);
   }, 90000);
+  it("four clients see identical public state, private hands, and reject another player's card", async () => {
+    const a = await host(); const group = [a];
+    for (let i = 1; i < 4; i++) group.push(await join(a.room.roomId, "Player " + i));
+    await fresh(a); await start(a); await Promise.all(group.map(fresh));
+    const publicState = (guest: Guest) => Object.fromEntries(Object.entries(guest.view!.game!).filter(([key]) => key !== "self"));
+    for (const guest of group) {
+      expect(publicState(guest)).toEqual(publicState(a));
+      const payload = JSON.stringify(guest.view);
+      for (const other of group.filter(other => other !== guest)) {
+        for (const card of other.view!.game!.self.hand) expect(payload).not.toContain(card.id);
+      }
+      const schema = JSON.stringify(guest.room.state);
+      for (const owner of group) for (const card of owner.view!.game!.self.hand) expect(schema).not.toContain(card.id);
+    }
+    const actor = group.find(guest => guest.view!.selfPlayerId === a.view!.game!.currentPlayerId)!;
+    const other = group.find(guest => guest !== actor)!;
+    expect((await send(actor, { type: "GAME_COMMAND", matchId: actor.view!.matchId!, expectedRevision: 0, command: { type: "PLAY_CARD", cardId: other.view!.game!.self.hand[0]!.id } })).code).toBe("CARD_NOT_OWNED");
+    await Promise.all(group.map(fresh));
+    for (const guest of group) expect(guest.view!.game!.revision).toBe(0);
+  });
+  it("four-client reconnection preserves both a stacked debt and the final +4 author's color decision", async () => {
+    scenario = "stacking";
+    const a = await host(); const b = await join(a.room.roomId); const c = await join(a.room.roomId); const d = await join(a.room.roomId);
+    await fresh(a); await start(a); await Promise.all([a, b, c, d].map(fresh));
+    const command = (guest: Guest, payload: UnoCommand) => send(guest, { type: "GAME_COMMAND", matchId: guest.view!.matchId!, expectedRevision: guest.view!.game!.revision, command: payload });
+    expect((await command(a, { type: "PLAY_CARD", cardId: "two", declareUno: true })).ok).toBe(true);
+    await fresh(b);
+    const tokenB = b.room.reconnectionToken; const handB = b.view!.game!.self.hand;
+    b.room.connection.close(1000); await waitFor(() => a.view?.paused);
+    expect((await command(a, { type: "DRAW_CARD" })).code).toBe("ROOM_PAUSED");
+    const restoredB = await attach(await new Client(endpoint).reconnect(tokenB)); guests.push(restoredB);
+    await waitFor(() => a.view && !a.view.paused);
+    expect(restoredB.view!.game).toMatchObject({ phase: "draw-stack", pendingDraw: 2, revision: 1, self: { hand: handB } });
+    expect((await command(restoredB, { type: "PLAY_CARD", cardId: "four-b", declareUno: true })).ok).toBe(true);
+    await fresh(c); expect((await command(c, { type: "PLAY_CARD", cardId: "four-c", declareUno: true })).ok).toBe(true);
+    await fresh(d); expect(d.view!.game!.pendingDraw).toBe(10);
+    expect((await command(d, { type: "ACCEPT_DRAW_PENALTY" })).ok).toBe(true);
+    await fresh(c); const tokenC = c.room.reconnectionToken; const handC = c.view!.game!.self.hand;
+    expect(c.view!.game!.phase).toBe("penalty-color");
+    c.room.connection.close(1000); await waitFor(() => a.view?.paused);
+    const restoredC = await attach(await new Client(endpoint).reconnect(tokenC)); guests.push(restoredC);
+    await waitFor(() => a.view && !a.view.paused);
+    expect(restoredC.view!.game).toMatchObject({ phase: "penalty-color", pendingDraw: 0, revision: 4, currentPlayerId: restoredC.view!.selfPlayerId, self: { hand: handC } });
+    expect((await command(restoredC, { type: "CHOOSE_COLOR", color: "green" })).ok).toBe(true);
+    await Promise.all([a, restoredB, restoredC, d].map(fresh));
+    for (const guest of [a, restoredB, restoredC, d]) expect(guest.view!.game).toMatchObject({ phase: "turn", revision: 5, activeColor: "green", currentPlayerId: a.view!.selfPlayerId });
+    expect(d.view!.game!.self.hand).toHaveLength(12);
+  });
+  it("four-player host departure ends the match and transfers rematch authority to a survivor", async () => {
+    const a = await host(); const b = await join(a.room.roomId); const c = await join(a.room.roomId); const d = await join(a.room.roomId);
+    await fresh(a); await start(a); await fresh(b); const previous = b.view!.matchId;
+    await a.room.leave();
+    await waitFor(() => [b, c, d].every(guest => guest.view?.status === "ENDED"));
+    for (const guest of [b, c, d]) {
+      expect(guest.view!.hostId).toBe(b.view!.selfPlayerId);
+      expect(guest.view!.outcome).toMatchObject({ reason: "player-left", winnerId: null });
+      expect(guest.view!.game).toBeNull();
+    }
+    expect((await start(c)).code).toBe("HOST_ONLY");
+    expect((await start(b)).ok).toBe(true);
+    await Promise.all([b, c, d].map(fresh));
+    for (const guest of [b, c, d]) {
+      expect(guest.view!.matchId).not.toBe(previous);
+      expect(guest.view!.game!.players).toHaveLength(3);
+      expect(guest.view!.game!.self.hand).toHaveLength(7);
+    }
+    expect((await send(b, { type: "GAME_COMMAND", matchId: previous!, expectedRevision: 0, command: { type: "DRAW_CARD" } })).code).toBe("STALE_MATCH");
+  });
+  it("a burst of duplicate draw requests executes once and emits one public event per client", async () => {
+    const a = await host(); const group = [a];
+    for (let i = 1; i < 4; i++) group.push(await join(a.room.roomId, "Player " + i));
+    await fresh(a); await start(a); await Promise.all(group.map(fresh));
+    const actor = group.find(guest => guest.view!.selfPlayerId === a.view!.game!.currentPlayerId)!;
+    const before = actor.replies.length;
+    const payload = { requestId: "draw-repeated", action: { type: "GAME_COMMAND", matchId: actor.view!.matchId!, expectedRevision: 0, command: { type: "DRAW_CARD" } } };
+    for (let i = 0; i < 12; i++) actor.room.send("action", payload);
+    await waitFor(() => actor.replies.length >= before + 12);
+    await Promise.all(group.map(fresh));
+    expect(actor.replies.slice(before).every(reply => reply.ok && reply.gameRevision === 1)).toBe(true);
+    expect(actor.view!.game!.self.hand).toHaveLength(8);
+    for (const guest of group) {
+      expect(guest.view!.game!.revision).toBe(1);
+      expect(guest.events.filter(event => event.revision === 1)).toHaveLength(1);
+    }
+  });
+
 });

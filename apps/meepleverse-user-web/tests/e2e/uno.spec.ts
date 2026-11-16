@@ -150,6 +150,11 @@ test("four-player +2/+4/+4 chain draws ten; only the last +4 author chooses colo
     await expectDebt(group.pages, c, 6);
     await play(c, "four2");
     await expectDebt(group.pages, d, 10);
+    const debtHand = await d.locator('.uno-hand-card').evaluateAll(nodes => nodes.map(node => node.getAttribute('data-card-id')));
+    await d.reload();
+    await expect(d.getByTestId("uno-board")).toHaveAttribute("data-phase", "draw-stack");
+    await expectDebt(group.pages, d, 10);
+    expect(await d.locator('.uno-hand-card').evaluateAll(nodes => nodes.map(node => node.getAttribute('data-card-id')))).toEqual(debtHand);
     for (const viewport of [{ width:1920, height:1080 }, { width:1366, height:768 }, { width:375, height:812 }, { width:812, height:375 }]) {
       for (const client of group.pages) await client.setViewportSize(viewport);
       await expectDebt(group.pages, d, 10);

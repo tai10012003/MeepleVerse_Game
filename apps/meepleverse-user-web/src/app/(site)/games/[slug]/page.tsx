@@ -1,3 +1,4 @@
+import { UnoRulesButton } from "@/modules/games/uno/presentation/rules/UnoRulesButton";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findCatalogGame } from "@/modules/game-catalog";
@@ -15,6 +16,7 @@ export default async function GamePage({ params }: { params: Promise<{ slug: str
       <span className={"game-status status-" + game.status}><i />{available ? "Đang mở bàn" : "Đang phát triển"}</span>
       <h1 id="game-title">{game.name}</h1><h2>{game.subtitle}</h2><p>{game.description}</p>
       <ul className="game-tags" aria-label="Đặc điểm trò chơi">{game.tags.map(tag => <li key={tag}>{tag}</li>)}</ul>
+      {game.id === "uno-basic" && <UnoRulesButton />}
       <GameArtwork variant={game.artwork} />
     </section>
     {available ? <RoomEntryForm /> : <section className="expansion-preview" aria-labelledby="expansion-title">
