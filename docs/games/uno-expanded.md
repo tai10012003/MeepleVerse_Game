@@ -2,7 +2,7 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Trạng thái: **BẢN ĐẶC TẢ ĐỂ REVIEW**. Chưa triển khai runtime, chưa mở tạo phòng.
+- Trạng thái: **LUẬT GHÉP ĐANG REVIEW; ĐÃ TRIỂN KHAI CẤU HÌNH BỘ BÀI**. Chưa triển khai gameplay Mở rộng, chưa mở tạo phòng.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là đề xuất cụ thể của MeepleVerse, chưa phải quyết định người dùng đã duyệt. Xem [bảng quyết định](uno-expanded-decisions.md).
@@ -68,6 +68,17 @@ Số lượng là cấu hình MeepleVerse đã chọn, không khẳng định tr
 - Mỗi lá có ID duy nhất; không dùng màu/loại/số làm ID chung cho các bản sao.
 - Sau mọi chuyển trạng thái, tổng ID trong các tay bài, chồng bốc và chồng bỏ vẫn đúng 198, không trùng ID. Lá chọn bí mật trong Battle chỉ được đánh dấu giữ chỗ, không tạo thêm bản sao vật lý.
 - Lá đầu ván chỉ là số thuần 0–9; không mở bằng High Five/Seven Change dù chúng có giá trị số.
+
+### 2.4. Cấu hình đã triển khai — bước 2
+
+- Kiểu bài dùng chung: `@meepleverse/contracts/uno-expanded`, tách khỏi `UnoCard` của Cơ bản. `UnoExpandedCard` tái sử dụng bài cơ bản và bổ sung các biến thể mới; High Five bắt buộc giá trị 5, Seven Change bắt buộc 7 và ràng buộc đúng màu L/R.
+- Cấu hình: `apps/meepleverse-api/src/modules/games/uno-expanded/domain/constants/deck-config.ts`. Mỗi mục là một mặt bài và số bản sao, được đóng băng để tránh sửa cấu hình ngoài ý muốn.
+- Hàm tạo bộ bài: `createExpandedDeck()` qua module `apps/meepleverse-api/src/modules/games/uno-expanded/index.ts`. Trả một mảng mới gồm 198 lá **có thứ tự, chưa xào/chia**, không áp dụng luật lá bài.
+- ID có tiền tố `uno-expanded:` và ổn định giữa các lần tạo cùng cấu hình. ID duy nhất **trong một bộ/ván**, không phải UUID toàn hệ thống; khi xử lý lệnh vẫn phải gắn matchId của ván.
+- Các lần gọi không chia sẻ object lá bài. Thay đổi một bộ đã tạo không ảnh hưởng cấu hình, bộ khác hoặc bộ Cơ bản.
+- Seven Change là một nhóm chức năng nhưng có hai kind `seven-change-left`/`seven-change-right`. Vì vậy 14 mục tương ứng 15 loại chức năng mới về nghiệp vụ, **16 kind mới trong code**; không lấy số kind làm số lá.
+- Kiểm thử: `apps/meepleverse-api/tests/unit/uno-expanded/deck.test.ts`; chạy cùng `npx.cmd --yes pnpm@10.34.9 test` hoặc lọc file qua script test của API.
+- Phạm vi bước này bao gồm dữ liệu bộ bài và kiểm tra số lượng (phần tương ứng E001/E002/E005). Chưa triển khai chia bài/mở đầu/lượt/hiệu ứng, nên chưa xem các ca còn lại trong tài liệu nghiệm thu là đã đạt.
 
 ## 3. Thiết lập và lượt thường
 
