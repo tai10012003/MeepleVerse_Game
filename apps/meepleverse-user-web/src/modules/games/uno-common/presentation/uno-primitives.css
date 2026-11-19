@@ -1,0 +1,20 @@
+.uno-card-back { display:block; width:100%; height:100%; pointer-events:none; }
+.color-red { --card-color:#ed1c24; }.color-yellow { --card-color:#f4c20d; }.color-green { --card-color:#35aa36; }.color-blue { --card-color:#007ac1; }.color-wild { --card-color:#26332b; }
+.color-dialog { text-align:center; }
+.color-dialog .eyebrow { margin-bottom:12px; }
+.color-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:25px; }
+.color-choice { background:var(--card-color); color:#fff; border:2px solid #fff7; border-radius:10px; padding:20px 10px; font-weight:700; }
+.color-choice:hover { filter:brightness(1.15); }
+.color-dialog>.text-button { margin-top:12px; }
+.direction-ring { position:absolute; pointer-events:none; z-index:-1; inset:0; color:var(--card-color,#d9e4d1); opacity:.7; filter:drop-shadow(0 0 5px color-mix(in srgb,currentColor 35%,transparent)); }
+.direction-ring svg { width:100%; height:100%; overflow:visible; }
+.direction-ring-orbit { transform-origin:160px 160px; animation:uno-orbit 12s linear infinite; }
+@keyframes uno-orbit { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .direction-ring-orbit { animation:none; } }
+.direction-ring.color-wild { color:#c1cfac; }
+.draw-debt { display:inline-flex; align-items:center; justify-content:center; min-width:36px; min-height:28px; padding:3px 9px; border:1px solid #ffe085; border-radius:16px; background:#182c23fa; color:#ffe085; font-size:.85rem; line-height:1.2; font-weight:900; white-space:nowrap; pointer-events:none; box-shadow:0 2px 8px #0004; }
+@media(max-width:640px) { .draw-debt { min-width:30px; min-height:24px; font-size:.72rem; padding:3px 7px; } }
+/* Defaults work without Basic table CSS; table layouts override slot variables. */
+.opponent-hand { position:relative; display:block; width:min(var(--fan-max,170px),calc((var(--back-count) - 1)*var(--fan-step,15px) + var(--back-size,34px))); height:calc(var(--back-size,34px)*1.44 + 8px); pointer-events:none; }
+.opponent-hand[data-count="0"] { visibility:hidden; }
+.opponent-card-back { position:absolute; top:0; left:calc(var(--back-index)*(100% - var(--back-size,34px))/max(1,var(--back-count) - 1)); display:block; width:var(--back-size,34px); height:calc(var(--back-size,34px)*1.44); border:0; border-radius:6px; background:transparent; box-shadow:1px 2px 3px #0006; font-style:normal; transform:translateY(var(--back-rise)) rotate(var(--back-angle)); }

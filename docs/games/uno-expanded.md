@@ -8,6 +8,8 @@
 - Các quy ước ghép bộ mang mã **Dxx** là đề xuất cụ thể của MeepleVerse, chưa phải quyết định người dùng đã duyệt. Xem [bảng quyết định](uno-expanded-decisions.md).
 - Xem [tình huống nghiệm thu](../testing/uno-expanded-acceptance.md) để triển khai và kiểm tra từng nhánh.
 
+> Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded gameplay remains unimplemented.
+
 ## 1. Nguồn và cách sử dụng
 
 | Mã | Tài liệu | Phạm vi tham khảo |

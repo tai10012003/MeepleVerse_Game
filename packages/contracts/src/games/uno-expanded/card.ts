@@ -1,7 +1,7 @@
-import type { UnoCard, UnoColor } from "../uno/card.js";
+import type { UnoStandardCard, UnoColor } from "../uno-common/card.js";
 
 export type UnoExpandedCard =
-  | UnoCard
+  | UnoStandardCard
   | { id: string; kind: "tornado" | "skip-two" | "discard-color"; color: UnoColor }
   | { id: string; kind: "high-five"; color: UnoColor; value: 5 }
   | { id: string; kind: "seven-change-left"; color: "red" | "yellow"; value: 7 }

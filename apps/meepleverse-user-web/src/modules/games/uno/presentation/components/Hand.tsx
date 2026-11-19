@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import type { UnoView } from "@meepleverse/contracts/uno";
 import { isPlayable } from "../../model/uno-view-state";
 import { Card } from "./Card";
-import { DrawDebt } from "./DrawDebt";
+import { DrawDebt } from "@/modules/games/uno-common";
 export function Hand({ game, selectedId, enabled, onSelect, newCardIds, pendingDraw }: {
   pendingDraw: number; newCardIds: string[]; game: UnoView; selectedId: string | null; enabled: boolean; onSelect: (id: string) => void;
 }) {

@@ -9,7 +9,7 @@ import { discardPlacement } from "../../model/discard-layout";
 import { cardName } from "../../model/uno-view-state";
 import { ReverseMark, SkipMark } from "../components/CardArtwork";
 import { CardFace } from "../components/Card";
-import { CardBack } from "../components/CardBack";
+import { CardBack } from "@/modules/games/uno-common";
 import "./uno-effects.css";
 
 interface Scene { frame: UnoVisualFrame; plan: EffectPlan; geometry: EffectGeometry; speed: number; reduced: boolean }

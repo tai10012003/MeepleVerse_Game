@@ -1,5 +1,6 @@
-import type { UnoColor } from "@meepleverse/contracts/uno";
-import { colorNames } from "../../model/uno-view-state";
+import "../uno-primitives.css";
+import type { UnoColor } from "@meepleverse/contracts/uno-common";
+import { colorNames } from "../../model/color-names";
 export function DirectionRing({ color, direction }: { color: UnoColor | null; direction: 1 | -1 }) {
   return <div className={"direction-ring color-" + (color ?? "wild")} data-testid="direction-ring" data-color={color ?? "wild"} data-direction={direction}
     role="img" aria-label={(direction === 1 ? "Thuận chiều" : "Ngược chiều") + (color ? " · Màu " + colorNames[color] : " · Chờ chọn màu")}>

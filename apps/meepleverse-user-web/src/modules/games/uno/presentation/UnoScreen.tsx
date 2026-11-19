@@ -1,4 +1,5 @@
 "use client";
+import { CardBack, OpponentHand, DirectionRing, DrawDebt, ColorPicker } from "@/modules/games/uno-common";
 import { useState, type ReactNode, type CSSProperties } from "react";
 import type { UnoCard, UnoCommand } from "@meepleverse/contracts/uno";
 import type { RoomGameEvents, UnoRoomView } from "@meepleverse/contracts/room";
@@ -6,12 +7,7 @@ import { RoomToolbar } from "@/layouts/RoomToolbar";
 import { cardName, isPlayable } from "../model/uno-view-state";
 import { discardPlacement } from "../model/discard-layout";
 import { CardFace } from "./components/Card";
-import { CardBack } from "./components/CardBack";
-import { DrawDebt } from "./components/DrawDebt";
-import { OpponentHand } from "./components/OpponentHand";
-import { DirectionRing } from "./components/DirectionRing";
 import { Hand } from "./components/Hand";
-import { ColorPicker } from "./components/ColorPicker";
 import { Results } from "./components/Results";
 import { UnoEffects } from "./animations/UnoEffects";
 import { planEffects, type UnoVisualFrame, type UnoPresentation } from "../model/uno-effects";

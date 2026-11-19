@@ -1,10 +1,7 @@
-import type { Card } from "../models/card.js";
+import { cardPoints } from "../../../uno-common/index.js";
 import type { UnoGame } from "../models/uno-game.js";
 import type { UnoEvents } from "../events/uno-event.js";
-export function cardPoints(card: Card): number {
-  if (card.kind === "number") return card.value;
-  return card.color === null ? 50 : 20;
-}
+export { cardPoints };
 export function endGame(game: UnoGame, winnerId: string | null, events: UnoEvents): void {
   const handPoints = Object.fromEntries(game.players.map(player => [player.id, player.hand.reduce((sum, card) => sum + cardPoints(card), 0)]));
   game.result = {

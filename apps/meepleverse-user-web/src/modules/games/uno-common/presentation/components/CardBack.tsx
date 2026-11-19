@@ -1,5 +1,6 @@
+"use client";
 import { useId } from "react";
-import "./card-back.css";
+import "../uno-primitives.css";
 
 export function CardBack() {
   const patternId = useId();

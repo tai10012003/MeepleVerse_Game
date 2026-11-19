@@ -1,3 +1,4 @@
+import "../uno-primitives.css";
 import type { CSSProperties } from "react";
 import { CardBack } from "./CardBack";
 export function OpponentHand({ count }: { count: number }) {

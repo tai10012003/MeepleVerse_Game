@@ -35,6 +35,11 @@ async function expectSlowDraw(pages: Page[], recipient: Page, count: number) {
       const state = await page.evaluate(() => {
         const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-effect="draw"]'));
         return {
+          backPatternIds:Array.from(document.querySelectorAll('.uno-card-back pattern')).map(pattern => pattern.id),
+          brokenBackReferences:Array.from(document.querySelectorAll('.uno-card-back')).filter(back => {
+            const pattern = back.querySelector('pattern');
+            return !pattern || back.querySelector('rect[fill="url(#' + pattern.id + ')"]') === null;
+          }).length,
           count:cards.length, durations:cards.map(card => card.dataset.drawDuration),
           faces:cards.filter(card => card.dataset.cardVisibility === "self").length,
           backs:cards.filter(card => card.dataset.cardVisibility === "back").length,
@@ -46,6 +51,8 @@ async function expectSlowDraw(pages: Page[], recipient: Page, count: number) {
           animating:document.querySelector('[data-testid="uno-screen"]')?.getAttribute('data-animating'),
         };
       });
+      expect(new Set(state.backPatternIds).size).toBe(state.backPatternIds.length);
+      expect(state.brokenBackReferences).toBe(0);
       expect(state.count).toBe(count); expect(state.durations).toEqual(Array(count).fill("1.85"));
       expect(state.faces).toBe(page === recipient ? count : 0);
       expect(state.backs).toBe(page === recipient ? 0 : count);

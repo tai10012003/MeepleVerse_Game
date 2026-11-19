@@ -22,7 +22,6 @@
 .draw-pile:not(:disabled):hover { transform:translateY(-4px); }
 .discard-stack { width:76px; height:109px; transform:none; }
 .active-color { padding:5px 10px; border-radius:20px; color:#fff; font-size:.6rem; background:var(--card-color,#4c6651); border:1px solid #fff4; }
-.color-red { --card-color:#ed1c24; }.color-yellow { --card-color:#f4c20d; }.color-green { --card-color:#35aa36; }.color-blue { --card-color:#007ac1; }.color-wild { --card-color:#26332b; }
 .opponent { position:absolute; z-index:1; display:flex; flex-direction:column; align-items:center; gap:4px; width:125px; padding:9px 8px; border-radius:15px; border:1px solid transparent; background:#14261caa; }
 .opponent.current { border-color:var(--green); box-shadow:0 0 25px #bada9222; }
 .opponent-top { top:0; left:50%; transform:translateX(-50%); }
@@ -58,12 +57,6 @@
 .uno-call { color:#17241c; background:var(--green); box-shadow:0 2px 20px #0004; font-size:.75rem; padding:10px 15px; min-height:40px; }
 .board-error { flex-shrink:0; margin:0 25px; color:#ffd0c4; background:#513226; padding:6px 12px; border-radius:5px; font-size:.7rem; }
 .reconnect-button { position:absolute; z-index:20; left:50%; top:50px; transform:translateX(-50%); }
-.color-dialog { text-align:center; }
-.color-dialog .eyebrow { margin-bottom:12px; }
-.color-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:25px; }
-.color-choice { background:var(--card-color); color:#fff; border:2px solid #fff7; border-radius:10px; padding:20px 10px; font-weight:700; }
-.color-choice:hover { filter:brightness(1.15); }
-.color-dialog>.text-button { margin-top:12px; }
 .uno-result-main { flex:1; min-height:0; overflow:auto; padding:24px 20px; }
 .uno-results { width:min(560px,100%); margin:0 auto; text-align:center; padding:20px; }
 .result-spark { font-size:3.5rem; color:var(--accent); display:block; margin-bottom:15px; }
@@ -176,10 +169,6 @@
 .table-center { padding-top:80px; gap:5px; }
 .table-center .table-title { display:none; }
 .pile-area { position:relative; isolation:isolate; width:320px; height:240px; display:grid; place-items:center; }
-.direction-ring { position:absolute; pointer-events:none; z-index:-1; inset:0; color:var(--card-color,#d9e4d1); opacity:.7; filter:drop-shadow(0 0 5px color-mix(in srgb,currentColor 35%,transparent)); }
-.direction-ring svg { width:100%; height:100%; overflow:visible; }
-.direction-ring-orbit { transform-origin:160px 160px; animation:uno-orbit 12s linear infinite; }
-@keyframes uno-orbit { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
 .discard-count { color:var(--muted); font-size:.6rem; }
 @media(min-height:850px) and (min-width:700px) { .pile-area { width:360px; height:280px; } }
 @media(max-width:640px) {
@@ -203,7 +192,6 @@
   .draw-dock .draw-pile { width:32px; height:46px; font-size:1rem; }
   .draw-dock small { display:none; }
 }
-@media(prefers-reduced-motion:reduce) { .direction-ring-orbit { animation:none; } }
 
 /* Recommendations apply only when this player can act; waiting hands keep full color. */
 .uno-hand-card { --suggest-lift:-20px; }
@@ -318,14 +306,17 @@
 @media(prefers-reduced-motion:reduce) { .uno-button.is-ready { animation:none; box-shadow:0 0 0 4px #ffe85d55,0 0 24px #ffd54a99; } }
 
 
-.direction-ring.color-wild { color:#c1cfac; }
 
 /* Keep the card count and penalty amount distinct beside the local hand. */
 .uno-hand > .hand-status { position:absolute; left:15px; top:24px; z-index:12; display:flex; align-items:center; gap:9px; }
 .hand-status > .hand-count { position:static; }
-.draw-debt { display:inline-flex; align-items:center; justify-content:center; min-width:36px; min-height:28px; padding:3px 9px; border:1px solid #ffe085; border-radius:16px; background:#182c23fa; color:#ffe085; font-size:.85rem; line-height:1.2; font-weight:900; white-space:nowrap; pointer-events:none; box-shadow:0 2px 8px #0004; }
-@media(max-width:640px) { .uno-hand > .hand-status { left:8px; top:22px; gap:7px; } .draw-debt { min-width:30px; min-height:24px; font-size:.72rem; padding:3px 7px; } }
+@media(max-width:640px) { .uno-hand > .hand-status { left:8px; top:22px; gap:7px; } }
 @media(max-height:500px) { .uno-hand > .hand-status { top:5px; } }
 
 .uno-hand.has-draw-debt { padding-top:30px; }
 .uno-hand.has-draw-debt > .hand-status { top:0; }
+
+/* Slot overrides for shared card-back artwork. */
+.uno-table .draw-dock .draw-pile { padding:0; border:0; background:transparent; }
+.uno-table .draw-dock .draw-pile:disabled { opacity:1; }
+.uno-table .opponent-card-back { display:block; border:0; background:transparent; }

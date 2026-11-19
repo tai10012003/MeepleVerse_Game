@@ -1,5 +1,6 @@
-import type { UnoCard, UnoColor, UnoView } from "@meepleverse/contracts/uno";
-export const colorNames: Record<UnoColor, string> = { red: "Đỏ", yellow: "Vàng", green: "Xanh lá", blue: "Xanh dương" };
+import type { UnoCard, UnoView } from "@meepleverse/contracts/uno";
+import { colorNames } from "../../uno-common/model/color-names";
+export { colorNames };
 export function cardSymbol(card: UnoCard): string {
   return card.kind === "number" ? String(card.value) : ({ skip: "⊘", reverse: "⇄", "draw-two": "+2", wild: "✦", "wild-draw-four": "+4" })[card.kind];
 }
