@@ -74,7 +74,7 @@ export class UnoGameService {
   view(playerId: string): UnoRoomView {
     requireRoom(this.members.some(member => member.playerId === playerId), "UNKNOWN_PLAYER");
     return {
-      roomId: this.roomId, revision: this.revision, status: this.status, hostId: this.hostId,
+      gameId: "uno-basic", roomId: this.roomId, revision: this.revision, status: this.status, hostId: this.hostId,
       paused: this.paused, members: structuredClone(this.members), selfPlayerId: playerId,
       matchId: this.matchId, game: this.game ? getPlayerView(this.game, playerId) : null,
       outcome: this.outcome ? structuredClone(this.outcome) : null,

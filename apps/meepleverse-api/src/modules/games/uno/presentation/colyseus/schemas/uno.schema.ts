@@ -8,6 +8,7 @@ export const MemberSchema = schema({
 export type MemberSchema = SchemaType<typeof MemberSchema>;
 // Deliberately contains no hands or stock.
 export const UnoRoomSchema = schema({
+  gameId: t.string().default("uno-basic"),
   roomId: t.string().default(""),
   revision: t.number().default(0),
   status: t.string().default("LOBBY"),

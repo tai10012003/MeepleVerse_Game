@@ -10,6 +10,8 @@
 
 > Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded gameplay remains unimplemented.
 
+> Internal room foundation: [setup, protocol and verification](../development/uno-expanded-foundation.md). The 198-card match can be prepared internally; gameplay remains unavailable.
+
 ## 1. Nguồn và cách sử dụng
 
 | Mã | Tài liệu | Phạm vi tham khảo |

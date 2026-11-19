@@ -8,6 +8,7 @@ import { Brand } from "@/layouts/SiteHeader";
 import { useRoomSession } from "../application/useRoomSession";
 import { RoomEntryForm } from "./RoomEntryForm";
 import { LeaveDialog } from "./LeaveDialog";
+import { ExpandedRoomNotice } from "@/modules/games/uno-expanded/presentation/ExpandedRoomNotice";
 import { UnoScreen } from "@/modules/games/uno";
 export function RoomScreen({ roomId }: { roomId: string }) {
   const router = useRouter();
@@ -15,6 +16,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">("idle");
   const [confirmLeave, setConfirmLeave] = useState(false);
   const view = state.view;
+  const expandedView = state.expandedView;
   useRoomAudio(view?.roomId === roomId ? roomId : null);
   const validCode = /^[A-Z0-9]{4}$/.test(roomId);
   const busy = state.status === "connecting" || state.status === "reconnecting";
@@ -24,6 +26,8 @@ export function RoomScreen({ roomId }: { roomId: string }) {
   }
   async function leave() { await state.session.leave(); router.replace("/"); }
   if (!validCode) return <main className="shell empty-state"><h1>Mã phòng chưa đúng.</h1><p>Mã phòng gồm 4 chữ cái hoặc chữ số.</p><Link className="button primary" href="/">Về trang chủ</Link></main>;
+  if (expandedView?.roomId === roomId) return <ExpandedRoomNotice view={expandedView} connected={state.status === "connected"}
+    onLeave={() => void leave()} onReconnect={() => void state.session.restore(roomId)} />;
   if (!view || view.roomId !== roomId) {
     return <><header className="site-header shell"><Link href="/" aria-label="MeepleVerse — trang chủ"><Brand /></Link><span className="pill">Phòng {roomId}</span></header>
       <main className="shell invite-main"><div><span className="eyebrow">Một chỗ ngồi dành cho bạn</span><h1>Hội bạn<br /><span className="accent">đang chờ.</span></h1><p>Nhập tên để vào phòng UNO cùng mọi người.</p></div>

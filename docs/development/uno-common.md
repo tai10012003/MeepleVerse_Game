@@ -25,7 +25,7 @@ Import `UnoColor`, `UnoDirection`, `UnoStandardCard` and `UNO_COLORS` from `@mee
 - `drawFromStock`: moves physical cards into a supplied hand, recycles the discard pile while retaining its top, returns the actual cards drawn. An exhausted stock returns a partial draw. Callers validate counts before calling.
 - `cardPoints`: default number/colored-action/wild scoring (value/20/50). Printed numbers on special cards are not pure number cards. Editions can supply other scoring policies later.
 
-Basic adapters keep public imports, `UnoRuleError` identity, random-call order and `CARDS_DRAWN` events. Turn validation, stacking, delayed +4 color choice, UNO penalties, opening-number selection, phases, events, privacy and results remain in Basic. Expanded currently has a deck factory only; this extraction does not register an Expanded room.
+Basic adapters keep public imports, `UnoRuleError` identity, random-call order and `CARDS_DRAWN` events. Turn validation, stacking, delayed +4 color choice, UNO penalties, opening-number selection, phases, events, privacy and results remain in Basic. Expanded now has its own preparation service and internal room; production registration remains disabled. See [Expanded foundation](uno-expanded-foundation.md).
 
 ## Frontend
 
@@ -36,3 +36,9 @@ Shared CSS provides artwork and primitive defaults. An edition owns table geomet
 ## Verification
 
 Shared unit tests exercise deterministic shuffle/error compatibility, seat wrapping, stock exhaustion, recycling and conservation of all physical IDs for both 108 and 198 cards. Existing Basic unit/integration tests protect the rules. Browser tests cover table geometry, color selection, debt indicators, synchronized effects, unique SVG card-back references, privacy and complete multiplayer matches.
+
+## Shared room transport
+
+`modules/room/presentation/colyseus/GameRoom.ts` now owns the transport lifecycle for both editions: private room codes, strict nickname handling, reconnection, bounded request receipts, duplicate/conflicting request handling, and per-client view delivery. Each edition supplies its own service, action parser, public schema mapper and error classifier. No rule or card type is accepted through a Basic cast.
+
+`contracts/room-common` contains room metadata, common error codes, join validation and the generic action reply. Public views identify editions through `gameId`; the existing Basic matchmaking name remains `uno` for compatibility.

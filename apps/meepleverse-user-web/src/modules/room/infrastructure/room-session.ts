@@ -1,5 +1,7 @@
 import { Client, type Room } from "@colyseus/sdk";
 import type { UnoRoomView, RoomAction, RoomActionReply, RoomGameEvents } from "@meepleverse/contracts/room";
+import type { UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
+import { expandedRoomView } from "@/modules/games/uno-expanded/infrastructure/uno-expanded-room.adapter";
 import type { UnoCommand } from "@meepleverse/contracts/uno";
 import { clearSession, readSession, saveSession } from "./session-storage";
 import { roomError } from "../model/room-errors";
@@ -8,10 +10,10 @@ import type { UnoVisualFrame } from "@/modules/games/uno";
 
 type Status = "idle" | "connecting" | "connected" | "reconnecting" | "disconnected";
 interface SessionState {
-  status: Status; view: UnoRoomView | null; error: string | null; starting: boolean; acting: boolean;
+  status: Status; view: UnoRoomView | null; expandedView: UnoExpandedRoomView | null; error: string | null; starting: boolean; acting: boolean;
   frames: UnoVisualFrame[]; events: RoomGameEvents | null;
 }
-const initial: SessionState = { status: "idle", view: null, error: null, starting: false, acting: false, frames: [], events: null };
+const initial: SessionState = { status: "idle", view: null, expandedView: null, error: null, starting: false, acting: false, frames: [], events: null };
 class RoomSession {
   private state = initial;
   private readonly listeners = new Set<() => void>();
@@ -33,8 +35,17 @@ class RoomSession {
     this.room = room;
     const current = () => this.generation === generation && this.room === room;
     saveSession(room.roomId, room.reconnectionToken);
-    room.onMessage("room_view", (view: UnoRoomView) => {
+    room.onMessage("room_view", (view: UnoRoomView | UnoExpandedRoomView) => {
       if (!current()) return;
+      if (view.gameId === "uno-expanded") {
+        const expandedView = expandedRoomView(view);
+        this.visualPairs.clear();
+        this.patch({ view: null, expandedView, status: "connected", frames: [], events: null,
+          error: expandedView ? null : "INVALID_ROOM_VIEW" });
+        this.snapshotWaiter?.();
+        return;
+      }
+      if (view.gameId !== "uno-basic") return;
       const previous = this.state.view;
       const newMatch = view.matchId !== previous?.matchId;
       if (newMatch || view.paused || !view.game) this.visualPairs.clear();
@@ -42,7 +53,7 @@ class RoomSession {
         this.visualPairs.set(view.game.revision, { before: previous, after: view });
         if (this.visualPairs.size > 8) this.visualPairs.delete(this.visualPairs.keys().next().value!);
       }
-      this.patch({ view, status: "connected", ...(newMatch ? { events: null } : {}), ...((newMatch || view.paused || !view.game) ? { frames: [] } : {}) });
+      this.patch({ view, expandedView: null, status: "connected", ...(newMatch ? { events: null } : {}), ...((newMatch || view.paused || !view.game) ? { frames: [] } : {}) });
       this.snapshotWaiter?.();
     });
     room.onMessage("action_reply", (reply: RoomActionReply) => {
@@ -81,7 +92,7 @@ class RoomSession {
     if (this.room) return Promise.resolve(this.room.roomId);
     const generation = ++this.generation;
     this.visualPairs.clear();
-    this.patch({ status: "connecting", error: null, view: null, frames: [], events: null });
+    this.patch({ status: "connecting", error: null, view: null, expandedView: null, frames: [], events: null });
     const task = (async () => {
       let joined: Room | null = null;
       try {
@@ -99,7 +110,7 @@ class RoomSession {
           this.room = null;
           if (joined) { joined.reconnection.enabled = false; await joined.leave().catch(() => {}); }
           clearSession();
-          this.patch({ status: "idle", view: null, error: roomError(error) });
+          this.patch({ status: "idle", view: null, expandedView: null, error: roomError(error) });
         }
         return null;
       }

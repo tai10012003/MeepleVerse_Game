@@ -23,6 +23,10 @@
     "./room": {
       "types": "./dist/room/index.d.ts",
       "import": "./dist/room/index.js"
+    },
+    "./room-common": {
+      "types": "./dist/room/common.d.ts",
+      "import": "./dist/room/common.js"
     }
   },
   "scripts": {
