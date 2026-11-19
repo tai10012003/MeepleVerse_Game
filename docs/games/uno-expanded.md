@@ -1,0 +1,297 @@
+# UNO Mở rộng — đặc tả luật v1
+
+- Ngày lập: **19/11/2026**.
+- Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
+- Trạng thái: **BẢN ĐẶC TẢ ĐỂ REVIEW**. Chưa triển khai runtime, chưa mở tạo phòng.
+- Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
+- [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
+- Các quy ước ghép bộ mang mã **Dxx** là đề xuất cụ thể của MeepleVerse, chưa phải quyết định người dùng đã duyệt. Xem [bảng quyết định](uno-expanded-decisions.md).
+- Xem [tình huống nghiệm thu](../testing/uno-expanded-acceptance.md) để triển khai và kiểm tra từng nhánh.
+
+## 1. Nguồn và cách sử dụng
+
+| Mã | Tài liệu | Phạm vi tham khảo |
+| --- | --- | --- |
+| S1 | [H2 Rubik — UNO Storm](https://rubikonline.vn/huong-dan-cach-choi-uno-storm-ban-mo-rong-uno) | Các chức năng Storm và số lượng lá |
+| S2 | [H2 Rubik — UNO Battle](https://rubikonline.vn/huong-dan-choi-uno-battle-uno-mo-rong) | Các chức năng Battle |
+| S3 | [Thủ Thuật Chơi — UNO Infinity](https://thuthuatchoi.com/huong-dan-cach-choi-uno-infinity.html) | ×2, ÷2, Wild Discard và số lượng tương ứng |
+| S4 | [Thủ Thuật Chơi — các lá mở rộng](https://thuthuatchoi.com/cac-quan-bai-mo-rong-trong-tro-choi-uno.html) | Mô tả chi tiết các biến thể Battle và Random |
+| S5 | [H2 Rubik — sản phẩm Battle](https://rubikonline.vn/uno-battle-ban-mo-rong-uno) | Một cách giải thích Random khác bài hướng dẫn S2 |
+
+Các tài liệu này mô tả những bộ mở rộng không chính thức và có chỗ khác nhau. Không có một tài liệu nguồn thống nhất cho đúng bộ kết hợp 198 lá. Khi nguồn mâu thuẫn, phải dùng lựa chọn có mã Dxx, không âm thầm ghép luật.
+
+Những ý tưởng trước đây **đã được thay thế**: đấu số riêng hai người, số tăng nghiêm ngặt/9 thắng ngay; đấu màu đối đáp tới hết màu; Khiên xóa mọi phạt; ×2/÷2 nhân/chia tổng phạt. Không triển khai các ý tưởng này trong v1.
+
+## 2. Cấu hình bộ bài đã chốt
+
+### 2.1. Phần nền: 144 lá
+
+| key | Loại | Mỗi màu | Tổng |
+| --- | --- | ---: | ---: |
+| number-0 | Số 0 | 1 | 4 |
+| number-1-9 | Mỗi số 1–9 có 3 bản | 27 | 108 |
+| skip | Cấm lượt | 2 | 8 |
+| reverse | Đảo chiều | 2 | 8 |
+| draw-two | +2 | 2 | 8 |
+| wild | Đổi màu | — | 4 |
+| wild-draw-four | +4 | — | 4 |
+| subtotal-base | Tổng phần nền | — | 144 |
+
+### 2.2. Phần mở rộng: 54 lá
+
+| STT | key dự kiến | Loại | Màu / phân bố | Tổng |
+| --- | --- | --- | --- | ---: |
+| 1 | wild-up | Tăng tiến | Đen | 4 |
+| 2 | wild-battle | Hai kiếm | Đen | 4 |
+| 3 | tornado | Lốc xoáy | 1 mỗi màu | 4 |
+| 4 | high-five | Đập tay | 1 mỗi màu, mang số 5 | 4 |
+| 5 | seven-change-left / seven-change-right | Chuyền bài | L: đỏ, vàng; R: xanh lá, xanh dương; mang số 7 | 4 |
+| 6 | wild-target-four | Chỉ định +4 | Đen | 4 |
+| 7 | wild-multiply-two | Nhân đôi tay bài | Đen | 2 |
+| 8 | wild-divide-two | Bỏ nửa tay bài | Đen | 4 |
+| 9 | wild-shield | Khiên | Đen | 6 |
+| 10 | skip-two | Cấm hai người | 1 mỗi màu | 4 |
+| 11 | discard-color | Xả màu cố định | 1 mỗi màu | 4 |
+| 12 | wild-discard | Xả màu tự chọn | Đen | 2 |
+| 13 | wild-random | Rút ngẫu nhiên +? | Đen | 4 |
+| 14a | wild-draw-six | +6 | Đen | 2 |
+| 14b | wild-draw-eight | +8 | Đen | 2 |
+| subtotal-expanded | — | Tổng phần mở rộng | — | 54 |
+
+Số lượng là cấu hình MeepleVerse đã chọn, không khẳng định trùng toàn bộ một bản in ngoài thị trường. Dùng các số lượng tham khảo Storm/Infinity, nhưng không nhập nguyên tất cả lá của ba gói.
+
+### 2.3. Bất biến bộ bài
+
+- **112 lá số thuần + 32 chức năng nền + 54 mở rộng = 198 lá**.
+- High Five/Seven Change mang giá trị số nhưng đã nằm trong 54; không đếm lại thành lá số thuần.
+- Mỗi màu có 39 lá vật lý: 28 số thuần + 6 chức năng nền + 5 mở rộng. Tổng 156 lá có màu và 42 lá đen.
+- Mỗi lá có ID duy nhất; không dùng màu/loại/số làm ID chung cho các bản sao.
+- Sau mọi chuyển trạng thái, tổng ID trong các tay bài, chồng bốc và chồng bỏ vẫn đúng 198, không trùng ID. Lá chọn bí mật trong Battle chỉ được đánh dấu giữ chỗ, không tạo thêm bản sao vật lý.
+- Lá đầu ván chỉ là số thuần 0–9; không mở bằng High Five/Seven Change dù chúng có giá trị số.
+
+## 3. Thiết lập và lượt thường
+
+Đề xuất kế thừa nền dự án theo **D01**:
+
+- 2–4 ghế, không có đội/bot/đấu xếp hạng; 7 lá/người; người chia ngẫu nhiên, ghế kế tiếp đi đầu theo chiều kim đồng hồ.
+- Đánh một lá cùng màu, cùng số hoặc cùng biểu tượng; lá đen được đánh trong lượt thường. Không có thách thức +4.
+- High Five có giá trị 5; Seven Change có giá trị 7, dùng để đối chiếu số với lá số thuần và với nhau khi phù hợp. Khi đánh trong lượt thường, chúng vẫn kích hoạt chức năng riêng.
+- Được chủ động bốc một lá. Sau đó chỉ đánh lá vừa bốc hoặc bỏ lượt; không đánh được thì tự qua lượt.
+- Skip bỏ một ghế; Reverse đổi chiều, với hai người trả lượt về người đánh. Không tự cho phép Reverse/Skip chặn chuỗi phạt.
+- Kết quả một ván độc lập, chủ phòng mở ván tiếp theo; chưa có giải nhiều ván tới 500 điểm.
+
+### 3.1. Chọn màu và chọn mục tiêu — D02
+
+Đề xuất cho bản Mở rộng: lá đen chọn màu **khi đánh**, gửi cùng ý định đánh bài; Target/Battle chọn thêm đối thủ. Bấm hủy trước khi gửi thì không thay đổi ván.
+
+Đây là điểm có chủ đích khác Cơ bản: Cơ bản hiện cho người đánh +4 cuối chọn màu sau khi người nhận bốc phạt. Bản Mở rộng đề xuất chọn màu ngay để thống nhất nhiều loại Wild; phải review D02 trước khi code, không sửa Cơ bản theo quyết định này.
+
+Mục tiêu phải là một người khác đang thuộc ván; không được tự chọn mình. Server xác định danh tính người gửi, không tin playerId do client tự nhận.
+
+## 4. Bảng tác dụng tham khảo của 14 mục
+
+Mô tả ngắn ở đây lấy từ S1–S4; chi tiết ghép và trường hợp thiếu nằm ở các mục sau, không xem chúng là luật gốc đã được chứng minh.
+
+| Mục | Tác dụng tham khảo |
+| --- | --- |
+| 1. Up — S1 | Chuỗi cả bàn; số bằng hoặc tăng. Người không theo được bốc theo số cao nhất vừa đánh. |
+| 2. Battle — S2/S4 | Chọn đối thủ, so một lá; thắng bỏ thêm 2, thua bốc 2; có hòa. Nguồn khác nhau về điều kiện màu và chọn lá. |
+| 3. Tornado — S1 | Người kế bốc tới màu của lá, rồi mất lượt. |
+| 4. High Five — S2 | Trừ người đánh, người đập tay cuối bốc 2. |
+| 5. Seven Change — S1 | Chuyền tay bài L/R; hướng tương ứng ảnh hưởng chiều đi. |
+| 6. Target +4 — S2 | Chọn người bốc 4; tiếp tục sau người bị chỉ định. |
+| 7. ×2 — S3 | Chọn màu; người kế bốc thêm bằng số lá đang cầm. |
+| 8. ÷2 — S3 | Chọn màu; bỏ nửa tay mình, làm tròn xuống, đặt dưới chồng bốc. |
+| 9. Shield — S1 | Chuyển cộng dồn, không xóa; không chặn mọi chức năng. |
+| 10. Skip Two — S2 | Bỏ hai lượt kế tiếp. |
+| 11. Discard Color — S1 | Xả cùng màu; nguồn tự mâu thuẫn về yêu cầu phải có thêm lá để xả. |
+| 12. Wild Discard — S3 | Chọn màu để xả. |
+| 13. Random — S4/S5 | Một cách giải thích: lật một lá; ra số thì bốc thêm theo số; ra chức năng không bốc thêm theo số. S2 mô tả khác và chưa đủ rõ. |
+| 14. +6/+8 | Mức rút cố định do phạm vi dự án chọn; cách ghép với chuỗi xem D03. |
+
+## 5. Chuỗi rút cố định — đề xuất D03
+
+Đây là quy ước ghép bộ, không phải khẳng định cả ba bộ có cùng quy tắc cộng dồn.
+
+- +2 mở chuỗi theo điều kiện đánh thường; +4/+6/+8/Target +4 mở chuỗi theo điều kiện lá đen.
+- Lưu tổng phạt, người đang phải đáp, và loại lá vừa dùng để chuyển phạt. Trong chuỗi chỉ có +2/+4/+6/+8/Target +4/Shield được dùng, hoặc nhận toàn bộ phạt.
+- Cho nối chéo các mức cộng bất kể màu; không bắt lá sau phải lớn hơn lá trước. **Ngoại lệ sau Shield: không nối +2 ngay lên Shield** theo giới hạn tham khảo S1.
+- +2/+4/+6/+8 tăng tổng và chuyển trách nhiệm sang ghế kế người đánh theo chiều hiện hành.
+- Target +4 tăng tổng thêm 4 và chuyển trách nhiệm sang đối thủ được chọn, không bắt buộc ghế liền kề. Không thay đổi thứ tự ghế.
+- Shield giữ nguyên tổng phạt và chuyển sang ghế kế người dùng; chọn màu theo D02. Shield ở lượt thường chỉ đổi màu, không tự sinh phạt.
+- Nhận phạt: bốc đúng tổng nếu đủ bài; nếu thiếu xử lý theo mục 12; kết thúc chuỗi và mất lượt, rồi tới ghế sau người nhận. Không dùng bài vừa nhận để nối lại.
+- Màu sau chuỗi là màu mà lá cuối xác lập; D02 đã chọn màu trước khi nhận phạt nên không mở lại chọn màu.
+- ×2/÷2, Up, Battle, Tornado, Random, Skip/Reverse/Skip Two và các lá xả/chuyền không dùng để đáp chuỗi.
+- Khiên không né được phạt quên UNO, High Five, Battle, Up, Tornado, Random hoặc ×2. Không mở cơ chế phản ứng tùy ý ngoài lượt.
+- Không đặt trần tổng phạt bằng 8; 8 chỉ là mức lớn nhất trên một lá cộng cố định.
+
+Ví dụ, chiều hiện tại A→B→C→D:
+
+1. A +2, B +6, C +8, D nhận: tổng 16; D mất lượt, tới A.
+2. A +4, B Shield: C chịu 4; C không được nối +2 ngay lên Shield, nhưng được dùng lá hợp lệ khác hoặc nhận.
+3. A +6, B Target +4 chọn D: D chịu 10; nếu nhận thì tới A, C không tự được bù một lượt.
+
+## 6. Chức năng thay đổi bài và lượt — D04 đến D06
+
+### 6.1. ×2 và ÷2
+
+- ×2 chỉ dùng lượt thường/lá vừa bốc hợp lệ, không cộng dồn. Server chụp số bài người kế đang cầm tại lúc xử lý; rút thêm đúng số đó rồi bỏ lượt (**D04**).
+- ÷2 tính trên tay bài **sau khi bỏ lá kích hoạt**: còn N lá thì chọn đúng floor(N/2) ID thuộc tay mình. Ví dụ sau khi bỏ ÷2 còn 7, bỏ 3 và giữ 4.
+- Các ID chọn để bỏ phải khác nhau, không gồm lá kích hoạt, không thuộc người khác. Đặt xuống đáy chồng bốc, giữ bí mật mặt bài với đối thủ; không kích hoạt chức năng của các lá được bỏ.
+- Lá ÷2 ở chồng bỏ, màu đã chọn được giữ. Không lấy các lá vừa đặt dưới chồng bốc thành lá trên bàn.
+- Client hoàn tất lựa chọn trước khi gửi; server chỉ chấp nhận khi toàn bộ payload hợp lệ (**D05**). Không cho thực hiện nửa thao tác.
+
+### 6.2. Xả màu cố định / tự chọn
+
+- Đề xuất D05: xả **toàn bộ** các lá có đúng màu tương ứng sau khi bỏ lá kích hoạt; gồm số và chức năng có màu, không gồm lá đen.
+- Không yêu cầu phải có lá phụ để xả. Các lá đi kèm không kích hoạt tác dụng, kể cả một lá xả khác.
+- Đặt các lá phụ dưới lá kích hoạt trong chồng bỏ; giữ lá kích hoạt ở trên cùng. Màu sau hành động là màu được xả.
+- Không cho chọn chỉ một phần màu; thứ tự phụ được server xác lập từ thứ tự tay bài, không để client đổi lá trên cùng.
+- Việc giảm từ nhiều lá xuống một lá và về đích áp dụng mục 11.
+
+### 6.3. Seven Change và Skip Two
+
+- Theo D06, danh sách ghế có thứ tự cố định theo chiều kim đồng hồ; không suy hướng từ avatar đang nằm trái/phải màn hình của từng client.
+- L: mỗi người chuyển bài sang ghế kế trong thứ tự đó; đặt chiều +1. R: chuyển về ghế trước; đặt chiều -1. Chuyền đồng thời sau khi lá kích hoạt rời tay.
+- Sau chuyền, lượt tới ghế kế người kích hoạt theo chiều mới. Không chạy lại chức năng của các lá nhận được.
+- Nhận một lá do chuyền không tự bị phạt quên UNO; trạng thái UNO đã chuẩn bị trước đó hết hiệu lực.
+- Với hai người: chuyền L/R đều trao đổi hai tay bài; Skip Two đề xuất bỏ hai cơ hội lượt liên tiếp theo vòng, nên tới đối thủ sau khi đã bỏ lượt của đối thủ rồi của người đánh. Với ba người: Skip Two trả lượt cho người đánh. Với bốn người: bỏ hai đối thủ kế, tới người thứ tư.
+
+## 7. Wild Up — D07
+
+- Kích hoạt ở lượt thường; chọn màu mở đầu. Chỉ người kế tiếp theo chiều đang có phải mở chuỗi, không chọn một đối thủ riêng.
+- Đề xuất: lá mở chuỗi phải có giá trị số và đúng màu đã chọn; các lá sau có giá trị **bằng hoặc lớn hơn** số gần nhất, không ràng buộc màu.
+- High Five tính là 5, Seven Change tính là 7; trong chuỗi chỉ dùng giá trị số, không phát sinh đập tay/chuyền bài. Các chức năng khác không được dùng làm số 0.
+- Mỗi lần đáp bỏ đúng một lá và chuyển người kế; có thể chạy nhiều vòng, không kết thúc vì vừa đi đủ một vòng. 9 có thể đáp bằng 9.
+- Nếu có lá hợp lệ thì phải đáp; server không chấp nhận nhận phạt thay để giấu lá hợp lệ. Không được bốc một lá thử vận may hoặc dùng Shield.
+- Khi không có lá hợp lệ: tự bốc N, N là số gần nhất (không phải số lượt đã hô). Nếu chưa có ai mở chuỗi được thì đề xuất N=1; nếu số gần nhất là 0 thì N=0. Người chịu phạt mất lượt; kết thúc Up, người kế tiếp trở lại lượt thường.
+- Lá đáp nằm trên chồng bỏ; màu sau Up là màu lá đáp cuối. Nếu không có lá đáp thì giữ Wild Up và màu mở đầu.
+- Đánh hết bài trong một lần đáp hợp lệ thắng ván; hủy phần Up còn lại. UNO áp dụng trên mỗi hành động theo mục 11.
+
+## 8. Wild Battle — D08
+
+Các mô tả nguồn khác nhau. Đề xuất chọn biến thể **S4 có điều kiện màu và chọn bí mật**, thay vì diễn giải rút ngẫu nhiên từ chồng bốc. Không dùng cơ chế đấu màu liên tục đã bỏ.
+
+### 8.1. Tóm tắt nhánh tham khảo S4
+
+- Người kích hoạt chọn màu và đối thủ. Hai bên cần lá số cùng màu đó để so.
+- Chỉ một bên có: bên đó xả lá so và thêm 2; bên kia bốc 2.
+- Không bên nào có: người kích hoạt bốc 3, đối thủ bốc 2.
+- Cả hai có: chọn bí mật một lá số, lật đồng thời; cao hơn xả thêm 2, thấp hơn bốc 2. Bằng nhau chỉ bỏ lá so, không có thưởng/phạt thêm.
+
+### 8.2. Quy ước triển khai đề xuất
+
+- D08 chọn số thuần cùng màu; High Five/Seven Change cũng được dùng theo giá trị 5/7, không chạy chức năng phụ. Không dùng lá đen/chức năng khác như số 0.
+- Server kiểm tra đủ điều kiện, không tin khai báo "không có bài". Nếu không có thì tự ghi nhận, không buộc gửi ID giả.
+- ID đã chọn được giữ trong tay với trạng thái giữ chỗ, không được dùng vào việc khác. Đối phương chỉ thấy đã khóa/chưa khóa, không thấy ID, số hay mặt lá trước khi cùng đủ điều kiện giải quyết.
+- Mỗi bên có một lần khóa, không sửa sau khi gửi. Khi giải quyết, các lá so được đưa lên chồng bỏ trong một giao dịch; không lộ một lá trước để người kia đổi lựa chọn.
+- Người thắng chọn thêm min(2, số bài còn lại) lá bất kỳ để bỏ; không tự kích hoạt chức năng của các lá đó. Lá thưởng bỏ được công khai khi vào chồng bỏ.
+- Nếu có nhiều bước, giữ `effectId`, lựa chọn đã khóa và người phải chọn. Không cho người ngoài cuộc đánh bài hoặc bắt đầu hiệu ứng khác.
+- Màu trò chơi giữ màu Battle đã chọn; lá Battle giữ trên cùng, các lá so/thưởng đặt bên dưới. Lượt thường tiếp theo là ghế sau người kích hoạt theo chiều hiện hành.
+- Phân xử về đích/UNO xem mục 11. Không lấy việc còn 0 tạm thời ở giữa giao dịch làm chiến thắng sớm.
+
+## 9. Tornado và Wild Random — D09, D10
+
+### 9.1. Tornado
+
+D09 đề xuất chỉ đánh được lên lá cùng màu hoặc lá Tornado khác; trường hợp trùng biểu tượng khác màu được xem như đối chiếu biểu tượng thông thường. Bốc đến **màu cố định của lá vừa đánh**, giữ cả lá khiến dừng và bỏ lượt.
+
+Nguồn S1 chỉ nói màu tương ứng, còn S4 cho phép lá đổi màu giúp dừng. Đề xuất v1 lấy cách hẹp: **chỉ lá có đúng màu mới dừng**, lá đen không dừng; phải review D09, không coi đây là dữ kiện thống nhất của nguồn.
+
+Các lá bốc trong hiệu ứng giữ bí mật như bốc thường; UI của người nhận hiện mặt bài, người khác chỉ thấy lưng và số lượng. Server xử lý hữu hạn theo mục 12, không chờ người dùng bấm rút từng lá.
+
+### 9.2. Wild Random +?
+
+D10 chọn cách giải thích S4/S5:
+
+1. Người kế tiếp rút đúng một lá, **công khai** cho cả bàn.
+2. Số thuần N: giữ lá vừa rút và bốc thêm N. Ra 0 thì không bốc thêm.
+3. Chức năng: giữ lá vừa rút, không bốc thêm theo số. High Five/Seven Change ở đây đề xuất tính là chức năng, không lấy 5/7; xem D10.
+4. Không tự chạy chức năng của lá lật. Người nhận mất lượt; ghế kế tiếp đi lượt thường. Phần mất lượt là lựa chọn ghép, vì S4 còn cho phép người nhận đánh tiếp.
+
+Chỉ lá đầu công khai; các lá bốc thêm vẫn riêng tư. Không dùng Shield để bỏ Random, không dùng bài vừa bốc để mở chuỗi phạt. Không diễn giải "+?" thành một số ngẫu nhiên do client chọn hay "bốc đến khi gặp chức năng".
+
+## 10. High Five trên web — D11
+
+- Người kích hoạt được miễn. Những người còn lại là tập người phải phản ứng cố định lúc tạo thử thách.
+- Đề xuất: server thông báo chuẩn bị 1,5 giây, sau đó nhận đập tay trong 8 giây. Thời gian, thứ tự nhận và kết quả do server quyết định; không tin timestamp client.
+- Mỗi người chỉ được xác nhận một lần cho cùng `effectId`; gửi trùng không thay thứ tự. Bấm trước lúc mở bị từ chối, không giữ hàng đợi.
+- Nếu tất cả bấm: người có xác nhận cuối bốc 2. Nếu chỉ một người không bấm: người đó bốc 2. Nhiều người cùng không bấm: chọn một người trong nhóm này theo thứ tự ghế từ sau người kích hoạt, theo chiều hiện tại, làm quy tắc hòa rõ ràng.
+- Với hai người: đối thủ duy nhất là người cuối, tự nhận 2, không bắt chờ 8 giây.
+- Sau phạt, lượt trở về ghế sau người kích hoạt, không chuyển lượt bất thường tới người chậm nhất. Không có phản ứng Shield.
+- Đây là quy ước thích nghi trên web, không bảo đảm độ trễ mạng công bằng tuyệt đối; không giả định có thể biết thời điểm chạm thật của từng máy.
+- Mất mạng thì đóng băng thử thách cùng ván; cách tiếp tục ở mục 13. Hết ván thì hủy mọi timer/click còn chờ.
+
+## 11. UNO, thứ tự hiệu ứng và về đích — D12, D13
+
+### 11.1. UNO
+
+- Đề xuất kế thừa tự phạt: một hành động chủ động làm tay người đó từ ít nhất 2 xuống đúng 1 phải có khai báo UNO; quên thì bốc 2. Không có bắt lỗi từ đối thủ hoặc hô bù sau giao dịch.
+- Áp dụng cho đánh một lá, xả màu, ÷2, chọn lá so Battle và bỏ lá thưởng Battle. Trường hợp xả từ 5 xuống 1 cũng cần UNO; UI phải báo trước theo kết quả lựa chọn, không chỉ nhìn điều kiện đang có 2 lá.
+- Không phạt nếu xả từ nhiều lá xuống 0; không yêu cầu UNO khi còn một lá rồi đánh lá cuối.
+- Nhận một lá do chuyền không cần hô. UNO đã chuẩn bị không đi theo tay bài được chuyển, không tồn tại qua revision mới.
+- Phạt UNO tách khỏi cộng dồn và mini-game; không chuyển bằng Shield. Áp dụng sau kết quả chủ động của người đó, trước khi xác định hết bài.
+- Battle bí mật chỉ xét UNO lúc các lá so thực sự được bỏ, không lộ số/ID qua việc khai báo sớm. Chọn lá thưởng là hành động riêng, kiểm tra UNO riêng.
+
+### 11.2. Kết thúc
+
+- Server chỉ kiểm tra thắng ở ranh giới giao dịch đã hoàn tất, không theo animation.
+- Nếu một người đánh hết bài bằng số/Skip/Reverse/Skip Two/Wild/Up/High Five/Seven Change/Battle: đề xuất chốt thắng ngay sau nước hợp lệ, không mở thêm cuộc đấu/đập tay/chuyền bài. Không yêu cầu chọn mục tiêu cho một hiệu ứng đã bị bỏ vì hết bài; màu Wild vẫn là phần của lệnh đánh.
+- Nếu lá cuối là +2/+4/+6/+8/Target +4, tính cả tổng phạt đang có, người nhận bắt buộc bốc rồi ván kết thúc; không nối/chặn tiếp. Target vẫn phải chọn người nhận.
+- Shield là lá cuối: nếu đang có chuỗi, chuyển tổng cho ghế kế và bắt buộc bốc trước khi kết thúc; không biến Shield thành xóa phạt. Nếu không có chuỗi thì chỉ đổi màu và thắng.
+- Nếu lá cuối là ×2/Tornado/Random: giải quyết lượt bốc bắt buộc hữu hạn rồi tính điểm, không mở phản ứng mới.
+- Xả màu/÷2 có thể thắng nếu sau giao dịch còn 0; không kích hoạt lại các lá đi kèm.
+- Battle đang diễn ra: giải quyết cùng lúc việc bỏ lá so, thưởng/phạt và phạt UNO tương ứng trước khi xác định hết bài. Không cho người thua tránh bốc phạt vì vừa dùng lá so cuối.
+- Nếu nhiều người cùng hết ở một giao dịch Battle: ưu tiên người thắng cuộc Battle nếu người đó hết; nếu hòa và nhiều người cùng hết, kết quả là hòa `simultaneous-finish`, không tự chọn thắng theo thứ tự xử lý packet.
+- Có kết quả thì hủy hiệu ứng, timer, lựa chọn giữ chỗ và khả năng nhận lệnh ván cũ; rematch có ID ván mới và trạng thái sạch.
+
+## 12. Hết chồng bốc, bảo toàn bài và tính điểm — D14
+
+- Hết chồng bốc: trộn lại chồng bỏ, giữ lá trên cùng. Không lấy bài trên tay, kể cả các ID đang giữ chỗ để so Battle.
+- Phạt lượng cố định: bốc tối đa số còn có thể, ghi nhận số yêu cầu và số thực nhận, không tạo thêm lá hoặc để tổng phạt treo mãi.
+- Tornado: dừng khi đúng màu, hoặc không còn ID nào có thể bốc; không xào lại chính các lá đã nhận. Nếu kho hữu hạn cạn, kết thúc hiệu ứng và mất lượt, không để vòng lặp vô hạn.
+- Random không còn lá để lật: không có lá công khai, thực nhận 0 và chuyển lượt theo D10.
+- Đề xuất kết thúc blocked khi cả một vòng lượt thường liên tiếp không có lá đánh được và không bốc được lá nào; không kết thúc blocked ngay vì một hiệu ứng bốc thiếu. Reset bộ đếm khi có hành động thay đổi bài/màu/lượt bằng chức năng.
+- Điểm đề xuất: số thuần theo số; mọi chức năng có màu (kể cả High Five/Seven Change) 20; lá đen 50. Không lấy giá trị 5/7 dùng để đối đáp làm điểm chức năng.
+- Người thắng nhận tổng điểm bài còn của các đối thủ sau các lượt bốc bắt buộc. Hòa/blocked không có điểm người thắng; vẫn hiển thị điểm còn lại của từng người.
+
+## 13. Mất kết nối, lựa chọn và thời hạn — D15
+
+- Giữ cơ chế phòng hiện có: mất kết nối giữ ghế tối đa 30 giây, tạm dừng toàn ván. Hết thời gian hoặc rời chủ động xử lý kết thúc ván do người rời như Cơ bản; không xóa ghế rồi tiếp tục bỏ qua hiệu ứng của người đó.
+- Snapshot phục hồi match/revision, tay bài, lượt, màu/chiều, chuỗi phạt, `effectId`, người phải đáp và các lựa chọn đã khóa được phép xem. Không phát lại hiệu ứng cũ hoặc chạy lại lần bốc đã hoàn tất.
+- Timer hiệu ứng lưu thời gian còn lại khi tạm dừng. Sau reconnect, High Five có lại 1,5 giây chuẩn bị cho những người chưa bấm; thứ tự các xác nhận hợp lệ trước đó giữ nguyên. Gói tin của một lần thử trước không được tính lại.
+- Đề xuất thời hạn lựa chọn mới (Battle khóa lá / chọn thưởng) 20 giây. Hết hạn chọn lá hợp lệ đầu tiên theo thứ tự tay bài mà server giữ; chọn thưởng dùng đủ số lượng còn có thể bỏ. Không dùng thời gian của animation làm hạn nghiệp vụ.
+- Không thêm timer cho lượt thường ở bước đặc tả này. Chọn màu/mục tiêu/xả/÷2 là phần chuẩn bị chưa gửi, chưa làm ván đổi phase; hủy UI không cần rollback server.
+- Auto-action có event và revision riêng khi thực sự thay đổi game; không tự hô UNO thay người dùng. Thử thách có ID chống thao tác đến muộn, retry không lặp hình phạt.
+- Chưa có phục hồi ván sau server crash, lưu MongoDB, nhiều tiến trình hoặc xử lý đồng bộ giữa nhiều máy chủ.
+
+## 14. Trạng thái và quyền riêng tư dự kiến
+
+Đây là thiết kế khái niệm, chưa phải types/API đã tồn tại. Backend giữ luật theo module; cơ chế chung tái sử dụng có kiểm thử bảo vệ Cơ bản.
+
+| Trạng thái | Ai được hành động | Kết thúc khi |
+| --- | --- | --- |
+| turn | Người tới lượt | Đánh / bốc hợp lệ |
+| drawn | Người vừa bốc | Đánh lá mới / bỏ lượt |
+| draw-stack | Người đang chịu phạt | Nối / chuyển / nhận |
+| up | Người phải đáp số hiện tại | Đáp / tự nhận phạt / hết bài |
+| battle-select | Hai người được chọn | Đủ lựa chọn hoặc hết hạn |
+| battle-discard | Người thắng Battle | Chọn đủ lá thưởng hoặc hết hạn |
+| high-five | Những người phải phản ứng | Đủ xác nhận hoặc hết hạn |
+| ended | Không ai đánh bài | Chủ phòng mở ván mới |
+
+Các hiệu ứng bốc hữu hạn/xả/chuyền giải quyết nguyên tử trên server; client nhận snapshot/event để diễn hoạt. Không cần biến mỗi lá bốc thành một command nghiệp vụ.
+
+- Người gửi phải có quyền ở đúng phase/effectId. Với Battle/High Five, không thể chỉ kiểm tra `currentTurn` như lượt thường vì có nhiều người được phản hồi.
+- Giao thức vẫn cần requestId, matchId và revision. Lệnh đánh/nhận phạt/chọn thưởng cần expectedRevision hiện tại. Riêng khóa lá Battle và đập tay được xét bằng effectId, lần thử, phase và slot riêng của người gửi: không từ chối chỉ vì một người khác vừa phản hồi làm global revision tăng. Server vẫn tăng revision cho chuyển trạng thái được chấp nhận; UI không tự retry mù quáng ý định trên tay bài cũ.
+- Phản hồi đồng thời không được bypass kiểm tra phase, quyền sở hữu, deadline hoặc dedup. Sau timeout/resolve/rematch, mọi effectId cũ vô hiệu; không chấp nhận phản hồi muộn bằng lý do cho phép revision cũ.
+- Phân biệt thông tin công khai (mục tiêu, số bài, tổng phạt, deadline, màu, chiều, thứ tự phản ứng) với private (tay bài, thứ tự kho, ID bí mật Battle, các lá ÷2 đặt dưới kho).
+- Chỉ công khai lá đầu Random và các lá Battle sau lúc lật theo luật; không broadcast toàn bộ state domain để tiện làm hiệu ứng.
+- Retry, reload, mất mạng không sinh thêm lần bốc, thưởng hoặc ghi nhận đập tay.
+
+## 15. Điều kiện hoàn thành bước 1
+
+- Có đủ 14 mục, bảng 198 lá và ranh giới giữa nguồn/luật đã chốt/đề xuất.
+- Mỗi chức năng xác định điều kiện đánh, người xử lý, tác động bài, màu/chiều/lượt sau, quyền riêng tư và tình huống thiếu bài/về đích.
+- Có bảng quyết định để review toàn bộ khoảng trống của bộ kết hợp, cùng ca nghiệm thu để bước sau không suy luật từ UI.
+- **Hoàn thành tài liệu không đồng nghĩa D01–D15 đã được duyệt.** Các bước triển khai phải giữ trạng thái phát hành Mở rộng là đang phát triển cho đến khi có luật đã duyệt và kiểm thử tương ứng.
