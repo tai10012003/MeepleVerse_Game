@@ -1,6 +1,6 @@
 import { Client, type Room } from "@colyseus/sdk";
 import type { UnoRoomView, RoomAction, RoomActionReply, RoomGameEvents } from "@meepleverse/contracts/room";
-import type { UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
+import type { UnoExpandedRoomView, UnoExpandedCommand, UnoExpandedRoomAction, UnoExpandedActionReply } from "@meepleverse/contracts/uno-expanded";
 import { expandedRoomView } from "@/modules/games/uno-expanded/infrastructure/uno-expanded-room.adapter";
 import type { UnoCommand } from "@meepleverse/contracts/uno";
 import { clearSession, readSession, saveSession } from "./session-storage";
@@ -8,6 +8,8 @@ import { roomError } from "../model/room-errors";
 
 import type { UnoVisualFrame } from "@/modules/games/uno";
 
+type TransportAction = RoomAction["action"] | UnoExpandedRoomAction["action"];
+type TransportReply = RoomActionReply | UnoExpandedActionReply;
 type Status = "idle" | "connecting" | "connected" | "reconnecting" | "disconnected";
 interface SessionState {
   status: Status; view: UnoRoomView | null; expandedView: UnoExpandedRoomView | null; error: string | null; starting: boolean; acting: boolean;
@@ -22,7 +24,7 @@ class RoomSession {
   private readonly visualPairs = new Map<number, { before: UnoRoomView; after: UnoRoomView }>();
   private pending: Promise<string | null> | null = null;
   private snapshotWaiter: (() => void) | null = null;
-  private actionWaiter: { id: string; finish: (reply: RoomActionReply | null) => void } | null = null;
+  private actionWaiter: { id: string; finish: (reply: TransportReply | null) => void } | null = null;
   getSnapshot = () => this.state;
   getServerSnapshot = () => initial;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
@@ -39,9 +41,11 @@ class RoomSession {
       if (!current()) return;
       if (view.gameId === "uno-expanded") {
         const expandedView = expandedRoomView(view);
+        const previousExpanded = this.state.expandedView;
+        const clearError = this.state.status !== "connected" || view.matchId !== previousExpanded?.matchId || view.game?.revision !== previousExpanded?.game?.revision;
         this.visualPairs.clear();
         this.patch({ view: null, expandedView, status: "connected", frames: [], events: null,
-          error: expandedView ? null : "INVALID_ROOM_VIEW" });
+          ...(!expandedView ? { error: "INVALID_ROOM_VIEW" } : clearError ? { error: null } : {}) });
         this.snapshotWaiter?.();
         return;
       }
@@ -56,7 +60,7 @@ class RoomSession {
       this.patch({ view, expandedView: null, status: "connected", ...(newMatch ? { events: null } : {}), ...((newMatch || view.paused || !view.game) ? { frames: [] } : {}) });
       this.snapshotWaiter?.();
     });
-    room.onMessage("action_reply", (reply: RoomActionReply) => {
+    room.onMessage("action_reply", (reply: TransportReply) => {
       if (current() && reply.requestId === this.actionWaiter?.id) this.actionWaiter.finish(reply);
     });
     room.onMessage("game_events", (batch: RoomGameEvents) => {
@@ -119,6 +123,10 @@ class RoomSession {
     return this.pending;
   }
   create(nickname: string): Promise<string | null> { return this.connect(() => this.sdk().create("uno", { nickname })); }
+  createExpanded(nickname: string): Promise<string | null> {
+    if (process.env.NODE_ENV !== "development") return Promise.resolve(null);
+    return this.connect(() => this.sdk().create("uno-expanded", { nickname }));
+  }
   join(roomId: string, nickname: string): Promise<string | null> { return this.connect(() => this.sdk().joinById(roomId, { nickname })); }
   async restore(roomId?: string): Promise<string | null> {
     if (this.room) return this.room.roomId;
@@ -127,12 +135,12 @@ class RoomSession {
     if (!saved || (roomId && saved.roomId !== roomId)) return null;
     return this.connect(() => this.sdk().reconnect(saved.token));
   }
-  private async sendAction(action: RoomAction["action"], kind: "start" | "game"): Promise<void> {
+  private async sendAction(action: TransportAction, kind: "start" | "game"): Promise<void> {
     const room = this.room;
-    if (!room || this.state.status !== "connected" || this.state.view?.paused || this.state.starting || this.state.acting) return;
+    if (!room || this.state.status !== "connected" || (this.state.view ?? this.state.expandedView)?.paused || this.state.starting || this.state.acting) return;
     this.patch({ starting: kind === "start", acting: kind === "game", error: null });
     const requestId = Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, "0")).join("");
-    const reply = await new Promise<RoomActionReply | null>(resolve => {
+    const reply = await new Promise<TransportReply | null>(resolve => {
       const timer = setTimeout(() => { if (this.actionWaiter?.id === requestId) this.actionWaiter.finish(null); }, 8000);
       this.actionWaiter = { id: requestId, finish: reply => { clearTimeout(timer); this.actionWaiter = null; resolve(reply); } };
       try { room.send("action", { requestId, action }); } catch { this.actionWaiter.finish(null); }
@@ -142,11 +150,16 @@ class RoomSession {
     if (this.state.status === "connected") room.send("get_view");
   }
   async start(): Promise<void> {
-    const view = this.state.view;
+    const view = this.state.view ?? this.state.expandedView;
     if (view) await this.sendAction({ type: "START_GAME", expectedRoomRevision: view.revision }, "start");
   }
   async command(command: UnoCommand): Promise<void> {
     const view = this.state.view;
+    if (!view?.game || view.status !== "PLAYING" || !view.matchId) return;
+    await this.sendAction({ type: "GAME_COMMAND", matchId: view.matchId, expectedRevision: view.game.revision, command }, "game");
+  }
+  async expandedCommand(command: UnoExpandedCommand): Promise<void> {
+    const view = this.state.expandedView;
     if (!view?.game || view.status !== "PLAYING" || !view.matchId) return;
     await this.sendAction({ type: "GAME_COMMAND", matchId: view.matchId, expectedRevision: view.game.revision, command }, "game");
   }

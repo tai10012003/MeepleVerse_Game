@@ -167,3 +167,9 @@ Các bảng bước 5–6 là lịch sử. Hiện mọi loại lá có luật ba
 Playwright `uno-expanded-cards.spec.ts` có 3 ca: đủ 22 kind/60 mẫu, nhãn truy cập và khung SVG; bộ lọc/kích thước/mobile-tablet/tỷ lệ tay-bàn; catalog chưa mở chơi. Cả 3 qua trên Edge. Chạy thêm 2 ca Cấm/Đổi chiều xanh lá ở 1366px trong `uno-effects.spec.ts`, đều qua sau khi chuyển vector nền sang common. TypeScript và lint frontend đạt. Không chạy lại bài chơi dài vì không đổi luật hoặc transport.
 
 Đã duyệt ảnh chụp mặt bài ở thư viện nội bộ; chưa xem đây là nghiệm thu E068 trên bàn chơi Mở rộng. Điều khiển, animation và chơi đủ ván bằng UI Mở rộng vẫn chờ bước tích hợp.
+
+## Kiểm tra UI 9A — 20/11/2026
+
+`uno-expanded.spec.ts` thay màn notice cũ bằng 7 ca nền: 4 browser/bộ 198/reload; drawn-card-only; Khiên/cộng dồn/màu; Target +4; ÷2 có/không hô UNO; kết thúc xả màu/rematch. Thêm 2 hồi quy sảnh/Wild Cơ bản, cả 9 ca liên quan qua. Đã xem ảnh bàn mobile và kiểm tra không tràn, chỉ render mặt sau đối thủ. Typecheck/lint workspace đạt. Xem [phạm vi 9A](../development/uno-expanded-table.md).
+
+Đây là nghiệm thu UI từng phần. Mini-game, hiệu ứng/sound cues và E067 chơi trọn ván Mở rộng bằng giao diện chờ 9B/9C; không suy ra đã sẵn sàng phát hành.

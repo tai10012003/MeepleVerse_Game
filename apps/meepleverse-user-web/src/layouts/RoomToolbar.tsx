@@ -2,12 +2,12 @@ import { UnoRulesButton } from "@/modules/games/uno/presentation/rules/UnoRulesB
 import { AudioControls } from "@/shared/audio/AudioControls";
 import Link from "next/link";
 import { Brand } from "./SiteHeader";
-export function RoomToolbar({ connected, reconnecting, onLeave, roomId }: {
-  connected: boolean; reconnecting: boolean; onLeave: () => void; roomId?: string;
+export function RoomToolbar({ connected, reconnecting, onLeave, roomId, gameId = "uno-basic" }: {
+  connected: boolean; reconnecting: boolean; onLeave: () => void; roomId?: string; gameId?: "uno-basic" | "uno-expanded";
 }) {
   return <header className="room-header shell"><Link href="/" aria-label="MeepleVerse — trang chủ"><Brand /></Link>
     {roomId && <span className="toolbar-code">#{roomId}</span>}
-    <span className={"connection-pill " + (connected ? "is-online" : "")}><span className="status-dot" /><span className="connection-label">{connected ? "Đã kết nối" : reconnecting ? "Đang kết nối lại…" : "Mất kết nối"}</span></span><UnoRulesButton compact /><AudioControls />
+    <span className={"connection-pill " + (connected ? "is-online" : "")}><span className="status-dot" /><span className="connection-label">{connected ? "Đã kết nối" : reconnecting ? "Đang kết nối lại…" : "Mất kết nối"}</span></span>{gameId === "uno-basic" && <UnoRulesButton compact />}<AudioControls />
     <button className="text-button" onClick={onLeave}>Rời phòng <span aria-hidden="true">↗</span></button>
   </header>;
 }

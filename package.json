@@ -11,6 +11,7 @@
     "dev:user": "npx --yes pnpm@10.34.9 --filter meepleverse-user-web dev",
     "dev:admin": "npx --yes pnpm@10.34.9 --filter meepleverse-admin-portal dev",
     "dev:api": "npx --yes pnpm@10.34.9 --filter meepleverse-api dev",
+    "dev:api:expanded": "npx --yes pnpm@10.34.9 --filter meepleverse-api dev:expanded",
     "typecheck": "npx --yes pnpm@10.34.9 -r --if-present typecheck",
     "lint": "npx --yes pnpm@10.34.9 -r --if-present lint",
     "build": "npx --yes pnpm@10.34.9 -r --if-present build",

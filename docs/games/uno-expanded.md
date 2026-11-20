@@ -2,7 +2,7 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Bước 8: backend bước 5–7 và bộ mặt bài SVG đã có; xem trước nội bộ tại `/dev/uno-expanded/cards` khi chạy development. Production chưa mở phòng Mở rộng; bộ điều khiển mini-game còn chờ tích hợp.
+- Bước 9A: bàn/thao tác nền mở nội bộ tại `/dev/uno-expanded/play`; bộ bài xem tại `/dev/uno-expanded/cards`. Production chưa mở phòng Mở rộng; mini-game UI và animation chờ 9B/9C.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là lựa chọn riêng của MeepleVerse; trạng thái xác nhận theo từng bước nằm trong [bảng quyết định](uno-expanded-decisions.md). Không coi chúng là một luật gốc thống nhất cho mọi bộ ngoài thị trường.
@@ -344,3 +344,7 @@ Catalog vẫn Đang phát triển, phòng Mở rộng ở production chưa bật
 Đã có renderer cho đủ 22 kind trong contracts, gồm các lá nền và 14 nhóm mở rộng. Thư viện nội bộ có 60 mẫu để duyệt biểu tượng/màu, lọc kích thước và xem cùng tỷ lệ tay/bàn. Đây là số mẫu trình bày, không thay cấu hình 198 lá. Xem [nguồn ảnh, kiến trúc và cách mở thư viện](../development/uno-expanded-card-artwork.md).
 
 Bước này chưa nối mặt bài với bàn Mở rộng hoặc thêm điều khiển mini-game/animation. Catalog vẫn Đang phát triển; các luật backend và Cơ bản giữ nguyên.
+
+## Bước 9A — tích hợp thao tác nền (20/11/2026)
+
+Đã nối sảnh, mặt bài, gợi ý server, bốc/bỏ lượt, cộng dồn/Khiên, màu/mục tiêu/÷2, UNO, kết quả và rematch. Xem [cách chạy và phạm vi](../development/uno-expanded-table.md). Up/Battle/High Five chưa có điều khiển nên UI tạm không cho chọn ba lá kích hoạt đó; backend giữ đầy đủ luật. Chưa mở chơi công khai hoặc nghiệm thu toàn bộ UI Mở rộng.

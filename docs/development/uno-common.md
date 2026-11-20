@@ -48,3 +48,5 @@ Expanded step 6 reuses the same turn engine and physical pile operations for ato
 Expanded step 7 keeps Up/Battle/High Five state, timers and concurrency policy in the Expanded edition; see [mini-games](uno-expanded-minigames.md). Shared room transport exposes protected publication/event hooks; only the Expanded adapter schedules an effect timer. Basic uses the default no-op hook. Common card operations and Basic rules do not import mini-game logic.
 
 Expanded step 8 reuses common standard artwork through a compatibility re-export for Basic; see [card artwork and development preview](uno-expanded-card-artwork.md). Expanded symbols and the development-only gallery remain in their edition, with no rule or room dependency.
+
+Expanded 9A shares ColorChoices and discard placement (Basic compatibility exports retained), plus RoomLobby metadata. Commands and game screens stay edition-specific. See [internal Expanded table](uno-expanded-table.md).
