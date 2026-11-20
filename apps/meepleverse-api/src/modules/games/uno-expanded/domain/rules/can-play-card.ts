@@ -9,7 +9,7 @@ export function canPlayExpandedCard(game: UnoExpandedGame, card: UnoExpandedCard
     return card.kind === "wild-shield" || (fixedDrawAmount(card) > 0 && !(top.kind === "wild-shield" && card.kind === "draw-two"));
   }
   return card.color === null || card.color === game.activeColor ||
-    (card.kind === "number" && top.kind === "number" ? card.value === top.value : card.kind !== "number" && card.kind === top.kind);
+    (("value" in card && "value" in top && card.value === top.value) || (card.kind !== "number" && card.kind === top.kind));
 }
 export function playableExpandedCardIds(game: UnoExpandedGame, playerId: string): string[] {
   if (game.phase === "ended" || game.players[game.currentIndex]!.id !== playerId) return [];

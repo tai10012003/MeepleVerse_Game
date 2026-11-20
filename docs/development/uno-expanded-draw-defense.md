@@ -1,3 +1,5 @@
+> Historical milestone: step 5 is extended by [step 6](uno-expanded-discard-turns.md). The earlier unavailable-card list below describes that milestone; only Up/Battle/High Five remain unavailable now.
+
 # UNO Mở rộng — nhóm rút bài và phòng thủ (bước 5)
 
 Ngày: 20/11/2026. Đây là mốc backend nội bộ, chưa phát hành gameplay Mở rộng trên giao diện.

@@ -134,3 +134,16 @@ Trừ khi nói khác, bốn ghế A→B→C→D theo chiều +1, đủ kho bốc
 Các file unit nằm trong `apps/meepleverse-api/tests/unit/uno-expanded`; test realtime nằm trong `tests/integration/realtime`. Đây là ánh xạ phạm vi, không khẳng định mọi biến thể của từng E-ID đã có test độc lập.
 
 Up, Battle, High Five, chuyền tay, Skip Two, ÷2, xả màu, UNO khi bỏ nhiều lá và timer mini-game vẫn chờ các bước sau. Mặt bài mới, bộ điều khiển và animation Mở rộng chưa được nghiệm thu ở bước này.
+
+## Phạm vi tự động hóa bổ sung ở bước 6 — 20/11/2026
+
+| Phạm vi | Test |
+| --- | --- |
+| ÷2 chọn đủ số lá, bảo mật đáy kho, thứ tự server và UNO nhiều-xuống-một | `divide-hand.test.ts` |
+| Hai loại xả màu, không chạy hiệu ứng phụ, giữ lá kích hoạt và thắng khi xả hết | `discard-colors.test.ts` |
+| L/R đồng thời với 2–4 người, hai chiều cũ, tay nhận một lá và phạt đúng người | `hand-transfers.test.ts` |
+| Skip Two 2–4 người/hai chiều; so số 7; lá vừa bốc; không né chuỗi; rollback | `bulk-and-turn-interactions.test.ts` |
+| Bảo toàn 198 ID sau mỗi lệnh, bao gồm lựa chọn nhiều lá và chuyền tay | `simulation.test.ts` |
+| Lựa chọn sai/duplicate; ÷2 → xả → chuyền; giữ kín tay mới và reconnect; kết thúc xả | `uno-expanded-room.test.ts` |
+
+Bảng bước 5 phía trên là lịch sử phạm vi của mốc đó. Hiện ÷2, xả màu, chuyền tay, Skip Two và UNO cho các thao tác trên đã được triển khai; Up/Battle/High Five cùng timer/kết quả mini-game và giao diện mới vẫn chờ các bước sau. Ánh xạ phạm vi không đồng nghĩa mọi tổ hợp E001–E070 đã có test riêng.

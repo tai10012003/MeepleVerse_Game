@@ -2,13 +2,13 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Step 5: internal base-turn and draw/defense gameplay implemented; public Expanded rooms remain disabled. Remaining expansion rules are still under review.
+- Step 6: internal discard/divide/hand-transfer/Skip Two rules implemented alongside step 5. Public Expanded rooms remain disabled; Up/Battle/High Five remain pending.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là đề xuất cụ thể của MeepleVerse, chưa phải quyết định người dùng đã duyệt. Xem [bảng quyết định](uno-expanded-decisions.md).
 - Xem [tình huống nghiệm thu](../testing/uno-expanded-acceptance.md) để triển khai và kiểm tra từng nhánh.
 
-> Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded draw/defense gameplay is implemented internally; remaining mechanics are unavailable.
+> Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded draw/defense and bulk-discard/turn-control gameplay is implemented internally; the three mini-game mechanics remain unavailable.
 
 > Internal room foundation: [setup, protocol and verification](../development/uno-expanded-foundation.md). The 198-card match supports internal base turns and draw/defense rules; see [step 5](../development/uno-expanded-draw-defense.md).
 
@@ -320,3 +320,13 @@ Not implemented: Up, Battle, High Five, Seven Change, Skip Two, discard-color, w
 Confirmed step 5 conventions: Wild color chosen on play; +2 prohibited directly after Shield; x2 isolated with a skipped turn and no Shield response; Tornado stops only on an exact colored card; Random retains its public reveal, adds N private draws only for a pure number, and always skips the recipient. Unknown/future cards revealed by Random do not activate effects. No challenge +4. Basic rules stay unchanged.
 
 Last fixed-draw/Shield card settles the existing debt before awarding a win; last Tornado/Random/x2 likewise resolves the mandatory draw before scoring. Short stock draws are finite and do not create cards. Only fully blocked normal turns can end with no winner. Multi-card discards and mini-game endings will be reviewed in their own stages.
+
+## Step 6 implementation status (2026-11-20)
+
+Implemented: divide-two, fixed-color discard, Wild Discard, Seven Change L/R and Skip Two. See [step 6 protocol and behavior](../development/uno-expanded-discard-turns.md). Up, Battle and High Five remain unavailable as activations. Such colored cards may still be discarded as side cards without activating their effects.
+
+The step 5 status section above is a historical milestone. Batch operations are now atomic, validate all supplied IDs, and keep the activation on top. Divide-two returns a chosen floor(N/2) subset of the remaining hand to the bottom of stock in canonical hand order, with no public face/ID event. Color discard removes all matching colored cards; no matching side card is also valid. Transfers are simultaneous by fixed seats, set L=+1/R=-1, and never trigger effects of received cards.
+
+UNO is required for any active discard from at least two cards to one, including a multi-card discard. Cards received through transfers do not require UNO. A player who actively discards from two to one via Seven Change must still declare; if omitted, the actor draws two after the transfer, preventing an innocent receiver from inheriting the penalty. A last Seven Change wins before passing an empty hand.
+
+Skip Two skips two turn opportunities: for 2/3/4 players, the next actor is respectively the opponent/the activating player/the fourth seat along the current direction. Transfers match printed seven as well as color, including ordinary seven on Seven Change. All step 6 actions are forbidden as responses to a draw stack.

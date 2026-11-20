@@ -42,3 +42,5 @@ Shared unit tests exercise deterministic shuffle/error compatibility, seat wrapp
 `modules/room/presentation/colyseus/GameRoom.ts` now owns the transport lifecycle for both editions: private room codes, strict nickname handling, reconnection, bounded request receipts, duplicate/conflicting request handling, and per-client view delivery. Each edition supplies its own service, action parser, public schema mapper and error classifier. No rule or card type is accepted through a Basic cast.
 
 `contracts/room-common` contains room metadata, common error codes, join validation and the generic action reply. Public views identify editions through `gameId`; the existing Basic matchmaking name remains `uno` for compatibility.
+
+Expanded step 6 reuses the same turn engine and physical pile operations for atomic hand reductions and transfers; see [discard and turn rules](uno-expanded-discard-turns.md). The common module and Basic rules do not need edition-specific branches.

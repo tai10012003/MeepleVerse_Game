@@ -9,11 +9,19 @@ describe("Expanded partial-rule simulation", () => {
       const random = seeded(seed); let game = createExpandedGame(Array.from({ length: count }, (_, i) => "p" + i), random);
       for (let step = 0; step < 500 && game.phase !== "ended"; step++) {
         const actor = game.players[game.currentIndex]!; const view = getExpandedPlayerView(game, actor.id);
-        const card = actor.hand.find(card => card.id === view.self.playableCardIds[Math.floor(random() * view.self.playableCardIds.length)]);
+        const selectedId = view.self.playableCardIds[Math.floor(random() * view.self.playableCardIds.length)];
+        const card = actor.hand.find(card => card.id === selectedId);
         let command: UnoExpandedCommand;
-        if (card) command = { type: "PLAY_CARD", cardId: card.id, declareUno: actor.hand.length === 2,
-          ...(card.color === null ? { chosenColor: "blue" as const } : {}),
-          ...(card.kind === "wild-target-four" ? { targetPlayerId: game.players[(game.currentIndex + 1) % count]!.id } : {}) };
+        if (card) {
+          const remaining = actor.hand.filter(held => held.id !== card.id);
+          const selected = card.kind === "wild-divide-two" ? remaining.slice(0, Math.floor(remaining.length / 2)) : [];
+          const discardCount = card.kind === "discard-color" || card.kind === "wild-discard"
+            ? remaining.filter(held => held.color === (card.color ?? "blue")).length : selected.length;
+          command = { type: "PLAY_CARD", cardId: card.id, declareUno: remaining.length - discardCount === 1,
+            ...(card.color === null ? { chosenColor: "blue" as const } : {}),
+            ...(card.kind === "wild-divide-two" ? { discardCardIds: selected.map(card => card.id) } : {}),
+            ...(card.kind === "wild-target-four" ? { targetPlayerId: game.players[(game.currentIndex + 1) % count]!.id } : {}) };
+        }
         else command = { type: game.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : game.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" };
         const previous = game; const transition = applyExpandedCommand(game, actor.id, command, random); game = transition.state;
         expect(game.revision).toBe(previous.revision + 1); conserved(previous, game);

@@ -4,7 +4,7 @@ import { Client, type Room } from "@colyseus/sdk";
 import type { UnoExpandedActionReply, UnoExpandedGameEvents, UnoExpandedRoomView, UnoExpandedRoomAction } from "@meepleverse/contracts/uno-expanded";
 import { createRealtimeServer } from "../../../src/bootstrap/create-realtime-server.js";
 import { createExpandedGame } from "../../../src/modules/games/uno-expanded/index.js";
-import { fixture, num, colored, black, stock } from "../../unit/uno-expanded/fixtures.js";
+import { fixture, num, colored, black, stock, right } from "../../unit/uno-expanded/fixtures.js";
 import { seeded } from "../../unit/uno/fixtures.js";
 import { waitFor } from "./helpers.js";
 function endpointFor(runtime: ReturnType<typeof createRealtimeServer>) {
@@ -31,7 +31,7 @@ describe("internal Expanded WebSocket rooms", () => {
   interface Guest { room: Room; view: UnoExpandedRoomView | null; replies: UnoExpandedActionReply[]; events: UnoExpandedGameEvents[] }
   let runtime: ReturnType<typeof createRealtimeServer>; let endpoint = "";
   const guests: Guest[] = [];
-  let scenario: "normal" | "stacking" | "effects" | "finish" = "normal";
+  let scenario: "normal" | "stacking" | "effects" | "finish" | "bulk" | "skip-two" | "bulk-finish" = "normal";
   async function attach(room: Room) {
     const guest: Guest = { room, view: null, replies: [], events: [] }; guests.push(guest);
     room.reconnection.enabled = false; room.onError(() => {});
@@ -62,6 +62,17 @@ describe("internal Expanded WebSocket rooms", () => {
     runtime = createRealtimeServer({ enableExpandedRooms: true, reconnectSeconds: 0.6,
       expandedGameFactory: ids => {
         if (scenario === "normal") return createExpandedGame(ids, seeded(29));
+        if (scenario === "bulk" || scenario === "skip-two" || scenario === "bulk-finish") {
+          const game = scenario === "bulk" ? fixture([
+            [black("divide", "wild-divide-two"), num("secret-a"), black("secret-b"), num("keep-a"), num("keep-b")],
+            [black("discard", "wild-discard"), num("blue-a", "blue"), colored("blue-skip", "skip-two", "blue"), num("red-keep")],
+            [right("change", "blue"), num("outgoing-c", "yellow", 9)],
+            [num("d-a"), num("d-b"), num("d-c")],
+          ], stock(30)) : scenario === "skip-two" ? fixture([
+            [colored("skip", "skip-two"), num("keep-a"), num("keep-b")], ...ids.slice(1).map((_, i) => [num("other-" + i)]),
+          ], stock(10)) : fixture([[black("last-discard", "wild-discard"), num("side"), colored("side-two", "draw-two")], [num("other")]], stock(10));
+          game.players.forEach((player, i) => { player.id = ids[i]!; }); return game;
+        }
         const game = scenario === "stacking" ? fixture([
           [colored("two", "draw-two"), num("a")], [black("six", "wild-draw-six"), num("b")],
           [black("shield", "wild-shield"), num("c")], [black("target", "wild-target-four"), num("d")],
@@ -190,6 +201,68 @@ describe("internal Expanded WebSocket rooms", () => {
     expect(b!.view!.game!.self.hand).toHaveLength(9); expect(b!.view!.game!.result!.winnerId).toBe(a!.view!.selfPlayerId);
     expect((await start(a!)).ok).toBe(true);
     expect((await send(a!, { type: "GAME_COMMAND", matchId: oldMatch, expectedRevision: 0, command: { type: "DRAW_CARD" } })).code).toBe("STALE_MATCH");
+  });
+  it("commits divide/discard/transfer atomically, protects returned cards and restores new private hands after reconnect", async () => {
+    scenario = "bulk"; const [a, b, c, d] = await group(4); const players = [a!, b!, c!, d!];
+    await start(a!); await Promise.all(players.map(fresh)); const initial = structuredClone(a!.view);
+    expect((await command(a!, { type: "PLAY_CARD", cardId: "divide", chosenColor: "red", discardCardIds: ["secret-a", "blue-a"] })).code).toBe("INVALID_SELECTION");
+    expect(await fresh(a!)).toEqual(initial);
+    await fresh(a!);
+    const divideAction: UnoExpandedRoomAction["action"] = { type: "GAME_COMMAND", matchId: a!.view!.matchId!, expectedRevision: 0,
+      command: { type: "PLAY_CARD", cardId: "divide", chosenColor: "blue", discardCardIds: ["secret-b", "secret-a"] } };
+    const accepted = await send(a!, divideAction, "divide-once"); expect(accepted.ok).toBe(true);
+    expect(await send(a!, divideAction, "divide-once")).toEqual(accepted);
+    await Promise.all(players.map(fresh));
+    expect(a!.view!.game!.self.hand.map(card => card.id)).toEqual(["keep-a", "keep-b"]);
+    for (const guest of players) {
+      expect(guest.view!.game!.revision).toBe(1);
+      for (const id of ["secret-a", "secret-b"]) {
+        expect(JSON.stringify(guest.view)).not.toContain('"' + id + '"'); expect(JSON.stringify(guest.events)).not.toContain('"' + id + '"');
+      }
+    }
+    expect((await command(b!, { type: "PLAY_CARD", cardId: "discard", chosenColor: "blue", declareUno: true })).ok).toBe(true);
+    await fresh(c!); expect(c!.view!.game!.currentPlayerId).toBe(c!.view!.selfPlayerId);
+    expect(c!.view!.game!.pendingDraw).toBe(0); expect(c!.view!.game!.topCard.id).toBe("discard");
+    const passAction: UnoExpandedRoomAction["action"] = { type: "GAME_COMMAND", matchId: c!.view!.matchId!, expectedRevision: 2,
+      command: { type: "PLAY_CARD", cardId: "change", declareUno: true } };
+    const passed = await send(c!, passAction, "pass-once"); expect(passed.ok).toBe(true);
+    expect(await send(c!, passAction, "pass-once")).toEqual(passed);
+    await Promise.all(players.map(fresh));
+    expect(players.map(guest => guest.view!.game!.self.hand.map(card => card.id))).toEqual([
+      ["red-keep"], ["outgoing-c"], ["d-a", "d-b", "d-c"], ["keep-a", "keep-b"],
+    ]);
+    for (const guest of players) {
+      expect(guest.view!.game!.direction).toBe(-1); expect(guest.view!.game!.currentPlayerId).toBe(b!.view!.selfPlayerId);
+      expect(guest.view!.game!.revision).toBe(3);
+      expect(guest.events.flatMap(batch => batch.events).filter(event => event.type === "HANDS_PASSED")).toHaveLength(1);
+      for (const other of players.filter(other => other !== guest)) for (const card of other.view!.game!.self.hand) {
+        expect(JSON.stringify(guest.view)).not.toContain('"' + card.id + '"');
+      }
+    }
+    const saved = structuredClone(a!.view); const token = a!.room.reconnectionToken;
+    a!.room.connection.close(1000); await waitFor(() => b!.view?.paused);
+    const restored = await attach(await new Client(endpoint).reconnect(token));
+    expect(restored.view!.game).toEqual(saved!.game); expect(restored.view!.matchId).toBe(saved!.matchId);
+    expect(restored.view!.selfPlayerId).toBe(saved!.selfPlayerId);
+  });
+  it.each([2, 3, 4])("Skip Two publishes the correct next actor to %i real clients", async count => {
+    scenario = "skip-two"; const players = await group(count); await start(players[0]!);
+    expect((await command(players[0]!, { type: "PLAY_CARD", cardId: "skip" })).ok).toBe(true);
+    await Promise.all(players.map(fresh));
+    const target = count === 2 ? 1 : count === 3 ? 0 : 3;
+    for (const player of players) {
+      expect(player.view!.game!.currentPlayerId).toBe(players[target]!.view!.selfPlayerId);
+      expect(player.view!.game!.pendingDraw).toBe(0); expect(player.view!.game!.revision).toBe(1);
+    }
+  });
+  it("publishes completion after a full color discard without activating an accompanying +2", async () => {
+    scenario = "bulk-finish"; const [a, b] = await group(2); await start(a!);
+    expect((await command(a!, { type: "PLAY_CARD", cardId: "last-discard", chosenColor: "red" })).ok).toBe(true);
+    await Promise.all([fresh(a!), fresh(b!)]);
+    expect(a!.view!.status).toBe("ENDED"); expect(a!.view!.game!.self.hand).toEqual([]);
+    expect(a!.view!.outcome).toMatchObject({ reason: "completed", winnerId: a!.view!.selfPlayerId });
+    expect(b!.view!.game!.self.hand).toHaveLength(1); expect(b!.view!.game!.topCard.id).toBe("last-discard");
+    expect(b!.view!.game!.result!.winnerId).toBe(a!.view!.selfPlayerId);
   });
   it("ends on reconnection expiry and allows the new host to prepare a fresh match", async () => {
     const [a, b, c] = await group(3); await start(a!); await Promise.all([fresh(a!), fresh(b!), fresh(c!)]);

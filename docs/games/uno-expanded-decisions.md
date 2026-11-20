@@ -72,3 +72,18 @@ The user requested implementation after the researched recommendations. This con
 | D13/D14 | Mandatory draw effects settle before last-card scoring; finite exhaustion/recycling with top discard retained; default number/colored-action/Wild points. Mini-game and simultaneous-winner cases remain pending. |
 
 The proposal tables above remain the original review record. This confirmation supersedes them only for the stated scope. Up/Battle/High Five, transfers, multi-card discards, divide-two and their timer/ending interactions remain unimplemented and under review.
+
+## Step 6 confirmation and implementation — 2026-11-20
+
+The user requested implementation after the step 6 plan. D05/D06 and the related D12/D13 scope are now implemented as follows; this does not approve pending mini-game decisions.
+
+| Decision | Step 6 behavior |
+| --- | --- |
+| D05 divide | After removing activation, choose exactly floor(N/2) distinct owned IDs from the remaining hand. Zero-sized selection may be omitted. Returned cards go below current stock; server hand order determines their future draw order, not client array order. No face/ID is broadcast for the returned subset. |
+| D05 color discard | Discard all cards of the fixed/chosen color, including colored actions but excluding black cards. No auxiliary card is required. Keep activation on top and do not trigger side-card effects. No partial selection payload is accepted. |
+| D06 transfers | L sends each hand to the next fixed seat and sets +1; R sends to the previous fixed seat and sets -1. Snapshot all hands before assignment. New turn follows the activating seat in the new direction. Printed seven matches ordinary seven. |
+| D06 Skip Two | Skip exactly two turn opportunities; 2/3/4 participants resume at opponent/actor/fourth seat in the current direction. |
+| D12 UNO | Active many-to-one discards require declaration. Receipt of one card through transfers does not. For a two-to-one active Seven Change, an omitted declaration penalizes the actor after transfer, so the debt cannot be passed with their old hand. No persistent UNO declaration follows a transferred hand. |
+| D13 endings | Clearing the hand by color discard/divide wins normally. A final Seven Change ends before transfer; no player can win by being given an empty hand. Mini-game endings remain pending. |
+
+No step 6 card can answer the draw-stack window. Commands and all follow-up hand changes are one revision; failures (including RNG failure while drawing an UNO penalty) roll back the entire transaction. Basic gameplay remains unchanged.

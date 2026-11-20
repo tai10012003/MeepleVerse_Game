@@ -12,5 +12,8 @@ export type UnoExpandedEvent =
   | { type: "DRAW_PENALTY_ACCEPTED"; playerId: string; requestedCount: number; count: number }
   | { type: "RANDOM_REVEALED"; playerId: string; card: UnoExpandedCard }
   | { type: "DRAW_EFFECT_RESOLVED"; playerId: string; actorId: string; kind: "tornado" | "wild-random" | "wild-multiply-two"; count: number }
+  | { type: "COLOR_DISCARDED"; playerId: string; color: UnoColor; cards: UnoExpandedCard[] }
+  | { type: "HAND_REDUCED"; playerId: string; count: number }
+  | { type: "HANDS_PASSED"; playerId: string; direction: 1 | -1; transfers: Array<{ fromPlayerId: string; toPlayerId: string; count: number }> }
   | { type: "TURN_CHANGED"; playerId: string; phase: UnoExpandedPhase }
   | { type: "GAME_ENDED"; winnerId: string | null };

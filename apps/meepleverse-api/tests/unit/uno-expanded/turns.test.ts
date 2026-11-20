@@ -38,7 +38,7 @@ describe("Expanded regular turns", () => {
     expect(play(drawn, "new").state.discardPile.at(-1)!.id).toBe("new");
   });
   it("automatically passes an unplayable draw, including a not-yet-supported special", () => {
-    const game = fixture([[num("old")], [num("other")]], [colored("future", "skip-two")]);
+    const game = fixture([[num("old")], [num("other")]], [black("future", "wild-up")]);
     const next = step(game, { type: "DRAW_CARD" }).state;
     expect(next.currentIndex).toBe(1); expect(next.phase).toBe("turn"); expect(next.players[0]!.hand).toHaveLength(2);
   });
@@ -50,7 +50,7 @@ describe("Expanded regular turns", () => {
     expect(play(game, "skip").state.currentIndex).toBe(2 % count);
   });
   it("hides unsupported cards from hints and rejects them atomically", () => {
-    const game = fixture([[colored("future", "discard-color"), num("keep")], [num("other")]]);
+    const game = fixture([[black("future", "wild-up"), num("keep")], [num("other")]]);
     expect(getExpandedPlayerView(game, "p0").self.playableCardIds).not.toContain("future");
     expect(() => play(game, "future", { declareUno: true })).toThrow("UNSUPPORTED_COMMAND");
     expect(game.players[0]!.hand).toHaveLength(2);

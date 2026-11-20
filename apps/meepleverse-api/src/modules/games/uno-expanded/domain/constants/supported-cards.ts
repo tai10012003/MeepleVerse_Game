@@ -3,7 +3,9 @@ export function isSupportedCard(card: UnoExpandedCard): boolean {
   switch (card.kind) {
     case "number": case "skip": case "reverse": case "draw-two": case "wild": case "wild-draw-four":
     case "wild-draw-six": case "wild-draw-eight": case "wild-target-four": case "wild-shield":
-    case "tornado": case "wild-random": case "wild-multiply-two": return true;
+    case "tornado": case "wild-random": case "wild-multiply-two":
+    case "wild-divide-two": case "discard-color": case "wild-discard":
+    case "seven-change-left": case "seven-change-right": case "skip-two": return true;
     default: return false;
   }
 }

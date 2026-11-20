@@ -5,7 +5,10 @@ import type { UnoExpandedEvents } from "../events/uno-expanded-events.js";
 import { requireExpanded } from "../errors/uno-expanded.errors.js";
 import { fixedDrawAmount, isSupportedCard } from "../constants/supported-cards.js";
 import { canPlayExpandedCard } from "./can-play-card.js";
-import { drawExpandedCards } from "./draw-cards.js";
+import { prepareHandChange } from "./prepare-hand-change.js";
+import { applyHandChange } from "./apply-hand-change.js";
+import { passExpandedHands } from "./pass-hands.js";
+import { resolveExpandedUno } from "./resolve-uno.js";
 import { acceptExpandedDrawPenalty } from "./accept-draw-penalty.js";
 import { resolveExpandedDrawEffect } from "./resolve-draw-effect.js";
 import { endExpandedGame } from "./scoring.js";
@@ -18,21 +21,29 @@ export function playExpandedCard(game: UnoExpandedGame, actorId: string, command
   requireExpanded(game.phase !== "drawn" || game.drawnCardId === card.id, "DRAWN_CARD_ONLY");
   requireExpanded(canPlayExpandedCard(game, card), "CARD_NOT_PLAYABLE");
   requireExpanded(card.color === null ? command.chosenColor !== undefined : command.chosenColor === undefined, "INVALID_COLOR");
-  requireExpanded(!command.declareUno || actor.hand.length === 2, "INVALID_UNO_CALL");
   let target = getNextPlayer(game.currentIndex, game.players.length, game.direction);
   if (card.kind === "wild-target-four") {
     target = game.players.findIndex(player => player.id === command.targetPlayerId && player.id !== actorId);
     requireExpanded(target !== -1, "INVALID_TARGET");
   } else requireExpanded(command.targetPlayerId === undefined, "INVALID_TARGET");
+  const handChange = prepareHandChange(actor, card, command);
   actor.hand.splice(index, 1); game.discardPile.push(card);
   game.activeColor = card.color ?? command.chosenColor!;
   game.drawnCardId = null; game.blockedTurns = 0;
   events.public.push({ type: "CARD_PLAYED", playerId: actorId, card: structuredClone(card) });
   if (card.color === null) events.public.push({ type: "COLOR_CHOSEN", playerId: actorId, color: game.activeColor });
-  if (actor.hand.length === 1) {
-    if (command.declareUno) events.public.push({ type: "UNO_CALLED", playerId: actorId });
-    else { events.public.push({ type: "UNO_PENALTY", playerId: actorId }); drawExpandedCards(game, actorId, 2, random, events, "uno"); }
+  applyHandChange(game, actorId, handChange, events);
+  if (card.kind === "seven-change-left" || card.kind === "seven-change-right") {
+    // A final non-draw card wins before its remaining transfer effect; never pass an empty hand to win for someone else.
+    if (actor.hand.length === 0) { endExpandedGame(game, actorId, events); return; }
+    passExpandedHands(game, actorId, card.kind === "seven-change-left" ? 1 : -1, events);
+    // Penalize the actual actor after transfers, so the penalty cannot be handed to an innocent recipient.
+    resolveExpandedUno(game, actorId, handChange.requiresUno, command.declareUno === true, random, events);
+    game.phase = "turn";
+    game.currentIndex = getNextPlayer(game.currentIndex, game.players.length, game.direction);
+    return;
   }
+  resolveExpandedUno(game, actorId, handChange.requiresUno, command.declareUno === true, random, events);
   const amount = fixedDrawAmount(card);
   if (amount > 0 || (card.kind === "wild-shield" && game.pendingDraw > 0)) {
     game.pendingDraw += amount; game.currentIndex = target; game.phase = "draw-stack";
@@ -46,7 +57,7 @@ export function playExpandedCard(game: UnoExpandedGame, actorId: string, command
   }
   game.phase = "turn";
   const forcedDraw = resolveExpandedDrawEffect(game, card, actorId, target, random, events);
-  let steps = forcedDraw || card.kind === "skip" ? 2 : 1;
+  let steps = card.kind === "skip-two" ? 3 : forcedDraw || card.kind === "skip" ? 2 : 1;
   if (card.kind === "reverse") {
     game.direction = game.direction === 1 ? -1 : 1;
     if (game.players.length === 2) steps = 2;
