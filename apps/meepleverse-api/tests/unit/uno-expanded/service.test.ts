@@ -15,17 +15,17 @@ describe("Expanded room service", () => {
     expect(() => s.execute("a", { type: "START_GAME", expectedRoomRevision: s.revision })).toThrow("ROOM_PAUSED");
     s.setConnected("b", true);
     const result = s.execute("a", { type: "START_GAME", expectedRoomRevision: s.revision });
-    expect(result.events.public[0]).toMatchObject({ type: "GAME_PREPARED", playerCount: 2 });
-    expect(s.view("a").gameId).toBe("uno-expanded"); expect(s.game!.phase).toBe("prepared");
+    expect(result.events.public[0]).toMatchObject({ type: "GAME_STARTED", playerCount: 2 });
+    expect(s.view("a").gameId).toBe("uno-expanded"); expect(s.game!.phase).toBe("turn");
     expect(() => s.execute("a", { type: "START_GAME", expectedRoomRevision: s.revision })).toThrow("INVALID_PHASE");
   });
-  it("checks match and game revisions, then rejects gameplay without any state changes", () => {
+  it("checks match and game revisions, then rejects an invalid phase without any state changes", () => {
     const s = service(); s.execute("a", { type: "START_GAME", expectedRoomRevision: s.revision });
-    const action = { type: "GAME_COMMAND" as const, matchId: s.matchId!, expectedRevision: 0, command: { type: "DRAW_CARD" as const } };
+    const action = { type: "GAME_COMMAND" as const, matchId: s.matchId!, expectedRevision: 0, command: { type: "CHOOSE_COLOR" as const, color: "red" as const } };
     expect(() => s.execute("a", { ...action, matchId: "old" })).toThrow("STALE_MATCH");
     expect(() => s.execute("a", { ...action, expectedRevision: 1 })).toThrow("STALE_REVISION");
     const before = s.view("a");
-    expect(() => s.execute("a", action)).toThrow("UNSUPPORTED_COMMAND"); expect(s.view("a")).toEqual(before);
+    expect(() => s.execute(s.game!.players[s.game!.currentIndex]!.id, action)).toThrow("INVALID_PHASE"); expect(s.view("a")).toEqual(before);
   });
   it("ends on departure, transfers host, and creates a fresh match for the remaining group", () => {
     const s = service(); s.add("c", "C");

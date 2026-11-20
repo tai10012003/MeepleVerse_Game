@@ -18,6 +18,6 @@ export interface UnoExpandedRoomView {
   paused: boolean; members: RoomMemberView[]; selfPlayerId: string;
   matchId: string | null; game: UnoExpandedView | null; outcome: MatchOutcome | null;
 }
-export type UnoExpandedErrorCode = CommonRoomErrorCode | "INVALID_SETUP" | "INVALID_RANDOM" | "UNKNOWN_PLAYER" | "INVALID_PHASE" | "UNSUPPORTED_COMMAND";
+export type UnoExpandedErrorCode = CommonRoomErrorCode | "INVALID_SETUP" | "INVALID_RANDOM" | "UNKNOWN_PLAYER" | "INVALID_PHASE" | "UNSUPPORTED_COMMAND" | "INVALID_COMMAND" | "GAME_ENDED" | "NOT_YOUR_TURN" | "CARD_NOT_OWNED" | "CARD_NOT_PLAYABLE" | "DRAWN_CARD_ONLY" | "INVALID_COLOR" | "INVALID_UNO_CALL" | "INVALID_TARGET";
 export type UnoExpandedActionReply = ActionReply<UnoExpandedErrorCode>;
 export interface UnoExpandedGameEvents { matchId: string; revision: number; events: UnoExpandedEvent[] }

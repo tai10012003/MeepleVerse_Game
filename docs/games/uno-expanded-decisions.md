@@ -56,3 +56,19 @@ Ngày: 19/11/2026. Đi cùng [đặc tả luật](uno-expanded.md).
 Bước 1 chỉ tạo đặc tả và ca nghiệm thu. Chưa thêm package, types runtime, room mới, mặt bài, UI tạo phòng, luật thật hay phát hành game.
 
 Bước 2 có thể kiểm tra độc lập cấu hình 198 lá theo C05. Các bước triển khai luật phải bám phiên bản Dxx được duyệt; nếu đổi một quyết định, cập nhật các ca nghiệm thu liên quan trước, không sửa hành vi Cơ bản theo.
+
+## Step 5 confirmation and implementation — 2026-11-20
+
+The user requested implementation after the researched recommendations. This confirms the step 5 choices below, not every pending D01–D15 detail:
+
+| Decision | Step 5 status |
+| --- | --- |
+| D02 | Wild color chosen immediately in the accepted PLAY_CARD command; Target also supplies a valid other participant. Basic's delayed +4 choice is unchanged. |
+| D03 | Fixed +2/+4/+6/+8/Target +4 stack across colors; Shield forwards unchanged debt. Direct +2 after Shield is forbidden; +4/+6/+8/Target/Shield or acceptance remain available. Recipient loses turn, play resumes after that recipient. |
+| D04 | x2 snapshots the next player's hand, draws that many cards, and skips them; no stacking or Shield response. |
+| D09 | Tornado stops only on the exact printed color, retains the stop card, skips the recipient; Wilds do not stop it. Only the recipient sees the drawn faces. |
+| D10 | Random retains the first publicly revealed card; pure number N adds N private cards; any functional card adds none and never activates. Always skips the recipient. |
+| D01/D12 | Base turns inherit draw-one/drawn-card-only/pass and automatic UNO penalty for a normal two-to-one play. Batch-discard UNO rules remain pending. |
+| D13/D14 | Mandatory draw effects settle before last-card scoring; finite exhaustion/recycling with top discard retained; default number/colored-action/Wild points. Mini-game and simultaneous-winner cases remain pending. |
+
+The proposal tables above remain the original review record. This confirmation supersedes them only for the stated scope. Up/Battle/High Five, transfers, multi-card discards, divide-two and their timer/ending interactions remain unimplemented and under review.

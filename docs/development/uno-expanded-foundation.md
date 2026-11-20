@@ -1,3 +1,5 @@
+> Historical milestone: this document describes step 4. Step 5 now enables internal base turns and draw/defense rules; see [current backend rules](uno-expanded-draw-defense.md). Public room creation remains disabled.
+
 # UNO Mở rộng — nền phòng nội bộ (bước 4)
 
 ## Trạng thái

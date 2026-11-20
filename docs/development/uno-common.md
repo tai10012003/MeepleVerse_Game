@@ -25,7 +25,7 @@ Import `UnoColor`, `UnoDirection`, `UnoStandardCard` and `UNO_COLORS` from `@mee
 - `drawFromStock`: moves physical cards into a supplied hand, recycles the discard pile while retaining its top, returns the actual cards drawn. An exhausted stock returns a partial draw. Callers validate counts before calling.
 - `cardPoints`: default number/colored-action/wild scoring (value/20/50). Printed numbers on special cards are not pure number cards. Editions can supply other scoring policies later.
 
-Basic adapters keep public imports, `UnoRuleError` identity, random-call order and `CARDS_DRAWN` events. Turn validation, stacking, delayed +4 color choice, UNO penalties, opening-number selection, phases, events, privacy and results remain in Basic. Expanded now has its own preparation service and internal room; production registration remains disabled. See [Expanded foundation](uno-expanded-foundation.md).
+Basic adapters keep public imports, `UnoRuleError` identity, random-call order and `CARDS_DRAWN` events. Turn validation, stacking, delayed +4 color choice, UNO penalties, opening-number selection, phases, events, privacy and results remain in Basic. Expanded now has its own internal turn engine and draw/defense rules; production registration remains disabled. See [step 5](uno-expanded-draw-defense.md). See [Expanded foundation](uno-expanded-foundation.md).
 
 ## Frontend
 

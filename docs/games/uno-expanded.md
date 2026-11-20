@@ -2,15 +2,15 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Trạng thái: **LUẬT GHÉP ĐANG REVIEW; ĐÃ TRIỂN KHAI CẤU HÌNH BỘ BÀI**. Chưa triển khai gameplay Mở rộng, chưa mở tạo phòng.
+- Step 5: internal base-turn and draw/defense gameplay implemented; public Expanded rooms remain disabled. Remaining expansion rules are still under review.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là đề xuất cụ thể của MeepleVerse, chưa phải quyết định người dùng đã duyệt. Xem [bảng quyết định](uno-expanded-decisions.md).
 - Xem [tình huống nghiệm thu](../testing/uno-expanded-acceptance.md) để triển khai và kiểm tra từng nhánh.
 
-> Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded gameplay remains unimplemented.
+> Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded draw/defense gameplay is implemented internally; remaining mechanics are unavailable.
 
-> Internal room foundation: [setup, protocol and verification](../development/uno-expanded-foundation.md). The 198-card match can be prepared internally; gameplay remains unavailable.
+> Internal room foundation: [setup, protocol and verification](../development/uno-expanded-foundation.md). The 198-card match supports internal base turns and draw/defense rules; see [step 5](../development/uno-expanded-draw-defense.md).
 
 ## 1. Nguồn và cách sử dụng
 
@@ -310,3 +310,13 @@ Các hiệu ứng bốc hữu hạn/xả/chuyền giải quyết nguyên tử tr
 - Mỗi chức năng xác định điều kiện đánh, người xử lý, tác động bài, màu/chiều/lượt sau, quyền riêng tư và tình huống thiếu bài/về đích.
 - Có bảng quyết định để review toàn bộ khoảng trống của bộ kết hợp, cùng ca nghiệm thu để bước sau không suy luật từ UI.
 - **Hoàn thành tài liệu không đồng nghĩa D01–D15 đã được duyệt.** Các bước triển khai phải giữ trạng thái phát hành Mở rộng là đang phát triển cho đến khi có luật đã duyệt và kiểm thử tương ứng.
+
+## Step 5 implementation status (2026-11-20)
+
+Implemented internally: number/Skip/Reverse/Wild turns; +2/+4/+6/+8 and Target +4 stacking; Shield forwarding; Tornado; Wild Random; x2; automatic UNO penalty; draw/pass; result/score; atomic commands, authoritative private hints and reconnect-safe revisions.
+
+Not implemented: Up, Battle, High Five, Seven Change, Skip Two, discard-color, wild-discard and divide-two. Such cards remain in the 198-card deck but cannot be played or suggested yet. This is an intermediate development milestone, not a complete playable Expanded release.
+
+Confirmed step 5 conventions: Wild color chosen on play; +2 prohibited directly after Shield; x2 isolated with a skipped turn and no Shield response; Tornado stops only on an exact colored card; Random retains its public reveal, adds N private draws only for a pure number, and always skips the recipient. Unknown/future cards revealed by Random do not activate effects. No challenge +4. Basic rules stay unchanged.
+
+Last fixed-draw/Shield card settles the existing debt before awarding a win; last Tornado/Random/x2 likewise resolves the mandatory draw before scoring. Short stock draws are finite and do not create cards. Only fully blocked normal turns can end with no winner. Multi-card discards and mini-game endings will be reviewed in their own stages.

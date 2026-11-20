@@ -9,7 +9,7 @@ describe("Expanded preparation", () => {
     const expected = createExpandedDeck().map(card => card.id).sort();
     for (let seed = 0; seed < 100; seed++) {
       const game = createExpandedGame(ids, seeded(seed));
-      expect(game.phase).toBe("prepared"); expect(game.gameId).toBe("uno-expanded");
+      expect(game.phase).toBe("turn"); expect(game.gameId).toBe("uno-expanded");
       expect(game.players.every(player => player.hand.length === 7)).toBe(true);
       expect(game.drawPile).toHaveLength(198 - count * 7 - 1);
       expect(game.discardPile).toHaveLength(1);

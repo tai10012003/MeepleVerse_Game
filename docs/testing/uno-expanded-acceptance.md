@@ -1,6 +1,6 @@
 # UNO Mở rộng — tình huống nghiệm thu v1
 
-Ngày: 19/11/2026. Đây là **kịch bản kiểm thử dự kiến**, chưa phải test tự động đã được viết hoặc đã chạy.
+Ngày lập: 19/11/2026. Đây là danh mục kịch bản thiết kế cho toàn bộ Mở rộng. Một phần đã có test tự động đến bước 5; xem phạm vi bên dưới, không coi cả E001–E070 là đã nghiệm thu.
 
 Đọc cùng [luật](../games/uno-expanded.md) và [quyết định](../games/uno-expanded-decisions.md). Kết quả gắn Dxx dưới đây là kỳ vọng theo đề xuất hiện tại; phải đổi nếu phương án review thay đổi.
 
@@ -117,3 +117,20 @@ Trừ khi nói khác, bốn ghế A→B→C→D theo chiều +1, đủ kho bốc
 - Đối chiếu Dxx đã duyệt trước khi viết assertion; không dùng assertion để âm thầm quyết định một luật còn mở.
 - Với các ca mạng, thêm kiểm tra lệnh sai/stale không sửa state, nhiều phản hồi đồng thời không làm kẹt mini-game, timer đã hủy không xử lý lại.
 - Chưa báo bất kỳ E001–E070 là "passed" trước khi có code và kết quả chạy thực tế.
+
+## Phạm vi tự động hóa đến bước 5 — 20/11/2026
+
+| Phạm vi | Test tương ứng |
+| --- | --- |
+| Bộ 198 lá, mở đầu số, bảo mật góc nhìn | `deck.test.ts`, `setup.test.ts`, `privacy-and-commands.test.ts` |
+| Lượt nền, UNO, gợi ý, lỗi không đổi state | `turns.test.ts`, `service.test.ts` |
+| +2/+4/+6/+8/Target/Shield và nhận phạt | `stacking.test.ts`, `uno-expanded-room.test.ts` |
+| Tornado, Random, ×2 và thiếu bài | `draw-effects.test.ts`, `results-and-privacy.test.ts` |
+| Lá cuối, tính điểm, bế tắc, RNG lỗi/rollback | `results-and-privacy.test.ts` |
+| Mô phỏng 2–4 người giữ đủ 198 ID | `simulation.test.ts` — luật từng phần, tối đa 500 lệnh mỗi lượt chạy |
+| Reconnect giữa chuỗi chuyển mục tiêu, dedup nhận phạt, rematch | `uno-expanded-room.test.ts` |
+| Catalog chưa mở Mở rộng, link mời nội bộ, sảnh Cơ bản | Playwright `catalog.spec.ts`, `uno-expanded.spec.ts`, `lobby.spec.ts` |
+
+Các file unit nằm trong `apps/meepleverse-api/tests/unit/uno-expanded`; test realtime nằm trong `tests/integration/realtime`. Đây là ánh xạ phạm vi, không khẳng định mọi biến thể của từng E-ID đã có test độc lập.
+
+Up, Battle, High Five, chuyền tay, Skip Two, ÷2, xả màu, UNO khi bỏ nhiều lá và timer mini-game vẫn chờ các bước sau. Mặt bài mới, bộ điều khiển và animation Mở rộng chưa được nghiệm thu ở bước này.

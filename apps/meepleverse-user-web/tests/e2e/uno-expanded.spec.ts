@@ -20,10 +20,10 @@ test("an internal Expanded invite never renders Basic controls, survives reload 
     await expect(page.getByRole("button", { name: "Bắt đầu ván", exact: true })).toHaveCount(0);
     await expect.poll(() => view?.members.length).toBe(2);
     host.send("action", { requestId: "prepare", action: { type: "START_GAME", expectedRoomRevision: view!.revision } });
-    await expect(notice).toHaveAttribute("data-phase", "prepared");
+    await expect(notice).toHaveAttribute("data-phase", "turn");
     const matchId = view!.matchId;
     await page.reload();
-    await expect(page.getByTestId("expanded-room-notice")).toHaveAttribute("data-phase", "prepared");
+    await expect(page.getByTestId("expanded-room-notice")).toHaveAttribute("data-phase", "turn");
     await expect(page.getByTestId("uno-board")).toHaveCount(0);
     await expect.poll(() => view?.paused).toBe(false);
     expect(view!.matchId).toBe(matchId);

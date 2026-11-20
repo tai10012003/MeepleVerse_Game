@@ -8,6 +8,7 @@ export const UnoExpandedRoomSchema = schema({
   gameId: t.string().default("uno-expanded"), roomId: t.string().default(""),
   revision: t.number().default(0), status: t.string().default("LOBBY"), hostId: t.string().default(""),
   paused: t.boolean().default(false), matchId: t.string().default(""),
+  currentPlayerId: t.string().default(""), pendingDraw: t.number().default(0),
   phase: t.string().default(""), activeColor: t.string().default(""),
   members: t.array(ExpandedMemberSchema),
 }, "UnoExpandedRoomSchema");

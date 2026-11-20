@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import type { UnoExpandedCommand } from "@meepleverse/contracts/uno-expanded";
 import { unoExpandedRoomActionSchema } from "@meepleverse/contracts/uno-expanded";
 import { createExpandedGame, getExpandedPlayerView } from "../../../src/modules/games/uno-expanded/index.js";
 import { applyExpandedCommand } from "../../../src/modules/games/uno-expanded/domain/rules/apply-command.js";
@@ -9,22 +8,19 @@ describe("Expanded view and command boundary", () => {
     const game = createExpandedGame(["a", "b", "c", "d"], seeded(7));
     for (const player of game.players) {
       const view = getExpandedPlayerView(game, player.id);
-      expect(view.self.hand).toEqual(player.hand); expect(view.currentPlayerId).toBeNull();
+      expect(view.self.hand).toEqual(player.hand); expect(view.currentPlayerId).toBe(game.players[game.currentIndex]!.id);
       expect(view.players.every(other => !('hand' in other))).toBe(true);
       for (const hidden of [...game.drawPile, ...game.players.filter(other => other !== player).flatMap(other => other.hand)]) {
         expect(JSON.stringify(view)).not.toContain('"' + hidden.id + '"');
       }
-      view.self.hand.length = 0; view.topCard.value = 99;
+      view.self.hand.length = 0; if (view.topCard.kind === "number") view.topCard.value = 99;
       expect(player.hand).toHaveLength(7); expect(game.discardPile[0]).not.toEqual(view.topCard);
     }
     expect(() => getExpandedPlayerView(game, "outsider")).toThrow("UNKNOWN_PLAYER");
   });
-  it.each<UnoExpandedCommand>([
-    { type: "DRAW_CARD" }, { type: "PASS_TURN" }, { type: "ACCEPT_DRAW_PENALTY" },
-    { type: "CHOOSE_COLOR", color: "red" }, { type: "PLAY_CARD", cardId: "any", declareUno: true },
-  ])("rejects reserved gameplay command $type atomically", command => {
+  it("rejects a separately chosen color without mutating the turn", () => {
     const game = createExpandedGame(["a", "b"], seeded(17)); const before = structuredClone(game);
-    expect(() => applyExpandedCommand(game, "a", command)).toThrow("UNSUPPORTED_COMMAND");
+    expect(() => applyExpandedCommand(game, game.players[game.currentIndex]!.id, { type: "CHOOSE_COLOR", color: "red" })).toThrow("INVALID_PHASE");
     expect(game).toEqual(before);
   });
   it("validates envelopes strictly instead of accepting arbitrary future actions or client settings", () => {

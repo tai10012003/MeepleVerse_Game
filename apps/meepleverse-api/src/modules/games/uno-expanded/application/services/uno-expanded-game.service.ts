@@ -50,12 +50,19 @@ export class UnoExpandedGameService {
       requireExpanded(this.members.length >= 2, "NOT_ENOUGH_PLAYERS");
       const game = this.factory(this.members.map(member => member.playerId));
       this.game = game; this.matchId = randomUUID(); this.status = "PLAYING"; this.outcome = null; this.revision++;
-      return { state: game, events: { public: [{ type: "GAME_PREPARED", playerCount: game.players.length, openingCardId: game.discardPile[0]!.id }] } };
+      return { state: game, events: { public: [{ type: "GAME_STARTED", playerCount: game.players.length, openingCardId: game.discardPile[0]!.id }] } };
     }
     requireExpanded(this.status === "PLAYING" && this.game, "NO_ACTIVE_GAME");
     requireExpanded(action.matchId === this.matchId, "STALE_MATCH");
     requireExpanded(action.expectedRevision === this.game.revision, "STALE_REVISION");
-    return applyExpandedCommand(this.game, playerId, action.command);
+    const transition = applyExpandedCommand(this.game, playerId, action.command);
+    this.game = transition.state;
+    if (this.game.phase === "ended") {
+      this.status = "ENDED";
+      this.outcome = { reason: this.game.result!.reason === "blocked" ? "blocked" : "completed", winnerId: this.game.result!.winnerId };
+    }
+    this.revision++;
+    return transition;
   }
   view(playerId: string): UnoExpandedRoomView {
     requireExpanded(this.members.some(member => member.playerId === playerId), "UNKNOWN_PLAYER");
