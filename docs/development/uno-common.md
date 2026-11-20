@@ -31,7 +31,7 @@ Basic adapters keep public imports, `UnoRuleError` identity, random-call order a
 
 Import `CardBack`, `OpponentHand`, `DirectionRing`, `DrawDebt`, `ColorPicker` and `colorNames` from `@/modules/games/uno-common`.
 
-Shared CSS provides artwork and primitive defaults. An edition owns table geometry and seat variables (`--back-size`, `--fan-step`, `--fan-max`). Components receive public data via props and do not connect to rooms or know gameplay rules. Card faces, hands, effects scheduling, audio and rules guides remain in Basic until a second consumer establishes what should be shared.
+Shared CSS provides artwork and primitive defaults. An edition owns table geometry and seat variables (`--back-size`, `--fan-step`, `--fan-max`). Components receive public data via props and do not connect to rooms or know gameplay rules. Hands, effects scheduling, audio and rules guides remain in Basic until a second consumer establishes what should be shared. Step 8 moves the unchanged standard SVG vectors to common; each edition still owns its face wrapper and presentation labels.
 
 ## Verification
 
@@ -46,3 +46,5 @@ Shared unit tests exercise deterministic shuffle/error compatibility, seat wrapp
 Expanded step 6 reuses the same turn engine and physical pile operations for atomic hand reductions and transfers; see [discard and turn rules](uno-expanded-discard-turns.md). The common module and Basic rules do not need edition-specific branches.
 
 Expanded step 7 keeps Up/Battle/High Five state, timers and concurrency policy in the Expanded edition; see [mini-games](uno-expanded-minigames.md). Shared room transport exposes protected publication/event hooks; only the Expanded adapter schedules an effect timer. Basic uses the default no-op hook. Common card operations and Basic rules do not import mini-game logic.
+
+Expanded step 8 reuses common standard artwork through a compatibility re-export for Basic; see [card artwork and development preview](uno-expanded-card-artwork.md). Expanded symbols and the development-only gallery remain in their edition, with no rule or room dependency.

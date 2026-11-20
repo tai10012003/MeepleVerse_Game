@@ -161,3 +161,9 @@ Bảng bước 5 phía trên là lịch sử phạm vi của mốc đó. Hiện 
 | Chơi trọn 60 ván có seed cho 2/3/4 người, bảo toàn 198 ID sau lệnh và timer | `simulation.test.ts` |
 
 Các bảng bước 5–6 là lịch sử. Hiện mọi loại lá có luật backend; mặt bài/bộ điều khiển/animation Mở rộng và bốn người thật sau deploy vẫn chưa được nghiệm thu. E067/E068/E069 không được coi hoàn thành chỉ từ test SDK/domain. Danh sách là ánh xạ phạm vi; không khẳng định mọi tổ hợp E001–E070 có test độc lập.
+
+## Kiểm tra hiển thị bước 8 — 20/11/2026
+
+Playwright `uno-expanded-cards.spec.ts` có 3 ca: đủ 22 kind/60 mẫu, nhãn truy cập và khung SVG; bộ lọc/kích thước/mobile-tablet/tỷ lệ tay-bàn; catalog chưa mở chơi. Cả 3 qua trên Edge. Chạy thêm 2 ca Cấm/Đổi chiều xanh lá ở 1366px trong `uno-effects.spec.ts`, đều qua sau khi chuyển vector nền sang common. TypeScript và lint frontend đạt. Không chạy lại bài chơi dài vì không đổi luật hoặc transport.
+
+Đã duyệt ảnh chụp mặt bài ở thư viện nội bộ; chưa xem đây là nghiệm thu E068 trên bàn chơi Mở rộng. Điều khiển, animation và chơi đủ ván bằng UI Mở rộng vẫn chờ bước tích hợp.

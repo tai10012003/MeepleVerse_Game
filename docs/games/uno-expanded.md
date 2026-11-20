@@ -2,7 +2,7 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Bước 7: backend đã triển khai Up/Battle/High Five cùng luật bước 5–6. Production chưa mở phòng Mở rộng; giao diện mini-game còn chờ các bước tiếp theo.
+- Bước 8: backend bước 5–7 và bộ mặt bài SVG đã có; xem trước nội bộ tại `/dev/uno-expanded/cards` khi chạy development. Production chưa mở phòng Mở rộng; bộ điều khiển mini-game còn chờ tích hợp.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là lựa chọn riêng của MeepleVerse; trạng thái xác nhận theo từng bước nằm trong [bảng quyết định](uno-expanded-decisions.md). Không coi chúng là một luật gốc thống nhất cho mọi bộ ngoài thị trường.
@@ -338,3 +338,9 @@ Wild Up, Wild Battle, High Five và đồng hồ mini-game đã được triển
 D07/D08/D11/D15 và phần D12/D13 liên quan mini-game được áp dụng theo kế hoạch bước 7 đã được yêu cầu triển khai; chi tiết xác nhận nằm trong bảng quyết định. Timer mặc định: High Five chuẩn bị 1,5 giây + phản hồi 8 giây; Battle chọn số/thưởng mỗi giai đoạn 20 giây. Fallback không tự hô UNO. Giữ bí mật lựa chọn Battle tới khi giải quyết; reconnect bảo toàn lựa chọn/thứ tự và thời gian còn lại.
 
 Catalog vẫn Đang phát triển, phòng Mở rộng ở production chưa bật; chưa có mặt bài, bộ điều khiển và animation Mở rộng. UNO Cơ bản giữ luật hiện tại.
+
+## Bước 8 — mặt bài SVG (20/11/2026)
+
+Đã có renderer cho đủ 22 kind trong contracts, gồm các lá nền và 14 nhóm mở rộng. Thư viện nội bộ có 60 mẫu để duyệt biểu tượng/màu, lọc kích thước và xem cùng tỷ lệ tay/bàn. Đây là số mẫu trình bày, không thay cấu hình 198 lá. Xem [nguồn ảnh, kiến trúc và cách mở thư viện](../development/uno-expanded-card-artwork.md).
+
+Bước này chưa nối mặt bài với bàn Mở rộng hoặc thêm điều khiển mini-game/animation. Catalog vẫn Đang phát triển; các luật backend và Cơ bản giữ nguyên.
