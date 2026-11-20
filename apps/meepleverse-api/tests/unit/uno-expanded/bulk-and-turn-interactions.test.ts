@@ -50,10 +50,10 @@ describe("Expanded bulk moves and turn interactions", () => {
     expect(() => applyExpandedCommand(game, "p0", { type: "PLAY_CARD", cardId: "activation" }, () => 1)).toThrow("INVALID_RANDOM");
     expect(game).toEqual(before);
   });
-  it("keeps mini-game cards unavailable and rejects arbitrary order/target selection for transfers", () => {
+  it("keeps transfer payloads strict after enabling mini-games", () => {
     const game = fixture([[left("change"), black("future", "wild-up"), num("keep")], [num("other")]], stock(4));
-    expect(getExpandedPlayerView(game, "p0").self.playableCardIds).not.toContain("future");
-    expect(() => play(game, "future")).toThrow("UNSUPPORTED_COMMAND");
+    expect(getExpandedPlayerView(game, "p0").self.playableCardIds).toContain("future");
+    expect(() => play(game, "future")).toThrow("INVALID_COLOR");
     expect(() => play(game, "change", { discardCardIds: [] })).toThrow("INVALID_SELECTION");
     expect(() => play(game, "change", { targetPlayerId: "p1" })).toThrow("INVALID_TARGET");
   });

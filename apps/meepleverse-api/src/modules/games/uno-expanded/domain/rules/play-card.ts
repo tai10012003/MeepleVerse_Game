@@ -1,3 +1,7 @@
+import type { EffectContext } from "../models/effect-context.js";
+import { startUp } from "./wild-up.js";
+import { startBattle } from "./wild-battle.js";
+import { startHighFive } from "./high-five.js";
 import type { UnoExpandedCommand } from "@meepleverse/contracts/uno-expanded";
 import { getNextPlayer, type RandomSource } from "../../../uno-common/index.js";
 import type { UnoExpandedGame } from "../models/uno-expanded-game.js";
@@ -12,7 +16,7 @@ import { resolveExpandedUno } from "./resolve-uno.js";
 import { acceptExpandedDrawPenalty } from "./accept-draw-penalty.js";
 import { resolveExpandedDrawEffect } from "./resolve-draw-effect.js";
 import { endExpandedGame } from "./scoring.js";
-export function playExpandedCard(game: UnoExpandedGame, actorId: string, command: Extract<UnoExpandedCommand, { type: "PLAY_CARD" }>, random: RandomSource, events: UnoExpandedEvents): void {
+export function playExpandedCard(game: UnoExpandedGame, actorId: string, command: Extract<UnoExpandedCommand, { type: "PLAY_CARD" }>, random: RandomSource, events: UnoExpandedEvents, context: EffectContext): void {
   const actor = game.players[game.currentIndex]!;
   const index = actor.hand.findIndex(card => card.id === command.cardId);
   requireExpanded(index !== -1, "CARD_NOT_OWNED");
@@ -22,7 +26,7 @@ export function playExpandedCard(game: UnoExpandedGame, actorId: string, command
   requireExpanded(canPlayExpandedCard(game, card), "CARD_NOT_PLAYABLE");
   requireExpanded(card.color === null ? command.chosenColor !== undefined : command.chosenColor === undefined, "INVALID_COLOR");
   let target = getNextPlayer(game.currentIndex, game.players.length, game.direction);
-  if (card.kind === "wild-target-four") {
+  if (card.kind === "wild-target-four" || (card.kind === "wild-battle" && (actor.hand.length > 1 || command.targetPlayerId !== undefined))) {
     target = game.players.findIndex(player => player.id === command.targetPlayerId && player.id !== actorId);
     requireExpanded(target !== -1, "INVALID_TARGET");
   } else requireExpanded(command.targetPlayerId === undefined, "INVALID_TARGET");
@@ -44,6 +48,13 @@ export function playExpandedCard(game: UnoExpandedGame, actorId: string, command
     return;
   }
   resolveExpandedUno(game, actorId, handChange.requiresUno, command.declareUno === true, random, events);
+  if (card.kind === "wild-up" || card.kind === "wild-battle" || card.kind === "high-five") {
+    if (actor.hand.length === 0) { endExpandedGame(game, actorId, events); return; }
+    if (card.kind === "wild-up") startUp(game, actorId, random, events);
+    else if (card.kind === "wild-battle") startBattle(game, actorId, target, context, random, events);
+    else startHighFive(game, actorId, context, random, events);
+    return;
+  }
   const amount = fixedDrawAmount(card);
   if (amount > 0 || (card.kind === "wild-shield" && game.pendingDraw > 0)) {
     game.pendingDraw += amount; game.currentIndex = target; game.phase = "draw-stack";

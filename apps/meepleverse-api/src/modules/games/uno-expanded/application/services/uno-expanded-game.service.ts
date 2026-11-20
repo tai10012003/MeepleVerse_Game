@@ -1,3 +1,5 @@
+import { effectContext, type EffectTiming } from "../../domain/models/effect-context.js";
+import { advanceExpandedEffects, nextEffectDeadline, pauseEffectClock, resumeEffectClock } from "../../domain/rules/effect-clock.js";
 import { randomUUID } from "node:crypto";
 import type { RoomMemberView, RoomStatus, MatchOutcome } from "@meepleverse/contracts/room-common";
 import type { UnoExpandedEvent, UnoExpandedRoomAction, UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
@@ -15,7 +17,22 @@ export class UnoExpandedGameService {
   game: UnoExpandedGame | null = null;
   matchId: string | null = null;
   outcome: MatchOutcome | null = null;
-  constructor(readonly roomId: string, private readonly factory: ExpandedGameFactory = createExpandedGame) {}
+  constructor(readonly roomId: string, private readonly factory: ExpandedGameFactory = createExpandedGame,
+    private readonly now: () => number = Date.now, private readonly timing: Partial<EffectTiming> = {}) {}
+  private context() { return effectContext({ now: this.now(), timing: this.timing }); }
+  get nextDeadline(): number | null { return this.paused || this.status !== "PLAYING" || !this.game ? null : nextEffectDeadline(this.game); }
+  advanceTime() {
+    if (this.paused || this.status !== "PLAYING" || !this.game) return null;
+    const transition = advanceExpandedEffects(this.game, this.context());
+    if (transition) { this.game = transition.state; this.updateOutcome(); this.revision++; }
+    return transition;
+  }
+  private updateOutcome(): void {
+    if (this.game?.phase === "ended") {
+      this.status = "ENDED";
+      this.outcome = { reason: this.game.result!.reason === "blocked" ? "blocked" : "completed", winnerId: this.game.result!.winnerId };
+    }
+  }
   get paused(): boolean { return this.members.some(member => !member.connected); }
   add(playerId: string, nickname: string): void {
     requireExpanded(this.status === "LOBBY", "ROOM_NOT_JOINABLE");
@@ -25,7 +42,14 @@ export class UnoExpandedGameService {
   }
   setConnected(playerId: string, connected: boolean): void {
     const member = this.members.find(member => member.playerId === playerId);
-    if (member && member.connected !== connected) { member.connected = connected; this.revision++; }
+    if (member && member.connected !== connected) {
+      const wasPaused = this.paused; member.connected = connected;
+      if (this.game && this.status === "PLAYING" && wasPaused !== this.paused) {
+        const updated = this.paused ? pauseEffectClock(this.game, this.context()) : resumeEffectClock(this.game, this.context());
+        if (updated) this.game = updated;
+      }
+      this.revision++;
+    }
   }
   leave(playerId: string, expired: boolean): void {
     const index = this.members.findIndex(member => member.playerId === playerId);
@@ -54,13 +78,11 @@ export class UnoExpandedGameService {
     }
     requireExpanded(this.status === "PLAYING" && this.game, "NO_ACTIVE_GAME");
     requireExpanded(action.matchId === this.matchId, "STALE_MATCH");
-    requireExpanded(action.expectedRevision === this.game.revision, "STALE_REVISION");
-    const transition = applyExpandedCommand(this.game, playerId, action.command);
+    const concurrent = action.command.type === "BATTLE_SELECT" || action.command.type === "HIGH_FIVE";
+    requireExpanded(concurrent ? action.expectedRevision <= this.game.revision : action.expectedRevision === this.game.revision, "STALE_REVISION");
+    const transition = applyExpandedCommand(this.game, playerId, action.command, Math.random, this.context());
     this.game = transition.state;
-    if (this.game.phase === "ended") {
-      this.status = "ENDED";
-      this.outcome = { reason: this.game.result!.reason === "blocked" ? "blocked" : "completed", winnerId: this.game.result!.winnerId };
-    }
+    this.updateOutcome();
     this.revision++;
     return transition;
   }

@@ -18,7 +18,7 @@ Ngày: 19/11/2026. Đi cùng [đặc tả luật](uno-expanded.md).
 
 ## 2. Đề xuất cụ thể cho các khoảng trống
 
-**Tất cả D01–D15 dưới đây đang là ĐỀ XUẤT, chưa có xác nhận của người dùng.** Việc chọn một phương án cụ thể giúp review được luật, không biến nó thành dữ kiện của bộ gốc. Khi được duyệt, ghi ngày/phiên bản quyết định; không xóa lịch sử lựa chọn.
+**Bảng D01–D15 bên dưới lưu đề xuất ban đầu. Trạng thái xác nhận sau đó được ghi theo từng bước ở cuối tài liệu; các mục đã triển khai không còn là đề xuất chờ duyệt.** Việc chọn một phương án cụ thể giúp review được luật, không biến nó thành dữ kiện của bộ gốc. Khi được duyệt, ghi ngày/phiên bản quyết định; không xóa lịch sử lựa chọn.
 
 | Mã | Vấn đề | Phương án đề xuất v1 | Điểm cần hiểu trước khi duyệt |
 | --- | --- | --- | --- |
@@ -87,3 +87,18 @@ The user requested implementation after the step 6 plan. D05/D06 and the related
 | D13 endings | Clearing the hand by color discard/divide wins normally. A final Seven Change ends before transfer; no player can win by being given an empty hand. Mini-game endings remain pending. |
 
 No step 6 card can answer the draw-stack window. Commands and all follow-up hand changes are one revision; failures (including RNG failure while drawing an UNO penalty) roll back the entire transaction. Basic gameplay remains unchanged.
+
+## Bước 7 — xác nhận và triển khai (20/11/2026)
+
+Người dùng yêu cầu bắt đầu sau kế hoạch bước 7. Áp dụng D07/D08/D11/D15 và phần UNO/kết thúc D12/D13 liên quan mini-game theo [tài liệu triển khai](../development/uno-expanded-minigames.md). Không thay đổi các quy tắc bước 5–6 đã chốt.
+
+| Mã | Hành vi bước 7 |
+| --- | --- |
+| D07 | Up theo cả bàn: mở số theo màu chọn, sau đó số >= gần nhất bất kỳ màu; 5/7 đặc biệt chỉ là số. Không có bài thì tự phạt số gần nhất (chưa mở: 1, sau 0: 0), bỏ lượt. |
+| D08 | Battle bí mật chọn số cùng màu, không đấu màu đối đáp. Cao hơn bỏ thêm min(2,N), thua +2; hòa chỉ bỏ lá so; cả hai không có thì người kích hoạt +3, đối thủ +2. Tiếp lượt sau người kích hoạt. |
+| D11 | High Five chuẩn bị 1.500ms, phản hồi 8.000ms; thứ tự server nhận. Hết giờ phạt một người chưa bấm đầu tiên theo ghế sau người kích hoạt trong chiều hiện tại; đủ phản hồi phạt người cuối. Hai người tự phạt đối thủ. |
+| D12 | UNO kiểm tra khi Up/Battle thực sự bỏ bài. Khóa Battle giữ cờ riêng; thưởng có khai báo riêng. Fallback không tự khai báo UNO. |
+| D13 | Lá kích hoạt cuối không mở mini-game; Battle cuối không cần mục tiêu. Lá đáp Up cuối thắng. Battle giải quyết UNO/thua/thưởng trước xét kết thúc, ưu tiên người thắng Battle; hòa cùng hết là simultaneous-finish. |
+| D15 | Chọn số và thưởng Battle mỗi giai đoạn 20s; hết giờ chọn lá đầu hợp lệ. Freeze timer khi mất mạng; Battle giữ khóa, High Five giữ thứ tự và mở attempt mới sau reconnect. Chỉ BATTLE_SELECT/HIGH_FIVE nhận revision cũ không ở tương lai cùng các kiểm tra effect/slot/deadline; lệnh khác giữ revision hiện tại. |
+
+Các quyết định triển khai không tuyên bố là luật chính thức thống nhất của Storm/Battle/Infinity. Chưa mở phát hành công khai hoặc nghiệm thu giao diện Mở rộng ở mốc này.

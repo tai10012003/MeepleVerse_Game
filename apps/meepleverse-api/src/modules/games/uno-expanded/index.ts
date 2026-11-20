@@ -5,3 +5,4 @@ export { getExpandedPlayerView } from "./domain/rules/get-player-view.js";
 export type { UnoExpandedGame } from "./domain/models/uno-expanded-game.js";
 export { applyExpandedCommand } from "./domain/rules/apply-command.js";
 export { playableExpandedCardIds } from "./domain/rules/can-play-card.js";
+export { advanceExpandedEffects } from "./domain/rules/effect-clock.js";

@@ -1,6 +1,6 @@
 # UNO Mở rộng — tình huống nghiệm thu v1
 
-Ngày lập: 19/11/2026. Đây là danh mục kịch bản thiết kế cho toàn bộ Mở rộng. Một phần đã có test tự động đến bước 5; xem phạm vi bên dưới, không coi cả E001–E070 là đã nghiệm thu.
+Ngày lập: 19/11/2026. Đây là danh mục kịch bản thiết kế cho toàn bộ Mở rộng. Backend đã có test tự động đến bước 7; xem phạm vi bên dưới, không coi cả E001–E070 là đã nghiệm thu.
 
 Đọc cùng [luật](../games/uno-expanded.md) và [quyết định](../games/uno-expanded-decisions.md). Kết quả gắn Dxx dưới đây là kỳ vọng theo đề xuất hiện tại; phải đổi nếu phương án review thay đổi.
 
@@ -147,3 +147,17 @@ Up, Battle, High Five, chuyền tay, Skip Two, ÷2, xả màu, UNO khi bỏ nhi�
 | Lựa chọn sai/duplicate; ÷2 → xả → chuyền; giữ kín tay mới và reconnect; kết thúc xả | `uno-expanded-room.test.ts` |
 
 Bảng bước 5 phía trên là lịch sử phạm vi của mốc đó. Hiện ÷2, xả màu, chuyền tay, Skip Two và UNO cho các thao tác trên đã được triển khai; Up/Battle/High Five cùng timer/kết quả mini-game và giao diện mới vẫn chờ các bước sau. Ánh xạ phạm vi không đồng nghĩa mọi tổ hợp E001–E070 đã có test riêng.
+
+## Phạm vi tự động hóa bổ sung ở bước 7 — 20/11/2026
+
+| Phạm vi | Test |
+| --- | --- |
+| Up mở màu, đáp >=, 5/7 không chạy phụ, tự phạt 1/0/số gần nhất, UNO và lá đáp cuối | `wild-up.test.ts` |
+| Battle khóa bí mật, một/cả hai không có, so số, thưởng, UNO, timeout và hòa cùng hết | `wild-battle.test.ts` |
+| High Five chuẩn bị/cửa sổ, thứ tự, trùng/ngoài cuộc, hai chiều, timeout, hai người | `high-five.test.ts` |
+| Lá kích hoạt cuối Up/Battle/High Five không mở thử thách | `mini-endings.test.ts` |
+| Cùng revision, freeze nhiều người, giữ khóa/thưởng, attempt mới, timeout/rematch | `effect-service.test.ts` |
+| Bốn SDK client qua WebSocket thật: privacy/schema/event, đồng thời, retry, timer, reconnect, lệnh ván cũ | `uno-expanded-minigames.test.ts` |
+| Chơi trọn 60 ván có seed cho 2/3/4 người, bảo toàn 198 ID sau lệnh và timer | `simulation.test.ts` |
+
+Các bảng bước 5–6 là lịch sử. Hiện mọi loại lá có luật backend; mặt bài/bộ điều khiển/animation Mở rộng và bốn người thật sau deploy vẫn chưa được nghiệm thu. E067/E068/E069 không được coi hoàn thành chỉ từ test SDK/domain. Danh sách là ánh xạ phạm vi; không khẳng định mọi tổ hợp E001–E070 có test độc lập.

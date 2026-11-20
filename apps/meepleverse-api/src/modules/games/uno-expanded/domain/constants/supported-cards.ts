@@ -5,7 +5,8 @@ export function isSupportedCard(card: UnoExpandedCard): boolean {
     case "wild-draw-six": case "wild-draw-eight": case "wild-target-four": case "wild-shield":
     case "tornado": case "wild-random": case "wild-multiply-two":
     case "wild-divide-two": case "discard-color": case "wild-discard":
-    case "seven-change-left": case "seven-change-right": case "skip-two": return true;
+    case "seven-change-left": case "seven-change-right": case "skip-two":
+    case "wild-up": case "wild-battle": case "high-five": return true;
     default: return false;
   }
 }

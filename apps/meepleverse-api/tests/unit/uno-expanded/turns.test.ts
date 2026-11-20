@@ -38,7 +38,7 @@ describe("Expanded regular turns", () => {
     expect(play(drawn, "new").state.discardPile.at(-1)!.id).toBe("new");
   });
   it("automatically passes an unplayable draw, including a not-yet-supported special", () => {
-    const game = fixture([[num("old")], [num("other")]], [black("future", "wild-up")]);
+    const game = fixture([[num("old")], [num("other")]], [num("unplayable", "blue", 2)]);
     const next = step(game, { type: "DRAW_CARD" }).state;
     expect(next.currentIndex).toBe(1); expect(next.phase).toBe("turn"); expect(next.players[0]!.hand).toHaveLength(2);
   });
@@ -49,10 +49,10 @@ describe("Expanded regular turns", () => {
     expect(reversed.direction).toBe(-1); expect(reversed.currentIndex).toBe(count === 2 ? 0 : count - 1);
     expect(play(game, "skip").state.currentIndex).toBe(2 % count);
   });
-  it("hides unsupported cards from hints and rejects them atomically", () => {
+  it("suggests Up but rejects it without the required color atomically", () => {
     const game = fixture([[black("future", "wild-up"), num("keep")], [num("other")]]);
-    expect(getExpandedPlayerView(game, "p0").self.playableCardIds).not.toContain("future");
-    expect(() => play(game, "future", { declareUno: true })).toThrow("UNSUPPORTED_COMMAND");
+    expect(getExpandedPlayerView(game, "p0").self.playableCardIds).toContain("future");
+    expect(() => play(game, "future", { declareUno: true })).toThrow("INVALID_COLOR");
     expect(game.players[0]!.hand).toHaveLength(2);
   });
   it("automatically penalizes an omitted UNO declaration separately from the opponent's debt", () => {

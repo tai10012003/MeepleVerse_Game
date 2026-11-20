@@ -1,3 +1,4 @@
+import { actingExpandedPlayerId, expandedEffectView, ownBattleView } from "./get-effect-view.js";
 import type { UnoExpandedView } from "@meepleverse/contracts/uno-expanded";
 import type { UnoExpandedGame } from "../models/uno-expanded-game.js";
 import { requireExpanded } from "../errors/uno-expanded.errors.js";
@@ -9,8 +10,8 @@ export function getExpandedPlayerView(game: UnoExpandedGame, playerId: string): 
   requireExpanded(top, "INVALID_SETUP");
   return structuredClone({ gameId: game.gameId, rulesVersion: game.rulesVersion, revision: game.revision, phase: game.phase,
     players: game.players.map(player => ({ playerId: player.id, handCount: player.hand.length })),
-    dealerId: game.players[game.dealerIndex]!.id, currentPlayerId: game.phase === "ended" ? null : game.players[game.currentIndex]!.id, direction: game.direction, activeColor: game.activeColor,
+    dealerId: game.players[game.dealerIndex]!.id, currentPlayerId: actingExpandedPlayerId(game), direction: game.direction, activeColor: game.activeColor,
     topCard: top, discardCards: game.discardPile.slice(-8), drawPileCount: game.drawPile.length,
-    discardPileCount: game.discardPile.length, pendingDraw: game.pendingDraw, result: game.result,
-    self: { playerId, hand: player.hand, drawnCardId: game.players[game.currentIndex]!.id === playerId ? game.drawnCardId : null, playableCardIds: playableExpandedCardIds(game, playerId) } });
+    discardPileCount: game.discardPile.length, pendingDraw: game.pendingDraw, result: game.result, effect: expandedEffectView(game),
+    self: { playerId, hand: player.hand, drawnCardId: game.players[game.currentIndex]!.id === playerId ? game.drawnCardId : null, playableCardIds: playableExpandedCardIds(game, playerId), battle: ownBattleView(game, playerId) } });
 }

@@ -2,13 +2,13 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Step 6: internal discard/divide/hand-transfer/Skip Two rules implemented alongside step 5. Public Expanded rooms remain disabled; Up/Battle/High Five remain pending.
+- Bước 7: backend đã triển khai Up/Battle/High Five cùng luật bước 5–6. Production chưa mở phòng Mở rộng; giao diện mini-game còn chờ các bước tiếp theo.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
-- Các quy ước ghép bộ mang mã **Dxx** là đề xuất cụ thể của MeepleVerse, chưa phải quyết định người dùng đã duyệt. Xem [bảng quyết định](uno-expanded-decisions.md).
+- Các quy ước ghép bộ mang mã **Dxx** là lựa chọn riêng của MeepleVerse; trạng thái xác nhận theo từng bước nằm trong [bảng quyết định](uno-expanded-decisions.md). Không coi chúng là một luật gốc thống nhất cho mọi bộ ngoài thị trường.
 - Xem [tình huống nghiệm thu](../testing/uno-expanded-acceptance.md) để triển khai và kiểm tra từng nhánh.
 
-> Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded draw/defense and bulk-discard/turn-control gameplay is implemented internally; the three mini-game mechanics remain unavailable.
+> Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded draw/defense, bulk-discard/turn-control and mini-games are implemented internally; see [step 7](../development/uno-expanded-minigames.md).
 
 > Internal room foundation: [setup, protocol and verification](../development/uno-expanded-foundation.md). The 198-card match supports internal base turns and draw/defense rules; see [step 5](../development/uno-expanded-draw-defense.md).
 
@@ -330,3 +330,11 @@ The step 5 status section above is a historical milestone. Batch operations are 
 UNO is required for any active discard from at least two cards to one, including a multi-card discard. Cards received through transfers do not require UNO. A player who actively discards from two to one via Seven Change must still declare; if omitted, the actor draws two after the transfer, preventing an innocent receiver from inheriting the penalty. A last Seven Change wins before passing an empty hand.
 
 Skip Two skips two turn opportunities: for 2/3/4 players, the next actor is respectively the opponent/the activating player/the fourth seat along the current direction. Transfers match printed seven as well as color, including ordinary seven on Seven Change. All step 6 actions are forbidden as responses to a draw stack.
+
+## Bước 7 — trạng thái triển khai (20/11/2026)
+
+Wild Up, Wild Battle, High Five và đồng hồ mini-game đã được triển khai trong backend. Các mục trạng thái bước 5–6 ở trên là lịch sử của từng mốc; hiện mọi loại lá trong bộ 198 đều được hỗ trợ ở domain. Xem [luật, lệnh, timer và kiểm thử bước 7](../development/uno-expanded-minigames.md).
+
+D07/D08/D11/D15 và phần D12/D13 liên quan mini-game được áp dụng theo kế hoạch bước 7 đã được yêu cầu triển khai; chi tiết xác nhận nằm trong bảng quyết định. Timer mặc định: High Five chuẩn bị 1,5 giây + phản hồi 8 giây; Battle chọn số/thưởng mỗi giai đoạn 20 giây. Fallback không tự hô UNO. Giữ bí mật lựa chọn Battle tới khi giải quyết; reconnect bảo toàn lựa chọn/thứ tự và thời gian còn lại.
+
+Catalog vẫn Đang phát triển, phòng Mở rộng ở production chưa bật; chưa có mặt bài, bộ điều khiển và animation Mở rộng. UNO Cơ bản giữ luật hiện tại.

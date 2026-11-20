@@ -1,3 +1,4 @@
+import type { ExpandedEffect } from "./effects.js";
 import type { UnoExpandedCard, UnoColor, UnoExpandedPhase, UnoExpandedResult } from "@meepleverse/contracts/uno-expanded";
 import type { UnoDirection } from "@meepleverse/contracts/uno-common";
 export interface UnoExpandedGame {
@@ -16,4 +17,6 @@ export interface UnoExpandedGame {
   pendingDraw: number;
   blockedTurns: number;
   result: UnoExpandedResult | null;
+  effectSequence: number;
+  effect: ExpandedEffect | null;
 }

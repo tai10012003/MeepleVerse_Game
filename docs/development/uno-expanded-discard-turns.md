@@ -1,3 +1,5 @@
+> Mốc lịch sử: tài liệu mô tả bước 6. Up/Battle/High Five và timer đã được bổ sung ở [bước 7](uno-expanded-minigames.md); các câu chưa triển khai bên dưới ghi lại phạm vi tại bước 6.
+
 # UNO Mở rộng — xả bài và điều khiển lượt (bước 6)
 
 Ngày: 20/11/2026. Bước này chỉ mở rộng backend, contracts và kiểm thử. Giao diện vẫn Đang phát triển; chưa có mặt bài hoặc bộ điều khiển Mở rộng mới.

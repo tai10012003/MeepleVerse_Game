@@ -1,3 +1,7 @@
+import { effectContext, type EffectOptions } from "../models/effect-context.js";
+import { answerUp } from "./wild-up.js";
+import { answerBattle, answerBattleReward } from "./wild-battle.js";
+import { answerHighFive } from "./high-five.js";
 import { unoExpandedCommandSchema } from "@meepleverse/contracts/uno-expanded";
 import { getNextPlayer, type RandomSource } from "../../../uno-common/index.js";
 import type { UnoExpandedGame } from "../models/uno-expanded-game.js";
@@ -10,16 +14,22 @@ import { acceptExpandedDrawPenalty } from "./accept-draw-penalty.js";
 import { endExpandedGame } from "./scoring.js";
 export interface ExpandedTransition { state: UnoExpandedGame; events: UnoExpandedEvents }
 /** Rejected commands never mutate the caller's state; accepted actions increment revision exactly once. */
-export function applyExpandedCommand(input: UnoExpandedGame, actorId: string, payload: unknown, random: RandomSource = Math.random): ExpandedTransition {
+export function applyExpandedCommand(input: UnoExpandedGame, actorId: string, payload: unknown, random: RandomSource = Math.random, options: EffectOptions = {}): ExpandedTransition {
   const parsed = unoExpandedCommandSchema.safeParse(payload);
   requireExpanded(parsed.success, "INVALID_COMMAND");
   requireExpanded(input.players.some(player => player.id === actorId), "UNKNOWN_PLAYER");
   requireExpanded(input.phase !== "ended", "GAME_ENDED");
-  requireExpanded(input.players[input.currentIndex]!.id === actorId, "NOT_YOUR_TURN");
   const game = structuredClone(input); const events: UnoExpandedEvents = { public: [] };
-  const command = parsed.data;
-  switch (command.type) {
-    case "PLAY_CARD": playExpandedCard(game, actorId, command, random, events); break;
+  const command = parsed.data; const context = effectContext(options);
+  if (command.type === "UP_PLAY") answerUp(game, actorId, command, random, events);
+  else if (command.type === "BATTLE_SELECT") answerBattle(game, actorId, command, context, random, events);
+  else if (command.type === "BATTLE_DISCARD") answerBattleReward(game, actorId, command, context, random, events);
+  else if (command.type === "HIGH_FIVE") answerHighFive(game, actorId, command, context, random, events);
+  else {
+    requireExpanded(["turn", "drawn", "draw-stack"].includes(game.phase), "INVALID_PHASE");
+    requireExpanded(game.players[game.currentIndex]!.id === actorId, "NOT_YOUR_TURN");
+    switch (command.type) {
+    case "PLAY_CARD": playExpandedCard(game, actorId, command, random, events, context); break;
     case "ACCEPT_DRAW_PENALTY": acceptExpandedDrawPenalty(game, actorId, random, events); break;
     case "PASS_TURN":
       requireExpanded(game.phase === "drawn", "INVALID_PHASE");
@@ -39,7 +49,8 @@ export function applyExpandedCommand(input: UnoExpandedGame, actorId: string, pa
       break;
     }
   }
+  }
   game.revision++;
-  if (game.phase !== "ended") events.public.push({ type: "TURN_CHANGED", playerId: game.players[game.currentIndex]!.id, phase: game.phase });
+  if (!["ended", "high-five", "battle-select"].includes(game.phase)) events.public.push({ type: "TURN_CHANGED", playerId: game.players[game.currentIndex]!.id, phase: game.phase });
   return { state: game, events };
 }

@@ -89,9 +89,18 @@ export abstract class GameRoom<Action, View, State extends Schema> extends Room<
       client.send("room_view", this.service.view(id));
     }
   }
-  private publish(): void {
+  protected onPublished(): void {}
+  protected publish(): void {
     this.syncState();
     for (const client of this.clients) this.sendView(client);
+    this.onPublished();
+  }
+  protected broadcastEvents(transition: { state: { revision: number }; events: { public: unknown[] } }): void {
+    for (const recipient of this.clients) {
+      const recipientId = this.identities.get(recipient.sessionId);
+      if (!recipientId || this.dropped.has(recipient.sessionId)) continue;
+      recipient.send("game_events", { matchId: this.service.matchId, revision: transition.state.revision, events: transition.events.public });
+    }
   }
   private reply(client: Client, requestId: string | null, code?: ActionReply["code"]): ActionReply {
     const reply: ActionReply = {
@@ -123,16 +132,7 @@ export abstract class GameRoom<Action, View, State extends Schema> extends Room<
       // Update service synchronously; matchmaking lock is only a secondary gate.
       if (this.service.status !== "LOBBY") void this.lock().catch(console.error);
       this.publish();
-      if (transition) {
-        for (const recipient of this.clients) {
-          const recipientId = this.identities.get(recipient.sessionId);
-          if (!recipientId || this.dropped.has(recipient.sessionId)) continue;
-          recipient.send("game_events", {
-            matchId: this.service.matchId, revision: transition.state.revision,
-            events: transition.events.public,
-          });
-        }
-      }
+      if (transition) this.broadcastEvents(transition);
       reply = this.reply(client, requestId);
     } catch (error) {
       const code = this.classifyError(error);

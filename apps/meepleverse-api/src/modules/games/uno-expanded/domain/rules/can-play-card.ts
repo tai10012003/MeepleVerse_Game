@@ -1,8 +1,9 @@
+import { canAnswerUp } from "./wild-up.js";
 import type { UnoExpandedCard } from "@meepleverse/contracts/uno-expanded";
 import type { UnoExpandedGame } from "../models/uno-expanded-game.js";
 import { fixedDrawAmount, isSupportedCard } from "../constants/supported-cards.js";
 export function canPlayExpandedCard(game: UnoExpandedGame, card: UnoExpandedCard): boolean {
-  if (!isSupportedCard(card) || game.phase === "ended") return false;
+  if (!isSupportedCard(card) || !["turn", "drawn", "draw-stack"].includes(game.phase)) return false;
   if (game.phase === "drawn" && card.id !== game.drawnCardId) return false;
   const top = game.discardPile.at(-1)!;
   if (game.phase === "draw-stack") {
@@ -13,5 +14,6 @@ export function canPlayExpandedCard(game: UnoExpandedGame, card: UnoExpandedCard
 }
 export function playableExpandedCardIds(game: UnoExpandedGame, playerId: string): string[] {
   if (game.phase === "ended" || game.players[game.currentIndex]!.id !== playerId) return [];
+  if (game.phase === "up") return game.players[game.currentIndex]!.hand.filter(card => canAnswerUp(game, card)).map(card => card.id);
   return game.players[game.currentIndex]!.hand.filter(card => canPlayExpandedCard(game, card)).map(card => card.id);
 }

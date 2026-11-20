@@ -13,7 +13,7 @@ export function fixture(hands: Card[][], next: Card[] = [], top: Card = num("top
   return { gameId: "uno-expanded", rulesVersion: "uno-expanded-v1", revision: 0, phase: "turn",
     players: hands.map((hand, i) => ({ id: "p" + i, hand })), dealerIndex: hands.length - 1, currentIndex: 0,
     direction: 1, activeColor: top.color ?? "red", drawPile: [...next].reverse(), discardPile: [top],
-    drawnCardId: null, pendingDraw: 0, blockedTurns: 0, result: null };
+    drawnCardId: null, pendingDraw: 0, blockedTurns: 0, result: null, effectSequence: 0, effect: null };
 }
 export function step(game: UnoExpandedGame, command: UnoExpandedCommand) {
   return applyExpandedCommand(game, game.players[game.currentIndex]!.id, command, seeded(21));

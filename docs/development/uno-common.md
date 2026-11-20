@@ -44,3 +44,5 @@ Shared unit tests exercise deterministic shuffle/error compatibility, seat wrapp
 `contracts/room-common` contains room metadata, common error codes, join validation and the generic action reply. Public views identify editions through `gameId`; the existing Basic matchmaking name remains `uno` for compatibility.
 
 Expanded step 6 reuses the same turn engine and physical pile operations for atomic hand reductions and transfers; see [discard and turn rules](uno-expanded-discard-turns.md). The common module and Basic rules do not need edition-specific branches.
+
+Expanded step 7 keeps Up/Battle/High Five state, timers and concurrency policy in the Expanded edition; see [mini-games](uno-expanded-minigames.md). Shared room transport exposes protected publication/event hooks; only the Expanded adapter schedules an effect timer. Basic uses the default no-op hook. Common card operations and Basic rules do not import mini-game logic.
