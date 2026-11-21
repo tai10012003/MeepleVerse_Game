@@ -28,6 +28,13 @@ export function planExpandedEffects(frame: ExpandedVisualFrame): ExpandedEffectP
  }
  const totals = new Map<string, number>();
  for (const event of frame.events) if (event.type === "CARDS_DRAWN") totals.set(event.playerId, (totals.get(event.playerId) ?? 0) + event.count);
+ const reveal = frame.events.find(event => event.type === "RANDOM_REVEALED");
+ if (reveal?.type === "RANDOM_REVEALED") {
+  const badge = badges.find(item => item.playerId === played?.playerId);
+  const detail = `Lật ${expandedCardName(reveal.card)} · ${name(reveal.playerId)} nhận ${totals.get(reveal.playerId) ?? 0} lá`;
+  if (badge) badge.label += " · " + detail;
+  else badges.push({ playerId: reveal.playerId, symbol: "+?", tone: "wild", color: after?.activeColor, delay: base, label: detail });
+ }
  const oldIds = new Set(before?.self.hand.map(card => card.id));
  const draws = [...totals].filter(([,count]) => count > 0).map(([playerId,count]) => ({ playerId, count,
   cards: playerId === after?.self.playerId ? after.self.hand.filter(card => !oldIds.has(card.id)).slice(0,count) : [], delay: base + .12,

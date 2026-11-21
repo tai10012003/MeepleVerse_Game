@@ -22,8 +22,10 @@ test("expanded 9B: Up suggests server-approved 5/7 replies, settles its penalty 
     await expect(b!.locator('[data-card-id="b-low"]')).toBeDisabled(); await expect(b!.getByRole("button", { name: "Bốc bài", exact: true })).toBeDisabled();
     await replyUp(b!, "five"); await expect(c!.getByTestId("up-panel")).toContainText("Đáp số ≥ 5");
     await expect(c!.locator('[data-card-id="seven"]')).toBeEnabled(); await replyUp(c!, "seven");
-    await nextRevision(a!, 3); await expect(a!.getByTestId("expanded-hand-count")).toHaveText("9 lá");
+    await nextRevision(a!, 3);
+    // Read the transient result before waiting for all seven cards to finish arriving.
     await expect(a!.getByTestId("mini-feedback")).toContainText("Host bốc 7 lá");
+    await expect(a!.getByTestId("expanded-hand-count")).toHaveText("9 lá");
     await expect(b!.getByTestId("expanded-hand-count")).toHaveText("1 lá"); await expect(c!.getByTestId("expanded-hand-count")).toHaveText("1 lá");
     await expect(a!.getByTestId("direction-ring")).toHaveAttribute("data-direction", "1");
     await a!.reload(); await expect(a!.getByTestId("expanded-board")).toHaveAttribute("data-phase", "turn"); await expect(a!.getByTestId("mini-feedback")).toHaveCount(0);

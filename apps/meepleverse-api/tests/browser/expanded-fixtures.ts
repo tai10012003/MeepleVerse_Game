@@ -1,9 +1,12 @@
+import { expandedAcceptanceFixture } from "./expanded-acceptance-fixtures.js";
 import type { UnoExpandedCard as Card } from "@meepleverse/contracts/uno-expanded";
 import { createExpandedGame, applyExpandedCommand, type UnoExpandedGame } from "../../src/modules/games/uno-expanded/index.js";
 import { seeded } from "../unit/uno/fixtures.js";
 const num = (id: string, color: "red" | "blue" | "green" | "yellow" = "red", value = 5): Card => ({ id, kind: "number", color, value });
 const wild = (id: string, kind: Extract<Card, { color: null }>["kind"] = "wild"): Card => ({ id, kind, color: null });
 export function expandedBrowserFixture(ids: readonly string[], scenario: string): UnoExpandedGame {
+  if (scenario.startsWith("expanded-accept-")) return expandedAcceptanceFixture(ids, scenario);
+  if (scenario.startsWith("expanded-full-")) return createExpandedGame(ids, seeded(Number(scenario.split("-").at(-1))));
   if (!scenario.startsWith("expanded-")) return createExpandedGame(ids, seeded(17));
   const hands: Card[][] = scenario.startsWith("expanded-effect-") ? [[{ id: "action", kind: scenario.endsWith("skip") ? "skip" : "reverse", color: "red" }, num("a-keep", "blue", 1), num("a-other", "green", 2)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]] : scenario === "expanded-up" ? [[wild("up", "wild-up"), num("a-low", "blue", 1), num("a-zero", "blue", 0)],
     [{ id: "five", kind: "high-five", color: "red", value: 5 }, num("b-low", "green", 1)], [{ id: "seven", kind: "seven-change-left", color: "yellow", value: 7 }, num("c-low", "green", 1)]]

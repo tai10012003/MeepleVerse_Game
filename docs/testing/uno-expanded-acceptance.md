@@ -193,3 +193,12 @@ Xem [phạm vi animation](../development/uno-expanded-animations.md). Các ca n�
 Đã qua 357 kiểm thử backend (30 file), gồm clock/concurrency/reconnect qua WebSocket và bảo toàn bộ bài. Tám ca giao diện liên quan đạt sau khi kiểm tra/cố định nút chỉ nhấp nháy ánh sáng: artwork 60 mẫu, bố cục sáu viewport, bốn người phản hồi, reconnect, timeout nhiều người, hai thứ tự ở bàn hai người và cả hai không bấm trong cửa sổ thật 5 giây. TypeScript frontend/backend và lint đạt. Đã xem ảnh nút trên mobile cùng ảnh +4/High Five phóng lớn.
 
 +4 thường dùng artwork chung thu nhỏ riêng nhóm bốn thẻ 10%, giữ nguyên elip. High Five dùng cách căn số chung với Cơ bản. Không thay các luật còn lại, không mở phát hành công khai hoặc suy ra đã nghiệm thu trọn ván trên môi trường triển khai.
+
+
+## Nghiệm thu trọn ván bước 10 — 21/11/2026
+
+Đã qua 29 ca UI riêng biệt trên Edge qua các lượt chạy tập trung: hai ván đầy đủ 198 lá với bốn phiên độc lập (seed 17/21), 17 tình huống chức năng và 10 ca mini-game. Mỗi ván đầy đủ có rời trang/kết nối lại và rematch; đối chiếu đồng bộ, tính riêng tư, tổng bài và kết quả sau từng thao tác. Các viewport là desktop, laptop, tablet và mobile mô phỏng; hai ván đầy đủ dùng giảm chuyển động, các ca chức năng dùng animation thường.
+
+E067 đã có bằng chứng qua UI local. E068 được bổ sung phạm vi bốn viewport, chưa xác nhận mọi tổ hợp hiển thị; E069 chưa nghiệm thu đầy đủ. Không suy ra đã kiểm tra nhóm người thật qua Internet hoặc sẵn sàng phát hành. Mọi đoạn “chưa chơi trọn ván UI” ở các mục lịch sử phía trên là trạng thái trước bước 10.
+
+Đã sửa thông báo Random để nêu lá lật công khai trong cùng thông báo. Đã sửa hai fixture Xả màu thiếu lá và thứ tự assertion của thông báo Up; các ca liên quan chạy lại đạt. Toàn bộ 357 kiểm thử backend (30 file), TypeScript và lint workspace đạt. Xem [phạm vi, kết quả và lệnh chạy lại bước 10](../development/uno-expanded-full-game-acceptance.md).

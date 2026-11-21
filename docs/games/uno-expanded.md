@@ -2,7 +2,7 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Bước 9C: bàn, ba mini-game và animation đánh/bốc mở nội bộ tại `/dev/uno-expanded/play`; kích thước theo Cơ bản, bộ bài xem tại `/dev/uno-expanded/cards`. Production chưa mở phòng Mở rộng; nghiệm thu tổng thể bằng UI còn riêng.
+- Bước 10: đã kiểm tra hai ván trọn bốn phiên trình duyệt, 17 tình huống chức năng và 10 ca mini-game; xem [kết quả nghiệm thu local](../development/uno-expanded-full-game-acceptance.md). Bàn mở nội bộ tại `/dev/uno-expanded/play`, bộ bài tại `/dev/uno-expanded/cards`. Production chưa mở phòng Mở rộng; kiểm thử người thật sau deploy còn riêng.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là lựa chọn riêng của MeepleVerse; trạng thái xác nhận theo từng bước nằm trong [bảng quyết định](uno-expanded-decisions.md). Không coi chúng là một luật gốc thống nhất cho mọi bộ ngoài thị trường.
