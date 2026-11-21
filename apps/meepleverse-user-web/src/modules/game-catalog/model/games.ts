@@ -3,7 +3,7 @@ export interface CatalogGame {
   name: string;
   subtitle: string;
   description: string;
-  status: "available" | "development";
+  status: "available" | "beta" | "development";
   artwork: "basic" | "expanded";
   tags: readonly string[];
 }
@@ -16,9 +16,14 @@ export const catalogGames: readonly CatalogGame[] = [
   },
   {
     id: "uno-expanded", name: "UNO Mở rộng", subtitle: "Thêm thử thách, thêm bất ngờ.",
-    description: "Một phiên bản dành cho hội đã quen tay, với nhiều lá chức năng và những cách xoay chuyển cuộc chơi mới.",
-    status: "development", artwork: "expanded", tags: ["Luật mở rộng", "Nhiều chiến thuật"],
+    description: "198 lá, 14 nhóm chức năng mới: cộng dồn tới +8, Khiên, xả màu và các mini-game. Dành cho hội đã quen UNO.",
+    status: "available", artwork: "expanded", tags: ["2–4 người", "198 lá", "14 nhóm mới"],
   },
 ];
 
 export function findCatalogGame(id: string) { return catalogGames.find(game => game.id === id); }
+
+export function isGamePlayable(game: CatalogGame) { return game.status === "available" || game.status === "beta"; }
+export function gameStatusLabel(game: CatalogGame) {
+  return game.status === "beta" ? "Chơi thử" : game.status === "available" ? "Đang mở bàn" : "Đang phát triển";
+}

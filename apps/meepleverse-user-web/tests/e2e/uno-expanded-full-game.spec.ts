@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { joinRoom } from "./helpers/expanded-room";
 import { expandedSnapshot, settledExpanded, advanceExpandedUi } from "./helpers/expanded-acceptance";
-for(const seed of [17,21]) test(`expanded acceptance: four browsers finish full 198-card games, reconnect and rematch (seed ${seed})`, async ({browser,request},info)=>{
+for(const seed of [17,21]) test(`expanded acceptance: public catalog, code and invites lead four browsers through full games and rematch (seed ${seed})`, async ({browser,request},info)=>{
  test.setTimeout(240000);
  await request.post(`http://127.0.0.1:5101/scenario/expanded-full-${seed}`);
- const group=await joinRoom(browser,4);const pages=group.pages,host=pages[0]!;const actions:Record<string,number>={};let reconnects=0,steps=0;
+ const group=await joinRoom(browser,4,{discover:true,joinByCode:true});const pages=group.pages,host=pages[0]!;const actions:Record<string,number>={};let reconnects=0,steps=0;
  try {
   for(const [i,page] of pages.entries()) {await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize([{width:1440,height:900},{width:1366,height:768},{width:768,height:1024},{width:375,height:812}][i]!);}
   let views=await settledExpanded(pages,198); const match=views[0]!.match;

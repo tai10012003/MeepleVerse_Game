@@ -1,12 +1,21 @@
 import { expect, type Browser, type Page } from "@playwright/test";
-export async function joinRoom(browser: Browser, count = 2) {
+export async function joinRoom(browser: Browser, count = 2, options: { discover?: boolean; joinByCode?: boolean } = {}) {
   const contexts = await Promise.all(Array.from({ length: count }, (_, index) => browser.newContext({ viewport: index === 0 ? { width: 1366, height: 900 } : { width: 375, height: 812 } })));
   const pages = await Promise.all(contexts.map(context => context.newPage())); const errors: string[] = [];
   pages.forEach(page => page.on("pageerror", error => errors.push(error.message)));
   try {
-    await pages[0]!.goto("/dev/uno-expanded/play"); await pages[0]!.getByLabel("Mọi người gọi bạn là gì?").fill("Host");
+    await pages[0]!.goto(options.discover ? "/" : "/games/uno-expanded");
+    if (options.discover) await pages[0]!.locator('article[data-game-id="uno-expanded"]').getByRole("link", { name: "Chơi ngay" }).click();
+    await pages[0]!.getByLabel("Mọi người gọi bạn là gì?").fill("Host");
     await pages[0]!.getByRole("button", { name: "Tạo phòng UNO Mở rộng", exact: true }).click(); await expect(pages[0]!).toHaveURL(/\/room\/[A-Z0-9]{4}$/);
-    for (let i = 1; i < count; i++) { await pages[i]!.goto(pages[0]!.url()); await pages[i]!.getByLabel("Mọi người gọi bạn là gì?").fill(`Guest${i}`); await pages[i]!.getByRole("button", { name: "Vào phòng", exact: true }).click(); await expect(pages[i]!.getByTestId("expanded-lobby")).toBeVisible(); }
+    for (let i = 1; i < count; i++) {
+      const byCode = options.joinByCode && i === 1;
+      await pages[i]!.goto(byCode ? "/games/uno-expanded" : pages[0]!.url());
+      if (byCode) { await pages[i]!.getByRole("button", { name: "Vào bằng mã", exact: true }).click(); await pages[i]!.getByLabel("Mã phòng", { exact: true }).fill(pages[0]!.url().split("/").at(-1)!); }
+      await pages[i]!.getByLabel("Mọi người gọi bạn là gì?").fill(`Guest${i}`);
+      await pages[i]!.getByRole("button", { name: "Vào phòng", exact: true }).click();
+      await expect(pages[i]!.getByTestId("expanded-lobby")).toBeVisible();
+    }
     await expect(pages[0]!.getByText(`${count}/4 ghế`, { exact: true })).toBeVisible();
     await expect(pages[1]!.getByRole("button", { name: "Chờ chủ phòng bắt đầu" })).toBeDisabled();
     await pages[0]!.getByRole("button", { name: "Bắt đầu ván", exact: true }).click();

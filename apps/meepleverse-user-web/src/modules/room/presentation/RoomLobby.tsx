@@ -20,7 +20,7 @@ export function RoomLobby({ view, connected, reconnecting, pending, error, onSta
   return <div className="room-shell" data-testid={expanded ? "expanded-lobby" : "basic-lobby"}>
     <RoomToolbar roomId={view.roomId} gameId={view.gameId} connected={connected} reconnecting={reconnecting} onLeave={onLeave} />
     <main className="shell lobby-main">
-      <div className="lobby-heading"><div><span className="eyebrow">{expanded ? "UNO Mở rộng · Bàn thử nội bộ" : "Góc tụ họp của cả hội"}</span><h1>Đợi bạn, đủ vui.</h1><p>Mời thêm bạn vào bàn. Chủ phòng sẽ bắt đầu khi mọi người sẵn sàng.</p></div><div className="game-stamp"><span>UNO</span><small>{expanded ? "MỞ RỘNG" : "CƠ BẢN"} · 2–4 NGƯỜI</small></div></div>
+      <div className="lobby-heading"><div><span className="eyebrow">{expanded ? "UNO Mở rộng · Đang mở bàn" : "Góc tụ họp của cả hội"}</span><h1>Đợi bạn, đủ vui.</h1><p>Mời thêm bạn vào bàn. Chủ phòng sẽ bắt đầu khi mọi người sẵn sàng.</p></div><div className="game-stamp"><span>UNO</span><small>{expanded ? "MỞ RỘNG" : "CƠ BẢN"} · 2–4 NGƯỜI</small></div></div>
       {view.paused && <div className="notice" role="status">Có người đang mất kết nối. Phòng giữ chỗ tối đa 30 giây; ván chơi tạm dừng trong lúc chờ.</div>}
       {error && <div className="error-message" role="alert">{error}</div>}
       {!connected && !reconnecting && <button className="button secondary" onClick={onReconnect}>Thử kết nối lại</button>}

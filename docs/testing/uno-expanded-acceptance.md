@@ -202,3 +202,13 @@ Xem [phạm vi animation](../development/uno-expanded-animations.md). Các ca n�
 E067 đã có bằng chứng qua UI local. E068 được bổ sung phạm vi bốn viewport, chưa xác nhận mọi tổ hợp hiển thị; E069 chưa nghiệm thu đầy đủ. Không suy ra đã kiểm tra nhóm người thật qua Internet hoặc sẵn sàng phát hành. Mọi đoạn “chưa chơi trọn ván UI” ở các mục lịch sử phía trên là trạng thái trước bước 10.
 
 Đã sửa thông báo Random để nêu lá lật công khai trong cùng thông báo. Đã sửa hai fixture Xả màu thiếu lá và thứ tự assertion của thông báo Up; các ca liên quan chạy lại đạt. Toàn bộ 357 kiểm thử backend (30 file), TypeScript và lint workspace đạt. Xem [phạm vi, kết quả và lệnh chạy lại bước 10](../development/uno-expanded-full-game-acceptance.md).
+
+
+## Hướng dẫn chơi bước 11 — 21/11/2026
+
+Đã có popup bộ 198 lá và 14 nhóm chức năng ở danh mục/giới thiệu, trang vào bàn nội bộ, sảnh và bàn. Tám ca UI liên quan trên Edge đều đạt, gồm bốn ca mới laptop/mobile, hai ca hướng dẫn Cơ bản và hai ca catalog; TypeScript/lint workspace đạt. Xác minh phòng vẫn nhận người/nước đánh khi đang đọc hướng dẫn và không tràn ngang. Đây là bằng chứng bổ sung cho phần hướng dẫn của E068, không đánh dấu toàn bộ E068/E069 hoàn tất. Xem [phạm vi và cách chạy bước 11](../development/uno-expanded-rules-ui.md).
+
+
+## Mở chơi thử bước 12 — 21/11/2026
+
+Đã qua 12 ca UI riêng biệt: catalog hai game chơi được, artwork gameplay, mobile/404/quay lại phòng, thư viện tách khỏi luồng chơi, hướng dẫn laptop/mobile, Cơ bản và hai ván Mở rộng đủ 198 lá. Hai ván xuất phát từ trang chủ, có người vào bằng mã và người vào link mời, reconnect và rematch. Một selector catalog cũ được sửa cho hai nút Chơi ngay và chạy lại đạt. 358 test backend (30 file), TypeScript/lint workspace đạt. Xem [mở chơi thử và giới hạn](../development/uno-expanded-beta.md). Chưa triển khai hoặc nghiệm thu qua Internet.

@@ -1,3 +1,4 @@
+import { ExpandedRulesButton } from "@/modules/games/uno-expanded/presentation/rules/ExpandedRulesButton";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -5,5 +6,5 @@ import { RoomEntryForm } from "@/modules/room/presentation/RoomEntryForm";
 export const metadata: Metadata = { title: "Bàn thử UNO Mở rộng | MeepleVerse", robots: { index: false, follow: false } };
 export default function ExpandedPlayPreviewPage() {
   if (process.env.NODE_ENV !== "development") notFound();
-  return <main className="shell invite-main"><div><Link className="brand" href="/">MeepleVerse</Link><span className="eyebrow">UNO Mở rộng · Bàn thử nội bộ</span><h1>Thêm lá mới.<br /><span className="accent">Thêm bất ngờ.</span></h1><p>Thử bàn chơi, cộng dồn, Tăng tiến, Battle và Đập tay cùng bạn bè.</p><Link className="button secondary" href="/dev/uno-expanded/cards">Xem bộ bài ↗</Link></div><RoomEntryForm gameId="uno-expanded" /></main>;
+  return <main className="shell invite-main"><div><Link className="brand" href="/">MeepleVerse</Link><span className="eyebrow">UNO Mở rộng · Bàn thử nội bộ</span><h1>Thêm lá mới.<br /><span className="accent">Thêm bất ngờ.</span></h1><p>Thử bàn chơi, cộng dồn, Tăng tiến, Battle và Đập tay cùng bạn bè.</p><ExpandedRulesButton /><Link className="button secondary" href="/dev/uno-expanded/cards">Xem bộ bài ↗</Link></div><RoomEntryForm gameId="uno-expanded" /></main>;
 }

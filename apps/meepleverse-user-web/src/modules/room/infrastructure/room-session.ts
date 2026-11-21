@@ -158,7 +158,6 @@ class RoomSession {
   }
   create(nickname: string): Promise<string | null> { return this.connect(() => this.sdk().create("uno", { nickname })); }
   createExpanded(nickname: string): Promise<string | null> {
-    if (process.env.NODE_ENV !== "development") return Promise.resolve(null);
     return this.connect(() => this.sdk().create("uno-expanded", { nickname }));
   }
   join(roomId: string, nickname: string): Promise<string | null> { return this.connect(() => this.sdk().joinById(roomId, { nickname })); }

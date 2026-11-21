@@ -10,7 +10,7 @@ import type { GameFactory } from "../modules/games/uno/application/services/uno-
 import type { ExpandedGameFactory } from "../modules/games/uno-expanded/application/services/uno-expanded-game.service.js";
 export interface RealtimeOptions {
   reconnectSeconds?: number; gameFactory?: GameFactory;
-  /** Trusted internal/test setup; the production entry point does not enable this. */
+  /** Both editions are enabled by default; a trusted server setup may explicitly disable Expanded. */
   enableExpandedRooms?: boolean; expandedGameFactory?: ExpandedGameFactory; expandedEffectTiming?: Partial<EffectTiming>;
 }
 export function createRealtimeServer(options: RealtimeOptions = {}) {

@@ -71,11 +71,11 @@ test("card studio: filters, large cards and hand/table dimensions fit mobile and
   await page.locator('[data-card-group="battle"]').screenshot({ path: info.outputPath("battle-corner-swords.png") });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
-test("card studio: catalog keeps Expanded unavailable and the preview has no gameplay actions", async ({ page }) => {
+test("card studio: artwork preview stays separate from playable Expanded entry", async ({ page }) => {
   await page.goto(previewPath);
   await expect(page.getByRole("button", { name: /Tạo phòng|Vào phòng|Bắt đầu/ })).toHaveCount(0);
   await page.getByRole("link", { name: "Giới thiệu game" }).click();
   await expect(page).toHaveURL(/\/games\/uno-expanded$/);
-  await expect(page.getByText("Đang phát triển", { exact: true })).toBeVisible();
-  await expect(page.locator("form")).toHaveCount(0);
+  await expect(page.getByText("Đang mở bàn", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Tạo phòng UNO Mở rộng", exact: true })).toBeEnabled();
 });

@@ -2,7 +2,7 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Bước 10: đã kiểm tra hai ván trọn bốn phiên trình duyệt, 17 tình huống chức năng và 10 ca mini-game; xem [kết quả nghiệm thu local](../development/uno-expanded-full-game-acceptance.md). Bàn mở nội bộ tại `/dev/uno-expanded/play`, bộ bài tại `/dev/uno-expanded/cards`. Production chưa mở phòng Mở rộng; kiểm thử người thật sau deploy còn riêng.
+- Bước 12: đã mở nhãn Chơi thử, tạo/vào phòng tại `/games/uno-expanded` và đăng ký API mặc định cho cả hai phiên bản; xem [luồng chơi thử](../development/uno-expanded-beta.md). Đã có [nghiệm thu local bước 10](../development/uno-expanded-full-game-acceptance.md) và hướng dẫn bước 11. Chưa triển khai server thật; kiểm thử người thật sau deploy còn riêng.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là lựa chọn riêng của MeepleVerse; trạng thái xác nhận theo từng bước nằm trong [bảng quyết định](uno-expanded-decisions.md). Không coi chúng là một luật gốc thống nhất cho mọi bộ ngoài thị trường.
@@ -362,3 +362,13 @@ Dùng chung mốc kích thước với Cơ bản; thêm hàng đợi đánh/bố
 ### Cập nhật Đập tay theo phản hồi chơi thử
 
 Nút ✋ luôn nằm cạnh UNO, chỉ cho bấm khi server mở cửa sổ phản ứng. Có đếm ngược, âm báo và trạng thái đã bấm. Phần số 5 dùng cùng cách căn chữ của bài số; nhóm bốn thẻ của +4 thường được thu nhỏ 10% ở cả hai phiên bản. Đây là luật MeepleVerse được chốt sau mốc 9B, thay thế quy định miễn người đánh/tự phạt đối phương ở bàn hai người.
+
+
+## Bước 11 — hướng dẫn chơi (21/11/2026)
+
+Có nút `?` và hướng dẫn đầy đủ theo luật đang chạy tại trang giới thiệu, sảnh và bàn nội bộ. Trang giới thiệu phân biệt 108/198 lá; popup có minh họa 14 nhóm, thao tác màu/mục tiêu/xả/÷2, UNO, mini-game và thời hạn. Mở hướng dẫn không tạm dừng ván. Xem [phạm vi và kiểm thử](../development/uno-expanded-rules-ui.md). Catalog vẫn Đang phát triển, chưa mở chơi công khai.
+
+
+## Bước 12 — mở chơi thử (21/11/2026)
+
+Danh mục chuyển Mở rộng sang Chơi thử/Chơi ngay, trang game có form tạo/vào phòng. API mặc định đăng ký cả hai loại phòng; frontend tạo Mở rộng không còn phụ thuộc development. Cơ bản giữ room type/luật riêng. Ảnh đại diện hai phiên bản dùng mặt bài SVG gameplay, gồm số/chức năng nền và số/chức năng mở rộng tương ứng. Xem [cấu hình và kiểm tra](../development/uno-expanded-beta.md). Các mô tả chỉ nội bộ ở các mục bước 4–11 là lịch sử trước mốc này.

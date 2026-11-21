@@ -11,7 +11,7 @@ export interface GameRoomRegistrySettings extends UnoRoomSettings {
 export function registerGameRooms(server: Server, settings: GameRoomRegistrySettings): void {
   // Keep the existing Basic room name for current clients and saved reconnection tokens.
   server.define("uno", createUnoRoomClass(settings));
-  if (settings.enableExpandedRooms === true) {
+  if (settings.enableExpandedRooms !== false) {
     server.define("uno-expanded", createUnoExpandedRoomClass({
       reconnectSeconds: settings.reconnectSeconds, codes: settings.codes, gameFactory: settings.expandedGameFactory, effectTiming: settings.expandedEffectTiming,
     }));

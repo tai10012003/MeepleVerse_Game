@@ -1,23 +1,25 @@
 # Sảnh game MeepleVerse
 
-- `/`: trang khám phá với minh họa board game và danh mục hai phiên bản UNO.
-- `/games`: danh mục trò chơi, dùng chung nguồn dữ liệu với trang chủ.
-- `/games/uno-basic`: giới thiệu bộ 108 lá, luật nhà và form tạo/vào phòng hiện có.
-- `/games/uno-expanded`: chỉ giới thiệu và nhãn Đang phát triển; không render form tạo phòng.
-- `/room/[id]`: link mời và bàn chơi giữ luồng hiện tại; layout chơi tách khỏi sảnh.
+- `/`: trang khám phá và danh mục hai phiên bản UNO.
+- `/games`: danh mục dùng cùng dữ liệu với trang chủ.
+- `/games/uno-basic`: bộ 108 lá, nhãn Đang mở bàn, hướng dẫn và tạo/vào phòng.
+- `/games/uno-expanded`: bộ 198 lá, nhãn Chơi thử, hướng dẫn và tạo/vào phòng. Nút Chơi ngay dẫn tới `#play`.
+- `/room/[id]`: link mời và bàn chơi; tự nhận diện đúng phiên bản. Layout phòng riêng với sảnh.
 - Slug không có trong danh mục trả 404.
 
-Model ở modules/game-catalog/model/games.ts là nguồn trạng thái, tên, mô tả và tags.
-GameCatalog được dùng ở trang chủ và danh mục. HomeScreen thuộc module game-catalog.
-Hình minh họa SVG/CSS có trong repo, không phụ thuộc dịch vụ ảnh hay font từ xa.
-Header/footer thể hiện nền tảng nhiều game, không gắn cố định với UNO.
+Nguồn dữ liệu là `modules/game-catalog/model/games.ts`. `available` và `beta` mở chơi; `development` chỉ giới thiệu. GameCatalog dùng chung ở trang chủ/danh mục. RoomEntryForm chọn đúng room type: `uno` cho Cơ bản, `uno-expanded` cho Mở rộng; vào bằng mã/link dùng room ID chung.
 
-Đây là bước giao diện. uno-basic và uno-expanded là mã danh mục frontend.
-UNO Cơ bản vẫn kết nối room type uno của API hiện tại; chưa thêm engine, room type
-hoặc endpoint cho bản mở rộng. Các tính năng mở rộng chỉ là dự kiến.
+Ảnh hai phiên bản dùng mặt bài SVG gameplay và các vector số/chức năng chung, không phải chữ thay hình. Cơ bản có số 7, Cấm, +4, số 2 và +2. Mở rộng có số 7, Tăng tiến, +8, Khiên và ×2. Nền xanh/vàng nâu và dải năm lá giúp nhận diện hai bộ; responsive giữ ảnh trong khung. Không dùng dịch vụ ảnh bên ngoài.
+
+Header/footer thể hiện nền tảng nhiều game. Nút hướng dẫn ở từng thẻ và trang game; trên sảnh/bàn hiển thị đúng luật theo phiên bản.
+
+Xem [hướng dẫn chơi](uno-expanded-rules-ui.md) và [mở chơi thử bước 12](uno-expanded-beta.md).
 
 ## Kiểm tra
-`npx.cmd --yes pnpm@10.34.9 --filter meepleverse-user-web test:e2e`
-Catalog tests kiểm tra điều hướng hai phiên bản, không có form chơi bản mở rộng,
-404 và không tràn ngang trên mobile. Các test chơi vào /games/uno-basic;
-link mời vẫn mở trực tiếp trang phòng.
+
+```powershell
+$env:PLAYWRIGHT_CHANNEL='msedge'
+npx.cmd --yes pnpm@10.34.9 --filter meepleverse-user-web test:e2e --grep 'home discovers both playable|mobile universe, catalog|catalog navigation works|a player can return'
+```
+
+Kiểm tra trạng thái/nút, mặt bài phân biệt hai bộ, tạo/vào phòng, quay lại phòng, điều hướng/404 và không tràn ngang trên mobile. Hai ván trọn trong `uno-expanded-full-game.spec.ts` bắt đầu từ trang chủ, có vào mã và link mời, kết thúc rồi rematch.

@@ -13,9 +13,23 @@ function endpointFor(runtime: ReturnType<typeof createRealtimeServer>) {
   return "http://127.0.0.1:" + address.port;
 }
 
-describe("production registration gate", () => {
-  it("does not register Expanded by default or trust client opt-in options", async () => {
+describe("game registration", () => {
+  it("registers both editions with the default server setup and shares unique room codes", async () => {
     const runtime = createRealtimeServer(); await runtime.server.listen(0, "127.0.0.1");
+    const sdk = new Client(endpointFor(runtime)); const rooms: Room[] = [];
+    try {
+      for (const name of ["uno", "uno-expanded"]) {
+        const room = await sdk.create(name, { nickname: name }); rooms.push(room);
+        room.reconnection.enabled = false; room.onMessage("room_view", () => {});
+        expect(room.name).toBe(name);
+      }
+      expect(rooms[0]!.roomId).toMatch(/^[A-Z0-9]{4}$/);
+      expect(rooms[1]!.roomId).toMatch(/^[A-Z0-9]{4}$/);
+      expect(rooms[0]!.roomId).not.toBe(rooms[1]!.roomId);
+    } finally { await Promise.all(rooms.map(room => room.leave())); await runtime.server.gracefullyShutdown(false); }
+  });
+  it("honors an explicit server disable and does not trust client opt-in options", async () => {
+    const runtime = createRealtimeServer({ enableExpandedRooms: false }); await runtime.server.listen(0, "127.0.0.1");
     const sdk = new Client(endpointFor(runtime));
     try {
       await expect(sdk.create("uno-expanded", { nickname: "A", enableExpandedRooms: true })).rejects.toThrow();

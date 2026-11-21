@@ -24,7 +24,7 @@ export function CardGallery() {
         <ExpandedCardFace card={{ kind: "wild-up", color: null }} /><ExpandedCardFace card={{ kind: "wild-shield", color: null }} /><ExpandedCardFace card={{ kind: "wild-target-four", color: null }} />
       </div>
     </section>
-    <div className="studio-note"><span aria-hidden="true">✦</span><p><strong>Đang phát triển.</strong> Đây là nơi duyệt mặt bài; bản Mở rộng chưa mở chơi công khai.</p><Link href="/games/uno-expanded">Giới thiệu game ↗</Link></div>
+    <div className="studio-note"><span aria-hidden="true">✦</span><p><strong>Thư viện mặt bài.</strong> UNO Mở rộng đã mở chơi thử trên trang game.</p><Link href="/games/uno-expanded">Giới thiệu game ↗</Link></div>
     <section className="studio-library" aria-labelledby="library-title">
       <div className="studio-library-heading"><h2 id="library-title">Thư viện mặt bài</h2><span aria-live="polite">{groups.length} nhóm · {groups.reduce((sum, group) => sum + group.faces.length, 0)} mẫu</span></div>
       <div className="studio-controls">

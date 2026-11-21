@@ -36,16 +36,14 @@
 .artwork-orbit { position:absolute; width:360px; height:175px; left:50%; top:58%; border:1px solid #91bd7666; border-radius:50%; transform:translate(-50%,-50%) rotate(-15deg); }
 .orbit-offset { width:315px; height:145px; transform:translate(-50%,-50%) rotate(20deg); opacity:.6; }
 .artwork-expanded .artwork-orbit { border-color:#dda85a55; }
-.catalog-card { position:absolute; width:92px; height:134px; top:49%; left:50%; border:5px solid #f4f0de; border-radius:11px; box-shadow:4px 13px 18px #0004; color:#fff; padding:7px; transform-origin:50% 90%; }
-.catalog-card::before { content:""; position:absolute; inset:12% 5%; border:2px solid #fffe; border-radius:50%; transform:rotate(27deg); }
-.catalog-card>span { font-size:.85rem; font-weight:900; font-style:italic; position:relative; }
-.catalog-card>strong { position:absolute; inset:0; display:grid; place-items:center; font:bold italic 2.8rem Arial,sans-serif; letter-spacing:-.09em; text-shadow:1px 2px #0005; }
-.card-back-one { background:#ed3838; transform:translate(-135%,-50%) rotate(-23deg); }
-.card-back-two { background:#efb82a; transform:translate(-35%,-50%) rotate(20deg); }
-.card-front { background:#3082a0; transform:translate(-83%,-43%) rotate(-3deg); }
-.artwork-expanded .card-back-one { background:#94643a; }
-.artwork-expanded .card-back-two { background:#61734a; }
-.artwork-expanded .card-front { background:#171f1b; border-color:#f1c887; }
+.card-showcase { position:absolute; inset:0; --cover-card-width:92px; --cover-step:54px; }
+.catalog-card { position:absolute; width:var(--cover-card-width); top:48%; left:50%; transform-origin:50% 90%; transform:translate(calc(-50% + var(--cover-offset)), -50%) rotate(var(--cover-angle)); filter:drop-shadow(3px 10px 9px #0005); }
+.catalog-card:nth-child(1) { --cover-offset:calc(var(--cover-step) * -2); --cover-angle:-23deg; z-index:1; }
+.catalog-card:nth-child(2) { --cover-offset:calc(var(--cover-step) * -1); --cover-angle:-12deg; z-index:3; }
+.catalog-card:nth-child(3) { --cover-offset:0px; --cover-angle:0deg; z-index:5; }
+.catalog-card:nth-child(4) { --cover-offset:var(--cover-step); --cover-angle:12deg; z-index:4; }
+.catalog-card:nth-child(5) { --cover-offset:calc(var(--cover-step) * 2); --cover-angle:23deg; z-index:2; }
+.catalog-card>.expanded-card-face { filter:none; }
 .artwork-star { position:absolute; color:#d3e8b4; }
 .star-a { top:21%; left:20%; font-size:1.5rem; }.star-b { top:39%; right:18%; font-size:1rem; }
 .artwork-expanded .artwork-star { color:#ecc78d; }
@@ -57,6 +55,7 @@
 .catalog-game-content { padding:25px 28px 28px; }
 .game-status { display:inline-flex; align-items:center; gap:7px; font-size:.64rem; font-weight:700; color:var(--green); }
 .game-status>i { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.status-beta { color:#efbf7c; }
 .status-development { color:#dcb67e; }
 .catalog-game-heading { display:flex; align-items:center; justify-content:space-between; margin:12px 0 10px; gap:12px; }
 .catalog-game-heading h3 { font-size:1.5rem; letter-spacing:-.035em; }.catalog-game-heading>span { font-size:1.5rem; color:#829c79; }
@@ -89,7 +88,7 @@
   .universe-scene { max-width:430px; width:100%; margin:8px auto 0; }.universe-scene>svg { max-height:310px; }
   .verse-section-heading { display:block; }.catalog-note { display:block; max-width:none; margin-top:12px; }.verse-section-heading h2 { font-size:1.55rem; }
   .game-catalog-grid { gap:20px; }.catalog-game-content { padding:20px; }.catalog-game-heading h3 { font-size:1.25rem; }.catalog-game-content>p { min-height:110px; font-size:.77rem; }
-  .game-artwork { height:210px; }.catalog-card { width:78px; height:113px; }.catalog-card>strong { font-size:2.2rem; }.star-a { left:12%; }.star-b { right:10%; }
+  .game-artwork { height:210px; }.card-showcase { --cover-card-width:72px; --cover-step:40px; }.catalog-card>strong { font-size:2.2rem; }.star-a { left:12%; }.star-b { right:10%; }
   .verse-how { gap:30px; grid-template-columns:1fr 1.3fr; }.verse-how h2 { font-size:1.65rem; }
   .verse-signoff { flex-wrap:wrap; padding:24px; }.verse-signoff>a { margin-left:0; width:100%; padding-left:51px; }
   .verse-detail-grid { grid-template-columns:1fr; gap:30px; }.verse-detail-copy>.game-artwork { height:200px; }.verse-basic-rules { gap:25px; grid-template-columns:1fr; }
@@ -98,7 +97,7 @@
   .verse-header { height:78px; gap:12px; }.verse-nav { display:none; }.verse-header .brand { font-size:1.15rem; gap:7px; }.verse-header .brand svg { width:24px; }.verse-room-link { padding:7px 12px; gap:10px; font-size:.75rem; }
   .verse-eyebrow { font-size:.55rem; letter-spacing:.1em; }.verse-hero h1 { margin:20px 0; }.verse-hero-actions { gap:19px; }.verse-hero-notes { gap:14px; font-size:.58rem; flex-wrap:wrap; margin-top:22px; }
   .universe-scene>svg { max-height:275px; }.scene-label { font-size:.5rem; }.verse-discover { padding-top:12px; padding-bottom:35px; }
-  .game-catalog-grid { grid-template-columns:1fr; }.game-artwork { height:220px; }.catalog-card { width:86px; height:125px; }.catalog-game-content { padding:23px; }.catalog-game-heading h3 { font-size:1.5rem; }.catalog-game-content>p { min-height:0; font-size:.82rem; }
+  .game-catalog-grid { grid-template-columns:1fr; }.game-artwork { height:220px; }.card-showcase { --cover-card-width:76px; --cover-step:41px; }.catalog-game-content { padding:23px; }.catalog-game-heading h3 { font-size:1.5rem; }.catalog-game-content>p { min-height:0; font-size:.82rem; }
   .verse-how { grid-template-columns:1fr; padding-block:32px; gap:25px; }.verse-how h2>br { display:none; }.verse-how h2 { font-size:1.8rem; }.verse-how>div>p>br { display:none; }.verse-signoff { margin-bottom:35px; padding:20px; gap:15px; }.verse-signoff>a { padding-left:47px; }.verse-signoff>p { font-size:.78rem; }
   .verse-footer { align-items:flex-start; gap:22px; }.verse-footer>span { font-size:.65rem; }.verse-footer nav { gap:25px; }
   .verse-games-page { padding-block:35px; }.verse-games-page>h1 { font-size:2.8rem; }.verse-page-intro { font-size:.85rem; margin-bottom:27px; }.verse-detail { padding-top:24px; }.verse-detail-grid { margin-top:25px; }.verse-detail-copy>h1 { font-size:2.7rem; }.verse-detail-copy>h2 { font-size:1.12rem; }.expansion-preview { padding:25px 22px; }.expansion-preview>h2 { font-size:1.7rem; }

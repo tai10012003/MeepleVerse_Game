@@ -63,8 +63,10 @@ ESLint được ghim ở 9.39.5 để tương thích các plugin của eslint-co
 
 Test UNO: xem docs/games/uno.md.
 
-## Bàn thử UNO Mở rộng
+## Hai phiên bản UNO
 
-`npm run dev:api` (hoặc `npm run dev`) hiện bật cả Cơ bản và Mở rộng trong development, qua entry chỉ nghe loopback và từ chối production. Không cần nhớ lệnh API riêng; `dev:api:expanded` là alias tương thích. Entry production/start vẫn chỉ bật Cơ bản.
+`npm run dev:api` và `npm run dev` dùng entry chuẩn `src/index.ts`, đăng ký cả `uno` và `uno-expanded`. Script start sau build cũng dùng cùng mặc định; không cần bật cờ development cho Mở rộng. `dev:api:expanded` vẫn là alias tương thích.
 
-Mở http://localhost:3000/dev/uno-expanded/play. Nếu API đã chạy trước khi cập nhật script, dừng terminal API bằng Ctrl+C rồi chạy lại `npm run dev:api`. Lỗi `provided room name "uno-expanded" not defined` nghĩa là tiến trình API cũ chỉ đăng ký Cơ bản; không phải mã phòng sai.
+Mở http://localhost:3000 rồi chọn Chơi ngay, hoặc vào http://localhost:3000/games/uno-expanded. Tạo phòng và mời bằng mã/link giống Cơ bản. Trang `/dev/uno-expanded/play` chỉ giữ cho công việc nội bộ, không còn là lối vào bắt buộc.
+
+Nếu API đang chạy từ trước thay đổi script, Ctrl+C rồi chạy lại `npm run dev:api`. Lỗi `provided room name "uno-expanded" not defined` nghĩa là tiến trình cũ chưa đăng ký Mở rộng. Xem [mở chơi thử](uno-expanded-beta.md). Bước này chưa triển khai lên server thật.
