@@ -62,3 +62,9 @@ Không có Docker, CI/CD hoặc AI.
 ESLint được ghim ở 9.39.5 để tương thích các plugin của eslint-config-next hiện tại. npm thông báo nhánh này đã hết hỗ trợ; cần nâng đồng bộ khi plugin hỗ trợ ESLint mới.
 
 Test UNO: xem docs/games/uno.md.
+
+## Bàn thử UNO Mở rộng
+
+`npm run dev:api` (hoặc `npm run dev`) hiện bật cả Cơ bản và Mở rộng trong development, qua entry chỉ nghe loopback và từ chối production. Không cần nhớ lệnh API riêng; `dev:api:expanded` là alias tương thích. Entry production/start vẫn chỉ bật Cơ bản.
+
+Mở http://localhost:3000/dev/uno-expanded/play. Nếu API đã chạy trước khi cập nhật script, dừng terminal API bằng Ctrl+C rồi chạy lại `npm run dev:api`. Lỗi `provided room name "uno-expanded" not defined` nghĩa là tiến trình API cũ chỉ đăng ký Cơ bản; không phải mã phòng sai.

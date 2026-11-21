@@ -25,7 +25,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
   const callbacks = { connected, reconnecting, pending: state.acting || state.starting, error: state.error,
     onLeave: () => setConfirmLeave(true), onReconnect: () => void state.session.restore(roomId) };
   if (current.status === "LOBBY") return <RoomLobby view={current} {...callbacks} onStart={() => void state.session.start()}>{dialog}</RoomLobby>;
-  if (expanded) return <ExpandedScreen view={expanded} {...callbacks} onCommand={command => void state.session.expandedCommand(command)} onRematch={() => void state.session.start()}>{dialog}</ExpandedScreen>;
+  if (expanded) return <ExpandedScreen view={expanded} {...callbacks} feedback={state.expandedFrames} interactionEpoch={state.expandedInteractionEpoch} onCommand={command => void state.session.expandedCommand(command)} onRematch={() => void state.session.start()}>{dialog}</ExpandedScreen>;
   if (view) return <UnoScreen view={view} {...callbacks} frames={state.frames} events={state.events} onCommand={command => void state.session.command(command)} onRematch={() => void state.session.start()}>{dialog}</UnoScreen>;
   return null;
 }

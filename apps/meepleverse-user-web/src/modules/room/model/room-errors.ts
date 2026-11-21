@@ -6,6 +6,10 @@ const messages: Record<string, string> = {
   INVALID_PHASE: "Lượt chơi vừa thay đổi. Hãy kiểm tra bàn rồi thử lại.",
   INVALID_COLOR: "Hãy chọn màu cho lá Wild.",
   INVALID_TARGET: "Hãy chọn một người chơi khác.",
+  STALE_EFFECT: "Thử thách vừa thay đổi. Hãy dùng lựa chọn đang hiển thị.",
+  ALREADY_RESPONDED: "Server đã ghi nhận phản hồi của bạn.",
+  EFFECT_NOT_OPEN: "Chưa có hiệu lệnh. Hãy chờ thử thách bắt đầu.",
+  EFFECT_EXPIRED: "Đã hết thời gian phản hồi. Đang chờ kết quả từ server.",
   INVALID_SELECTION: "Số lá được chọn chưa đúng. Hãy kiểm tra rồi thử lại.",
   INVALID_UNO_CALL: "Hô UNO trước nước đánh đưa tay bài xuống còn một lá.",
   GAME_ENDED: "Ván đã kết thúc. Chờ chủ phòng mở ván mới.",
@@ -20,6 +24,9 @@ const messages: Record<string, string> = {
 };
 export function roomError(error: unknown): string {
   const text = error instanceof Error ? error.message : String(error);
+  if (/provided room name\s+["']uno-expanded["']\s+not defined/i.test(text)) {
+    return "API đang chạy chưa bật UNO Mở rộng. Dừng API rồi chạy lại npm run dev:api.";
+  }
   for (const [code, message] of Object.entries(messages)) if (text.includes(code)) return message;
   if (/not found|not defined|invalid room|not available|locked|522|404/i.test(text)) return "Không tìm thấy phòng, phòng đã đầy hoặc ván đã bắt đầu. Kiểm tra lại mã phòng nhé.";
   return "Chưa kết nối được phòng. Hãy kiểm tra mạng và thử lại.";

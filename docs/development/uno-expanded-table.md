@@ -1,3 +1,5 @@
+> Mốc lịch sử 9A: giới hạn Up/Battle/High Five bên dưới đã được gỡ ở [9B — mini-game UI](uno-expanded-minigame-ui.md). Thao tác nền vẫn giữ như mô tả.
+
 # UNO Mở rộng — bàn nội bộ và thao tác nền (9A)
 
 Ngày: 20/11/2026. Không đổi luật hoặc cấu hình 198 lá. Chưa phát hành công khai.
@@ -7,8 +9,8 @@ Ngày: 20/11/2026. Không đổi luật hoặc cấu hình 198 lá. Chưa phát 
 Tại repo, mở hai terminal:
 
 ```powershell
-# API nội bộ, dùng thay dev:api, port 5000
-npm run dev:api:expanded
+# API development, port 5000
+npm run dev:api
 # Frontend, port 3000
 npm run dev:user
 ```
@@ -51,3 +53,5 @@ npx.cmd --yes pnpm@10.34.9 --filter meepleverse-user-web test:e2e --grep 'expand
 7 ca Mở rộng: chia đúng 198 lá với 4 browser/reload/privacy/mobile; drawn-card-only; +2 → Khiên → +4 và nhận 6; Target +4 không liền ghế/cancel/UNO; ÷2 có và không hô (hai ca, gồm reload lựa chọn); xả hết/rematch. Thêm 2 hồi quy sảnh/chọn màu Cơ bản. Cả 9 ca liên quan đã qua: 8 ca trong lượt đầu, ca chia bài sửa giả định chủ phòng đi đầu rồi chạy lại riêng. TypeScript/lint toàn workspace đạt.
 
 Fixture browser chỉ nằm trong entry test, không được import production. Không chạy lại ván chơi dài hay toàn bộ backend vì không sửa luật/transport server. Chưa nghiệm thu mini-game UI, đầy đủ animation hoặc bốn người thật qua Internet.
+
+Cập nhật khởi chạy: script `dev:api` mặc định đã bật cả hai phiên bản local; alias `dev:api:expanded` vẫn dùng được. API đang chạy bằng entry cũ cần dừng và chạy lại để áp dụng script mới. Frontend nhận diện lỗi room type chưa đăng ký và hướng dẫn khởi động lại đúng API.

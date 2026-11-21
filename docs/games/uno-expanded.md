@@ -2,7 +2,7 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Bước 9A: bàn/thao tác nền mở nội bộ tại `/dev/uno-expanded/play`; bộ bài xem tại `/dev/uno-expanded/cards`. Production chưa mở phòng Mở rộng; mini-game UI và animation chờ 9B/9C.
+- Bước 9B: bàn và cả ba mini-game mở nội bộ tại `/dev/uno-expanded/play`; bộ bài xem tại `/dev/uno-expanded/cards`. Production chưa mở phòng Mở rộng; animation/sound cues và nghiệm thu tổng thể chờ 9C.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là lựa chọn riêng của MeepleVerse; trạng thái xác nhận theo từng bước nằm trong [bảng quyết định](uno-expanded-decisions.md). Không coi chúng là một luật gốc thống nhất cho mọi bộ ngoài thị trường.
@@ -348,3 +348,7 @@ Bước này chưa nối mặt bài với bàn Mở rộng hoặc thêm điều 
 ## Bước 9A — tích hợp thao tác nền (20/11/2026)
 
 Đã nối sảnh, mặt bài, gợi ý server, bốc/bỏ lượt, cộng dồn/Khiên, màu/mục tiêu/÷2, UNO, kết quả và rematch. Xem [cách chạy và phạm vi](../development/uno-expanded-table.md). Up/Battle/High Five chưa có điều khiển nên UI tạm không cho chọn ba lá kích hoạt đó; backend giữ đầy đủ luật. Chưa mở chơi công khai hoặc nghiệm thu toàn bộ UI Mở rộng.
+
+## Bước 9B — giao diện Up/Battle/High Five (21/11/2026)
+
+Ba lá kích hoạt được mở lại trong UI. Có đáp Up theo gợi ý server, Battle chọn kín/khóa/lật/thưởng, High Five chuẩn bị/đập tay/thứ tự. UNO, timeout, phản hồi đồng thời và reconnect dùng trạng thái authoritative hiện có. Xem [phạm vi UI và kiểm thử](../development/uno-expanded-minigame-ui.md). Mục 9A phía trên là lịch sử; không còn khóa ba lá mini-game. Catalog tiếp tục Đang phát triển.

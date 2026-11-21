@@ -1,6 +1,7 @@
+import { isMiniFeedback, type MiniFeedbackFrame, type MiniDraw } from "@/modules/games/uno-expanded/model/mini-feedback";
 import { Client, type Room } from "@colyseus/sdk";
 import type { UnoRoomView, RoomAction, RoomActionReply, RoomGameEvents } from "@meepleverse/contracts/room";
-import type { UnoExpandedRoomView, UnoExpandedCommand, UnoExpandedRoomAction, UnoExpandedActionReply } from "@meepleverse/contracts/uno-expanded";
+import type { UnoExpandedRoomView, UnoExpandedCommand, UnoExpandedRoomAction, UnoExpandedActionReply, UnoExpandedGameEvents } from "@meepleverse/contracts/uno-expanded";
 import { expandedRoomView } from "@/modules/games/uno-expanded/infrastructure/uno-expanded-room.adapter";
 import type { UnoCommand } from "@meepleverse/contracts/uno";
 import { clearSession, readSession, saveSession } from "./session-storage";
@@ -13,14 +14,16 @@ type TransportReply = RoomActionReply | UnoExpandedActionReply;
 type Status = "idle" | "connecting" | "connected" | "reconnecting" | "disconnected";
 interface SessionState {
   status: Status; view: UnoRoomView | null; expandedView: UnoExpandedRoomView | null; error: string | null; starting: boolean; acting: boolean;
+  expandedFrames: MiniFeedbackFrame[]; expandedInteractionEpoch: number;
   frames: UnoVisualFrame[]; events: RoomGameEvents | null;
 }
-const initial: SessionState = { status: "idle", view: null, expandedView: null, error: null, starting: false, acting: false, frames: [], events: null };
+const initial: SessionState = { status: "idle", view: null, expandedView: null, error: null, starting: false, acting: false, frames: [], events: null, expandedFrames: [], expandedInteractionEpoch: 0 };
 class RoomSession {
   private state = initial;
   private readonly listeners = new Set<() => void>();
   private room: Room | null = null;
   private generation = 0;
+  private lastExpandedEventRevision = -1;
   private readonly visualPairs = new Map<number, { before: UnoRoomView; after: UnoRoomView }>();
   private pending: Promise<string | null> | null = null;
   private snapshotWaiter: (() => void) | null = null;
@@ -43,8 +46,12 @@ class RoomSession {
         const expandedView = expandedRoomView(view);
         const previousExpanded = this.state.expandedView;
         const clearError = this.state.status !== "connected" || view.matchId !== previousExpanded?.matchId || view.game?.revision !== previousExpanded?.game?.revision;
+        const resetFeedback = this.state.status !== "connected" || view.matchId !== previousExpanded?.matchId || !view.game || view.paused;
+        if (resetFeedback) this.lastExpandedEventRevision = view.game?.revision ?? -1;
+        const pausedNow = view.paused && !previousExpanded?.paused;
         this.visualPairs.clear();
         this.patch({ view: null, expandedView, status: "connected", frames: [], events: null,
+          ...(resetFeedback ? { expandedFrames: [] } : {}), expandedInteractionEpoch: this.state.expandedInteractionEpoch + Number(pausedNow),
           ...(!expandedView ? { error: "INVALID_ROOM_VIEW" } : clearError ? { error: null } : {}) });
         this.snapshotWaiter?.();
         return;
@@ -63,19 +70,33 @@ class RoomSession {
     room.onMessage("action_reply", (reply: TransportReply) => {
       if (current() && reply.requestId === this.actionWaiter?.id) this.actionWaiter.finish(reply);
     });
-    room.onMessage("game_events", (batch: RoomGameEvents) => {
-      if (!current() || batch.matchId !== this.state.view?.matchId) return;
-      const pair = this.visualPairs.get(batch.revision);
-      this.visualPairs.delete(batch.revision);
-      const id = batch.matchId + ":" + batch.revision;
-      const frame: UnoVisualFrame | null = pair && !this.state.view?.paused && !this.state.frames.some(frame => frame.id === id) ? {
-        id, matchId: batch.matchId, revision: batch.revision, before: pair.before, after: pair.after,
-        events: batch.events,
-      } : null;
-      this.patch({ events: batch, ...(frame ? { frames: [...this.state.frames, frame].slice(-16) } : {}) });
-    });
+    // The SDK room name comes from matchmaking and stays fixed for the connection.
+    if (room.name === "uno-expanded") {
+      room.onMessage("game_events", (batch: UnoExpandedGameEvents) => {
+        const view = this.state.expandedView;
+        if (!current() || !view || view.paused || batch.matchId !== view.matchId || !Number.isSafeInteger(batch.revision) ||
+          batch.revision <= this.lastExpandedEventRevision || batch.revision > (view.game?.revision ?? -1)) return;
+        this.lastExpandedEventRevision = batch.revision;
+        const events = batch.events.filter(isMiniFeedback);
+        if (!events.length) return;
+        const frame: MiniFeedbackFrame = { id: `${batch.matchId}:${batch.revision}`, matchId: batch.matchId, revision: batch.revision, events, draws: batch.events.filter((event): event is MiniDraw => event.type === "CARDS_DRAWN") };
+        this.patch({ expandedFrames: [...this.state.expandedFrames, frame].slice(-8) });
+      });
+    } else {
+      room.onMessage("game_events", (batch: RoomGameEvents) => {
+        if (!current() || batch.matchId !== this.state.view?.matchId) return;
+        const pair = this.visualPairs.get(batch.revision);
+        this.visualPairs.delete(batch.revision);
+        const id = batch.matchId + ":" + batch.revision;
+        const frame: UnoVisualFrame | null = pair && !this.state.view?.paused && !this.state.frames.some(frame => frame.id === id) ? {
+          id, matchId: batch.matchId, revision: batch.revision, before: pair.before, after: pair.after,
+          events: batch.events,
+        } : null;
+        this.patch({ events: batch, ...(frame ? { frames: [...this.state.frames, frame].slice(-16) } : {}) });
+      });
+    }
     room.onDrop(() => {
-      if (current()) { this.actionWaiter?.finish(null); this.visualPairs.clear(); this.patch({ status: "reconnecting", starting: false, acting: false, frames: [] }); }
+      if (current()) { this.actionWaiter?.finish(null); this.visualPairs.clear(); this.patch({ status: "reconnecting", starting: false, acting: false, frames: [], expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1 }); }
     });
     room.onReconnect(() => {
       if (!current()) return;
@@ -87,7 +108,7 @@ class RoomSession {
       if (!current()) return;
       this.actionWaiter?.finish(null);
       this.room = null;
-      this.patch({ status: "disconnected", starting: false, acting: false, error: "Kết nối phòng đã đóng. Bạn có thể thử kết nối lại hoặc rời phòng." });
+      this.patch({ status: "disconnected", starting: false, acting: false, expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1, error: "Kết nối phòng đã đóng. Bạn có thể thử kết nối lại hoặc rời phòng." });
     });
     room.onError((_code, message) => { if (current()) this.patch({ error: roomError(message ?? "connection failed") }); });
   }
@@ -96,7 +117,8 @@ class RoomSession {
     if (this.room) return Promise.resolve(this.room.roomId);
     const generation = ++this.generation;
     this.visualPairs.clear();
-    this.patch({ status: "connecting", error: null, view: null, expandedView: null, frames: [], events: null });
+    this.lastExpandedEventRevision = -1;
+    this.patch({ expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1, status: "connecting", error: null, view: null, expandedView: null, frames: [], events: null });
     const task = (async () => {
       let joined: Room | null = null;
       try {

@@ -173,3 +173,9 @@ Playwright `uno-expanded-cards.spec.ts` có 3 ca: đủ 22 kind/60 mẫu, nhãn 
 `uno-expanded.spec.ts` thay màn notice cũ bằng 7 ca nền: 4 browser/bộ 198/reload; drawn-card-only; Khiên/cộng dồn/màu; Target +4; ÷2 có/không hô UNO; kết thúc xả màu/rematch. Thêm 2 hồi quy sảnh/Wild Cơ bản, cả 9 ca liên quan qua. Đã xem ảnh bàn mobile và kiểm tra không tràn, chỉ render mặt sau đối thủ. Typecheck/lint workspace đạt. Xem [phạm vi 9A](../development/uno-expanded-table.md).
 
 Đây là nghiệm thu UI từng phần. Mini-game, hiệu ứng/sound cues và E067 chơi trọn ván Mở rộng bằng giao diện chờ 9B/9C; không suy ra đã sẵn sàng phát hành.
+
+## Kiểm tra UI 9B — 21/11/2026
+
+`uno-expanded-minigames.spec.ts`: 7 ca Up/Battle/High Five, gồm privacy trước lật, draft khi đối thủ khóa, chọn đồng thời, UNO ở hai giao dịch Battle, reload giữa thưởng, thứ tự/attempt High Five sau reload và timeout server. Chạy cùng ca Cấm xanh lá 1366px để bảo vệ queue sự kiện Cơ bản: 8/8 qua. Sau thêm số phạt Battle, kiểm lại ca liên quan cùng ÷2/UNO và thông báo API cũ: 3/3 qua. Tổng 10 ca riêng biệt được xác minh, typecheck/lint workspace đạt.
+
+Đã gỡ giới hạn kích hoạt ba mini-game trong UI nội bộ. Chưa coi E067 chơi trọn ván bằng UI, E069 trải nghiệm hiệu ứng đầy đủ hoặc kiểm thử bốn người thật qua Internet là hoàn thành. Xem [tài liệu 9B](../development/uno-expanded-minigame-ui.md).

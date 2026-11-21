@@ -1,24 +1,5 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
-async function joinRoom(browser: Browser, count = 2) {
-  const contexts = await Promise.all(Array.from({ length: count }, (_, index) => browser.newContext({ viewport: index === 0 ? { width: 1366, height: 900 } : { width: 375, height: 812 } })));
-  const pages = await Promise.all(contexts.map(context => context.newPage())); const errors: string[] = [];
-  pages.forEach(page => page.on("pageerror", error => errors.push(error.message)));
-  try {
-    await pages[0]!.goto("/dev/uno-expanded/play"); await pages[0]!.getByLabel("Mọi người gọi bạn là gì?").fill("Host");
-    await pages[0]!.getByRole("button", { name: "Tạo phòng UNO Mở rộng", exact: true }).click(); await expect(pages[0]!).toHaveURL(/\/room\/[A-Z0-9]{4}$/);
-    for (let i = 1; i < count; i++) { await pages[i]!.goto(pages[0]!.url()); await pages[i]!.getByLabel("Mọi người gọi bạn là gì?").fill(`Guest${i}`); await pages[i]!.getByRole("button", { name: "Vào phòng", exact: true }).click(); await expect(pages[i]!.getByTestId("expanded-lobby")).toBeVisible(); }
-    await expect(pages[0]!.getByText(`${count}/4 ghế`, { exact: true })).toBeVisible();
-    await expect(pages[1]!.getByRole("button", { name: "Chờ chủ phòng bắt đầu" })).toBeDisabled();
-    await pages[0]!.getByRole("button", { name: "Bắt đầu ván", exact: true }).click();
-    for (const page of pages) await expect(page.getByTestId("expanded-board")).toBeVisible();
-    return { pages, errors, close: async () => { await Promise.all(contexts.map(context => context.close())); } };
-  } catch (error) { await Promise.all(contexts.map(context => context.close())); throw error; }
-}
-async function play(page: Page, id: string) {
-  await page.locator(`.expanded-hand-card[data-card-id="${id}"]`).click(); await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
-}
-async function confirmColor(page: Page, name: string) { const dialog = page.getByRole("dialog"); await dialog.getByRole("button", { name, exact: true }).click(); await dialog.getByRole("button", { name: "Xác nhận đánh bài" }).click(); await expect(dialog).toHaveCount(0); }
-async function nextRevision(page: Page, revision: number) { await expect(page.getByTestId("expanded-screen")).toHaveAttribute("data-revision", String(revision)); }
+import { expect, test } from "@playwright/test";
+import { joinRoom, play, confirmColor, nextRevision } from "./helpers/expanded-room";
 
 test("expanded 9A: internal lobby deals a real 198-card deck, keeps opponent faces private and restores on reload", async ({ browser, request }, info) => {
   await request.post("http://127.0.0.1:5101/scenario/normal"); const group = await joinRoom(browser, 4); const [a, b] = group.pages;
@@ -97,4 +78,13 @@ test("expanded 9A: color discard finishes and host rematches with a new match ID
     await a!.getByRole("button", { name: "Chơi ván mới" }).click(); await expect(a!.getByTestId("expanded-board")).toBeVisible();
     await expect(a!.getByTestId("expanded-screen")).not.toHaveAttribute("data-match-id", matchId!); await expect(a!.getByTestId("expanded-hand-count")).toHaveText("2 lá"); expect(group.errors).toEqual([]);
   } finally { await group.close(); }
+});
+
+test("expanded 9A: an older Basic-only API explains how to enable Expanded instead of reporting a missing room", async ({ page }) => {
+  await page.route("**/matchmake/create/uno-expanded", route => route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ code: 520, error: 'provided room name "uno-expanded" not defined' }) }));
+  await page.goto("/dev/uno-expanded/play");
+  await page.getByLabel("Mọi người gọi bạn là gì?").fill("Host");
+  await page.getByRole("button", { name: "Tạo phòng UNO Mở rộng", exact: true }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "API đang chạy chưa bật UNO Mở rộng" })).toHaveText("API đang chạy chưa bật UNO Mở rộng. Dừng API rồi chạy lại npm run dev:api.");
+  await expect(page.getByRole("button", { name: "Tạo phòng UNO Mở rộng", exact: true })).toBeEnabled();
 });

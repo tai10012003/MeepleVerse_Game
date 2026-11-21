@@ -50,3 +50,5 @@ Expanded step 7 keeps Up/Battle/High Five state, timers and concurrency policy i
 Expanded step 8 reuses common standard artwork through a compatibility re-export for Basic; see [card artwork and development preview](uno-expanded-card-artwork.md). Expanded symbols and the development-only gallery remain in their edition, with no rule or room dependency.
 
 Expanded 9A shares ColorChoices and discard placement (Basic compatibility exports retained), plus RoomLobby metadata. Commands and game screens stay edition-specific. See [internal Expanded table](uno-expanded-table.md).
+
+Expanded 9B keeps mini-game controllers, response drafts and public feedback in its own module. The SDK room name selects the typed event handler; Basic retains its existing visual queue. CardChoiceGrid belongs to Expanded and is shared by divide-two and Battle there. See [mini-game UI](uno-expanded-minigame-ui.md).
