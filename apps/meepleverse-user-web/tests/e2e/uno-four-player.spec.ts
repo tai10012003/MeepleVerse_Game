@@ -1,3 +1,4 @@
+import { chooseAndConfirmColor } from "./helpers/color-picker";
 import { expect, test, type Page } from "@playwright/test";
 const colors = { red: "Đỏ", yellow: "Vàng", green: "Xanh lá", blue: "Xanh dương" };
 async function snapshot(page: Page) {
@@ -76,7 +77,7 @@ test("four independent browsers finish a full 108-card game, keep synchronized a
       let action: string;
       if (phase === "penalty-color" || phase === "choose-color") {
         action = "choose-color";
-        await actor.getByRole("button", { name: "Đỏ", exact: true }).click();
+        await chooseAndConfirmColor(actor, "Đỏ");
       } else {
         const legal = actor.locator('.uno-hand-card:not(:disabled)');
         if (await legal.count()) {
@@ -84,7 +85,7 @@ test("four independent browsers finish a full 108-card game, keep synchronized a
           if (await uno.getAttribute("aria-disabled") === "false") await uno.click();
           const card = legal.first(); action = "play:" + await card.getAttribute("data-card-kind");
           await card.click(); await actor.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
-          if (action === "play:wild") await actor.getByRole("button", { name: colors.red, exact: true }).click();
+          if (action === "play:wild") await chooseAndConfirmColor(actor, colors.red);
         } else {
           action = phase === "draw-stack" ? "accept-debt" : phase === "drawn" ? "pass" : "draw";
           await actor.getByRole("button", { name: phase === "draw-stack" ? /^Nhận \d+ lá$/ : phase === "drawn" ? "Bỏ lượt" : "Bốc bài", exact: true }).click();

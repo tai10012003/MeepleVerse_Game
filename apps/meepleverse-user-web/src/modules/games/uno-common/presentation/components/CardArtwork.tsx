@@ -35,10 +35,12 @@ export function ActionArtwork({ kind }: { kind: UnoStandardCard["kind"] }) {
       <MiniCard x={31} y={62} fill="#fafaf5" />
     </> : <>
       <ellipse cx="50" cy="70" rx="32" ry="53" transform="rotate(28 50 70)" fill="#f8f8f3" />
+      <g data-draw-four-cards="true" transform="translate(50 70) scale(.9) translate(-50 -70)">
       <MiniCard x={19} y={72} fill={inks.green} />
       <MiniCard x={34} y={48} fill={inks.blue} />
       <MiniCard x={58} y={33} fill={inks.yellow} />
       <MiniCard x={46} y={59} fill={inks.red} />
+      </g>
     </>}
   </svg>;
 }
@@ -61,9 +63,9 @@ function SkipShape() {
 export function SkipMark() {
   return <svg className="skip-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><SkipShape /></svg>;
 }
-export function NumberArtwork({ value }: { value: number }) {
+export function NumberArtwork({ value, fill = "#fff", strokeWidth = 2.4 }: { value: number; fill?: string; strokeWidth?: number }) {
   return <svg className="card-number-art" viewBox="0 0 100 140" aria-hidden="true" focusable="false">
-    <text x="47" y="70" dominantBaseline="central" textAnchor="middle" fill="#fff" stroke="#111" strokeWidth="2.4" paintOrder="stroke" fontFamily="Arial Black, Arial, sans-serif" fontWeight="900" fontStyle="italic" fontSize="66">{value}</text>
+    <text x="47" y="70" dominantBaseline="central" textAnchor="middle" fill={fill} stroke="#111" strokeWidth={strokeWidth} paintOrder="stroke" fontFamily="Arial Black, Arial, sans-serif" fontWeight="900" fontStyle="italic" fontSize="66">{value}</text>
     {(value === 6 || value === 9) && <path d="M34 109H65" stroke="#fff" strokeWidth="3" />}
   </svg>;
 }

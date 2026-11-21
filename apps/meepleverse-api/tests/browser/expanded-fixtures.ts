@@ -5,7 +5,7 @@ const num = (id: string, color: "red" | "blue" | "green" | "yellow" = "red", val
 const wild = (id: string, kind: Extract<Card, { color: null }>["kind"] = "wild"): Card => ({ id, kind, color: null });
 export function expandedBrowserFixture(ids: readonly string[], scenario: string): UnoExpandedGame {
   if (!scenario.startsWith("expanded-")) return createExpandedGame(ids, seeded(17));
-  const hands: Card[][] = scenario === "expanded-up" ? [[wild("up", "wild-up"), num("a-low", "blue", 1), num("a-zero", "blue", 0)],
+  const hands: Card[][] = scenario.startsWith("expanded-effect-") ? [[{ id: "action", kind: scenario.endsWith("skip") ? "skip" : "reverse", color: "red" }, num("a-keep", "blue", 1), num("a-other", "green", 2)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]] : scenario === "expanded-up" ? [[wild("up", "wild-up"), num("a-low", "blue", 1), num("a-zero", "blue", 0)],
     [{ id: "five", kind: "high-five", color: "red", value: 5 }, num("b-low", "green", 1)], [{ id: "seven", kind: "seven-change-left", color: "yellow", value: 7 }, num("c-low", "green", 1)]]
     : scenario === "expanded-battle" ? [[wild("battle", "wild-battle"), num("secret-a", "red", 9), num("reward-a", "blue", 1), num("reward-b", "blue", 2), num("keep-a", "blue", 3)],
       [num("secret-b", "red", 3), num("keep-b", "blue", 4)], [num("observer", "green", 5)]]

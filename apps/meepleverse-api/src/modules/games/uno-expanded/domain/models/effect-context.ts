@@ -1,6 +1,6 @@
 import { requireExpanded } from "../errors/uno-expanded.errors.js";
 export interface EffectTiming { highFivePrepareMs: number; highFiveWindowMs: number; battleChoiceMs: number }
-export const DEFAULT_EFFECT_TIMING: Readonly<EffectTiming> = Object.freeze({ highFivePrepareMs: 1500, highFiveWindowMs: 8000, battleChoiceMs: 20000 });
+export const DEFAULT_EFFECT_TIMING: Readonly<EffectTiming> = Object.freeze({ highFivePrepareMs: 1000, highFiveWindowMs: 5000, battleChoiceMs: 20000 });
 export interface EffectContext { now: number; timing: EffectTiming }
 export type EffectOptions = { now?: number; timing?: Partial<EffectTiming> };
 export function effectContext(options: EffectOptions = {}): EffectContext {

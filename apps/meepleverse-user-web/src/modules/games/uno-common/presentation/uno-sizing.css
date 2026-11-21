@@ -1,0 +1,5 @@
+.uno-page,.expanded-game { --table-card-width:86px; --table-card-height:124px; --table-back-width:64px; --table-deck-width:68px; --table-deck-height:95px; }
+@media(max-width:900px) { .uno-page,.expanded-game { --table-back-width:40px; } }
+@media(max-width:640px) { .uno-page,.expanded-game { --table-card-width:63px; --table-card-height:93px; --table-deck-width:48px; --table-deck-height:69px; } }
+@media(max-height:620px) { .uno-page,.expanded-game { --table-card-width:53px; --table-card-height:77px; --table-back-width:34px; --table-deck-width:40px; --table-deck-height:58px; } }
+@media(max-height:500px) { .uno-page,.expanded-game { --table-card-width:40px; --table-card-height:57px; --table-back-width:29px; --table-deck-width:32px; --table-deck-height:46px; } }

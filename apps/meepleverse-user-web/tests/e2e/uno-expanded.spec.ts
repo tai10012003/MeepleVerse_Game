@@ -43,11 +43,11 @@ test("expanded 9A: target +4 commits color and a non-adjacent target atomically,
   await request.post("http://127.0.0.1:5101/scenario/expanded-target"); const group = await joinRoom(browser, 3); const [a, b, c] = group.pages;
   try {
     await a!.getByRole("button", { name: "Hô UNO", exact: true }).click(); await play(a!, "target");
-    let dialog = a!.getByRole("dialog"); await dialog.getByRole("button", { name: "Vàng", exact: true }).click(); await expect(dialog.getByRole("button", { name: "Xác nhận đánh bài" })).toBeDisabled();
+    let dialog = a!.getByRole("dialog"); await dialog.getByRole("button", { name: "Vàng", exact: true }).click(); await expect(dialog.getByRole("button", { name: "Xác nhận" })).toBeDisabled();
     await dialog.getByRole("button", { name: "Chọn lá khác" }).click(); await nextRevision(a!, 0);
     await expect(a!.getByRole("button", { name: "Hô UNO", exact: true })).toHaveAttribute("aria-pressed", "true");
     await a!.getByRole("button", { name: "Đánh lá bài", exact: true }).click(); dialog = a!.getByRole("dialog");
-    await dialog.getByRole("button", { name: "Guest2", exact: true }).click(); await dialog.getByRole("button", { name: "Xác nhận đánh bài" }).click();
+    await dialog.getByRole("button", { name: "Guest2", exact: true }).click(); await dialog.getByRole("button", { name: "Xác nhận" }).click();
     await nextRevision(c!, 1); await expect(a!.getByTestId("expanded-hand-count")).toHaveText("1 lá");
     await expect(b!.getByRole("button", { name: "Nhận 4 lá", exact: true })).toBeDisabled();
     await c!.getByRole("button", { name: "Nhận 4 lá", exact: true }).click(); await nextRevision(a!, 2);
@@ -61,10 +61,10 @@ for (const declareUno of [true, false]) test(`expanded 9A: divide selection is e
     await play(a!, "divide");
     if (declareUno) { await a!.getByRole("dialog").getByRole("button", { name: "Xanh lá", exact: true }).click(); await a!.reload(); await expect(a!.getByTestId("expanded-board")).toBeVisible(); await expect(a!.getByRole("dialog")).toHaveCount(0); await expect(a!.getByRole("button", { name: "Hô UNO", exact: true })).toHaveAttribute("aria-pressed", "false"); await play(a!, "divide"); }
     const dialog = a!.getByRole("dialog"); await dialog.getByRole("button", { name: "Xanh lá", exact: true }).click();
-    await expect(dialog.getByRole("button", { name: "Xác nhận đánh bài" })).toBeDisabled(); await dialog.locator('[data-choice-card-id="return-blue"]').click();
+    await expect(dialog.getByRole("button", { name: "Xác nhận" })).toBeDisabled(); await dialog.locator('[data-choice-card-id="return-blue"]').click();
     await expect(dialog.locator('[data-choice-card-id="keep-red"]')).toBeDisabled();
     if (declareUno) await dialog.getByRole("button", { name: "Hô UNO", exact: true }).click();
-    await dialog.getByRole("button", { name: "Xác nhận đánh bài" }).click(); await nextRevision(b!, 1);
+    await dialog.getByRole("button", { name: "Xác nhận" }).click(); await nextRevision(b!, 1);
     await expect(a!.getByTestId("expanded-hand-count")).toHaveText(`${declareUno ? 1 : 3} lá`);
     await expect(b!.locator('[data-card-id="return-blue"]')).toHaveCount(0); await expect(a!.locator('[data-card-id="b-green"]')).toHaveCount(0);
     await expect(a!.getByTestId("direction-ring")).toHaveAttribute("data-color", "green"); expect(group.errors).toEqual([]);

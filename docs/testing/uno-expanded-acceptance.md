@@ -75,10 +75,10 @@ Trừ khi nói khác, bốn ghế A→B→C→D theo chiều +1, đủ kho bốc
 | E043 | Random lật số 0 | Giữ một lá, không rút thêm. |
 | E044 | Random lật High Five/+8/Wild | Theo D10 giữ một lá, không dùng 5/8 làm số rút; không chạy chức năng vừa lật. |
 | E045 | Shield trong Tornado/Random/Battle/Up/High Five | Không được dùng như phản ứng né hiệu ứng. |
-| E046 | High Five đủ ba người phản ứng | Chỉ người kích hoạt được miễn, người phản ứng cuối bốc 2; lượt thường trở về sau người kích hoạt. |
-| E047 | Bấm trước 1,5 giây, bấm hai lần, timestamp giả | Không thay thứ tự; server quyết định theo thời gian nhận hợp lệ. |
-| E048 | High Five: một/nhiều người không bấm | Theo D11 phạt đúng một người; trường hợp nhiều người dùng thứ tự ghế đã định. |
-| E049 | High Five hai người | Tự phạt đối thủ duy nhất 2, không chờ vô ích. |
+| E046 | High Five đủ mọi người phản ứng | Kể cả người kích hoạt tham gia; người phản ứng cuối bốc 2; lượt thường trở về sau người kích hoạt. |
+| E047 | Bấm trước 1 giây, bấm hai lần, timestamp giả | Không thay thứ tự; server quyết định theo thời gian nhận hợp lệ. |
+| E048 | High Five: một/nhiều người không bấm | Mỗi người chưa bấm khi hết cửa sổ 5 giây đều bốc 2, người đã bấm không bị phạt. |
+| E049 | High Five hai người | Cả hai phải bấm: đủ phản hồi thì người cuối +2; không ai bấm thì cả hai +2. |
 | E050 | Hai người gửi đập tay cùng revision gần đồng thời | Cả hai có thể được ghi nhận, không loại một người do global revision tăng; server vẫn phân thứ tự nhận. |
 
 ## F. UNO và kết thúc
@@ -179,3 +179,17 @@ Playwright `uno-expanded-cards.spec.ts` có 3 ca: đủ 22 kind/60 mẫu, nhãn 
 `uno-expanded-minigames.spec.ts`: 7 ca Up/Battle/High Five, gồm privacy trước lật, draft khi đối thủ khóa, chọn đồng thời, UNO ở hai giao dịch Battle, reload giữa thưởng, thứ tự/attempt High Five sau reload và timeout server. Chạy cùng ca Cấm xanh lá 1366px để bảo vệ queue sự kiện Cơ bản: 8/8 qua. Sau thêm số phạt Battle, kiểm lại ca liên quan cùng ÷2/UNO và thông báo API cũ: 3/3 qua. Tổng 10 ca riêng biệt được xác minh, typecheck/lint workspace đạt.
 
 Đã gỡ giới hạn kích hoạt ba mini-game trong UI nội bộ. Chưa coi E067 chơi trọn ván bằng UI, E069 trải nghiệm hiệu ứng đầy đủ hoặc kiểm thử bốn người thật qua Internet là hoàn thành. Xem [tài liệu 9B](../development/uno-expanded-minigame-ui.md).
+
+
+## Kiểm tra UI 9C — 21/11/2026
+
+Đã qua 7 ca liên quan: so kích thước trực tiếp với Cơ bản trên năm viewport, bốc chậm/riêng tư/reload, +2/không báo trùng, cấm, đảo chiều, High Five bốn client và hồi quy đánh lá số Cơ bản. Đã xem ảnh bàn Mở rộng ở desktop và mobile. Typecheck/lint workspace đạt. Kiểm thử thông báo Cơ bản đo timeline opacity thực thay vì chờ thêm 1.2 giây sau nhiều assertion vốn đã tiêu thụ thời gian hiển thị.
+
+Xem [phạm vi animation](../development/uno-expanded-animations.md). Các ca này chưa xác nhận E067 (chơi trọn ván Mở rộng bằng UI), toàn bộ tiêu chí E069 hoặc thử người thật qua Internet.
+
+
+## Cập nhật artwork và luật Đập tay — 21/11/2026
+
+Đã qua 357 kiểm thử backend (30 file), gồm clock/concurrency/reconnect qua WebSocket và bảo toàn bộ bài. Tám ca giao diện liên quan đạt sau khi kiểm tra/cố định nút chỉ nhấp nháy ánh sáng: artwork 60 mẫu, bố cục sáu viewport, bốn người phản hồi, reconnect, timeout nhiều người, hai thứ tự ở bàn hai người và cả hai không bấm trong cửa sổ thật 5 giây. TypeScript frontend/backend và lint đạt. Đã xem ảnh nút trên mobile cùng ảnh +4/High Five phóng lớn.
+
++4 thường dùng artwork chung thu nhỏ riêng nhóm bốn thẻ 10%, giữ nguyên elip. High Five dùng cách căn số chung với Cơ bản. Không thay các luật còn lại, không mở phát hành công khai hoặc suy ra đã nghiệm thu trọn ván trên môi trường triển khai.

@@ -1,5 +1,7 @@
 import { discardPlacement } from "../../model/discard-layout";
-import type { UnoVisualFrame } from "../../model/uno-effects";
+export interface GeometryFrame { after: { selfPlayerId: string; game: { topCard: { id: string } } | null } }
+export const basicAnchors = { card: ".uno-hand-card", opponent: ".opponent[data-player-id]", hand: ".hand-scroll", deck: ".draw-pile", discard: ".discard-stack", table: ".uno-table", identity: ".opponent-identity", handArea: ".uno-hand" };
+export type GeometryAnchors = typeof basicAnchors;
 export interface Point { x: number; y: number }
 export interface EffectGeometry {
   deck: Point; discard: Point; turn: Point; width: number; height: number;
@@ -11,33 +13,33 @@ function center(element: Element | null): Point | undefined {
   const rect = element.getBoundingClientRect();
   return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }
-export function cacheGeometry(cache: GeometryCache, selfId: string): void {
-  document.querySelectorAll<HTMLElement>(".uno-hand-card").forEach(element => {
+export function cacheGeometry(cache: GeometryCache, selfId: string, anchors: GeometryAnchors = basicAnchors): void {
+  document.querySelectorAll<HTMLElement>(anchors.card).forEach(element => {
     if (element.dataset.cardId) cache.cards.set(element.dataset.cardId, center(element)!);
   });
-  document.querySelectorAll<HTMLElement>(".opponent[data-player-id]").forEach(element => {
+  document.querySelectorAll<HTMLElement>(anchors.opponent).forEach(element => {
     if (element.dataset.playerId) cache.players.set(element.dataset.playerId, center(element.querySelector(".opponent-hand")) ?? center(element)!);
   });
-  const hand = center(document.querySelector(".hand-scroll"));
+  const hand = center(document.querySelector(anchors.hand));
   if (hand) cache.players.set(selfId, hand);
-  cache.deck = center(document.querySelector(".draw-pile")) ?? cache.deck;
-  cache.discard = center(document.querySelector(".discard-stack")) ?? cache.discard;
+  cache.deck = center(document.querySelector(anchors.deck)) ?? cache.deck;
+  cache.discard = center(document.querySelector(anchors.discard)) ?? cache.discard;
 }
-export function effectGeometry(cache: GeometryCache, frame: UnoVisualFrame): EffectGeometry {
-  cacheGeometry(cache, frame.after.selfPlayerId);
-  const pile = document.querySelector(".discard-stack")?.getBoundingClientRect();
+export function effectGeometry(cache: GeometryCache, frame: GeometryFrame, anchors: GeometryAnchors = basicAnchors): EffectGeometry {
+  cacheGeometry(cache, frame.after.selfPlayerId, anchors);
+  const pile = document.querySelector(anchors.discard)?.getBoundingClientRect();
   const width = pile?.width ?? (innerWidth <= 640 ? 60 : 82);
   const height = pile?.height ?? Math.round(width * 1.45);
   const top = frame.after.game?.topCard;
   const placement = top ? discardPlacement(top.id) : { x: 0, y: 0 };
   const base = cache.discard ?? { x: innerWidth / 2, y: innerHeight * .43 };
-  const table = document.querySelector(".uno-table")?.getBoundingClientRect();
+  const table = document.querySelector(anchors.table)?.getBoundingClientRect();
   const notices = new Map<string, Point>();
-  document.querySelectorAll<HTMLElement>(".opponent[data-player-id]").forEach(element => {
-    const rect = (element.querySelector(".opponent-identity") ?? element).getBoundingClientRect();
+  document.querySelectorAll<HTMLElement>(anchors.opponent).forEach(element => {
+    const rect = (element.querySelector(anchors.identity) ?? element).getBoundingClientRect();
     if (element.dataset.playerId) notices.set(element.dataset.playerId, { x: rect.left + rect.width / 2, y: rect.bottom + 14 });
   });
-  const hand = document.querySelector(".uno-hand")?.getBoundingClientRect();
+  const hand = document.querySelector(anchors.handArea)?.getBoundingClientRect();
   if (hand) notices.set(frame.after.selfPlayerId, { x: innerWidth / 2, y: hand.top + 4 });
   return {
     notices, deck: cache.deck ?? { x: innerWidth / 2 - 45, y: innerHeight * .43 },

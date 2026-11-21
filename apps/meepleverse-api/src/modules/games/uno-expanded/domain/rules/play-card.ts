@@ -52,7 +52,7 @@ export function playExpandedCard(game: UnoExpandedGame, actorId: string, command
     if (actor.hand.length === 0) { endExpandedGame(game, actorId, events); return; }
     if (card.kind === "wild-up") startUp(game, actorId, random, events);
     else if (card.kind === "wild-battle") startBattle(game, actorId, target, context, random, events);
-    else startHighFive(game, actorId, context, random, events);
+    else startHighFive(game, actorId, context, events);
     return;
   }
   const amount = fixedDrawAmount(card);

@@ -15,9 +15,9 @@ Ba lá Wild Up, Wild Battle, High Five đã được mở lại để đánh t�
 | Up | Chọn màu khi kích hoạt; panel nêu màu mở hoặc số cần đáp >=. Tay bài lấy playableCardIds server gửi. Nút Đáp lá bài gửi UP_PLAY, không gửi PLAY_CARD; không kích hoạt phụ của số 5/7. Bốc thường bị khóa. UNO dùng nút chính. |
 | Battle chọn | Chọn màu và đối thủ khi kích hoạt (lá cuối không cần đối thủ). Hai bên chọn một số hợp lệ từ eligibleCardIds riêng rồi khóa. Đối phương chỉ thấy trạng thái sẵn sàng, không có ID/mặt bài/khai báo UNO trước lúc lật. Người ngoài chỉ theo dõi. |
 | Battle thưởng | Hiện các lá đã lật, người thắng và số lá bốc thực tế từ event công khai nếu phiên đã nhận được event đó. Người thắng chọn đúng rewardCount lá rồi xác nhận bỏ; kiểm tra UNO riêng khi còn một. Người còn lại chờ. |
-| High Five | Hiển thị chuẩn bị, thời gian, hiệu lệnh và thứ tự server ghi nhận. Chỉ cho bấm khi stage=active, người gửi thuộc eligiblePlayerIds và chưa có trong responseOrder. Người kích hoạt được miễn. Lệnh gửi đúng effectId/attempt; không gửi timestamp máy người chơi. |
+| High Five | Hiển thị chuẩn bị, thời gian, hiệu lệnh và thứ tự server ghi nhận. Chỉ cho bấm khi stage=active, người gửi thuộc eligiblePlayerIds và chưa có trong responseOrder. Kể cả người kích hoạt phải phản ứng. Nút ✋ nằm cạnh UNO; có 1 giây chuẩn bị và 5 giây phản hồi. Lệnh gửi đúng effectId/attempt; không gửi timestamp máy người chơi. |
 
-Các panel thay phần tâm bàn khi có thử thách; giữ chỗ ngồi và tay bài, có cuộn nội bộ trên mobile. Khóa điều khiển thường trong Battle/High Five; Up dùng tay bài và nút đáp riêng. Nút UNO chính dùng cùng trạng thái với lựa chọn Battle, không cần một nút UNO trùng trong panel.
+Battle/Up dùng panel tâm bàn; High Five giữ tâm bàn, dùng thông báo nhỏ và nút ✋ cạnh UNO; giữ chỗ ngồi và tay bài, có cuộn nội bộ trên mobile. Khóa điều khiển thường trong Battle/High Five; Up dùng tay bài và nút đáp riêng. Nút UNO chính dùng cùng trạng thái với lựa chọn Battle, không cần một nút UNO trùng trong panel.
 
 Không tự hô UNO khi khóa/chọn thưởng; cũng không tự xác nhận lựa chọn lúc đồng hồ về 0. Server tự giải quyết timeout theo luật bước 7. Đồng hồ client chỉ để hiển thị; quyền bấm theo stage/snapshot server, tránh lấy giờ client làm kết quả.
 

@@ -17,5 +17,5 @@ export async function joinRoom(browser: Browser, count = 2) {
 export async function play(page: Page, id: string) {
   await page.locator(`.expanded-hand-card[data-card-id="${id}"]`).click(); await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
 }
-export async function confirmColor(page: Page, name: string) { const dialog = page.getByRole("dialog"); await dialog.getByRole("button", { name, exact: true }).click(); await dialog.getByRole("button", { name: "Xác nhận đánh bài" }).click(); await expect(dialog).toHaveCount(0); }
+export async function confirmColor(page: Page, name: string) { const dialog = page.getByRole("dialog"); await dialog.getByRole("button", { name, exact: true }).click(); await dialog.getByRole("button", { name: "Xác nhận" }).click(); await expect(dialog).toHaveCount(0); }
 export async function nextRevision(page: Page, revision: number) { await expect(page.getByTestId("expanded-screen")).toHaveAttribute("data-revision", String(revision)); }

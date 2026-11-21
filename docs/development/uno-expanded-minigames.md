@@ -8,7 +8,7 @@ Ngày: 20/11/2026. Triển khai backend, contracts và kiểm thử cho Wild Up,
 | --- | --- |
 | Wild Up | Chọn màu khi kích hoạt. Người kế mở bằng lá số màu đó; sau đó đáp bất kỳ màu với giá trị >= lá trước. High Five=5, Seven Change=7 chỉ dùng giá trị, không chạy chức năng phụ. Không có bài hợp lệ thì tự bốc bằng số gần nhất (chưa mở: 1; sau 0: 0), mất lượt rồi quay lại lượt thường. Không giới hạn một vòng, 9 đáp 9 được. |
 | Wild Battle | Chọn màu và một đối thủ. Mỗi bên bí mật khóa một lá số cùng màu, lật cùng lúc sau khi đủ lựa chọn. High Five/Seven Change được so bằng 5/7. Cao hơn thắng: bỏ thêm min(2,N) lá tùy chọn; thấp hơn +2. Bằng nhau chỉ bỏ lá so. Một bên có số thì chọn và thắng; cả hai không có: người kích hoạt +3, đối thủ +2. |
-| High Five | Người kích hoạt được miễn. Chuẩn bị 1,5 giây, sau đó cửa sổ 8 giây. Xếp thứ tự theo lúc server nhận phản hồi hợp lệ. Người cuối +2; khi hết giờ, chọn đúng một người chưa bấm đầu tiên theo ghế sau người kích hoạt trong chiều hiện tại. Hai người chơi thì đối thủ tự +2 ngay. |
+| High Five | Tất cả người chơi cùng tham gia, kể cả người kích hoạt. Chuẩn bị 1 giây, sau đó cửa sổ 5 giây. Đủ người bấm thì người cuối +2; khi hết giờ, mỗi người chưa bấm +2. Hai người chơi cũng dùng luật này. |
 
 Battle luôn tiếp tục lượt thường ở ghế sau người kích hoạt, không lấy ghế người thắng/thua làm mốc. Lá so và phần thưởng nằm dưới lá Battle; giữ màu đã chọn. High Five tiếp tục ghế sau người kích hoạt, không bỏ thêm lượt người bị phạt. Shield không phản ứng trong ba mini-game.
 
@@ -19,7 +19,7 @@ Battle luôn tiếp tục lượt thường ở ghế sau người kích hoạt,
 | `up` | `UP_PLAY { effectId, cardId, declareUno? }` từ người đang đáp |
 | `battle-select` | `BATTLE_SELECT { effectId, cardId, declareUno? }` từ người có số phù hợp, chưa khóa |
 | `battle-discard` | `BATTLE_DISCARD { effectId, cardIds, declareUno? }` từ người thắng, chọn đúng số thưởng |
-| `high-five` | `HIGH_FIVE { effectId, attempt }` từ người không được miễn, chưa bấm, trong cửa sổ |
+| `high-five` | `HIGH_FIVE { effectId, attempt }` từ người trong eligiblePlayerIds, chưa bấm, trong cửa sổ |
 
 Kích hoạt vẫn dùng `PLAY_CARD`; Up/Battle chọn màu trong cùng lệnh, Battle thêm `targetPlayerId`. Không có lệnh tự khai “không có bài”: server kiểm tra tay thật. Trong mini-game không nhận đánh thường, bốc thường, nối phạt hoặc Shield.
 
@@ -38,7 +38,7 @@ Lệnh qua phòng giữ envelope `matchId`, `expectedRevision`, `requestId`. Eff
 
 Battle có 20 giây cho chọn số và thêm 20 giây cho chọn thưởng. Hết giờ, server giữ lựa chọn đã khóa, tự lấy lá hợp lệ đầu tiên theo thứ tự tay; thưởng tự lấy đúng số lá đầu tiên. Không tự hô UNO hộ người chơi. Đây là phương án tránh kẹt ván, không tối ưu chiến thuật hộ người vắng mặt.
 
-Mất kết nối tạm dừng cả phòng và lưu thời gian còn lại. Battle giữ lựa chọn bí mật và cả giai đoạn thưởng. High Five giữ thứ tự người đã bấm; sau khi tất cả kết nối lại, tăng `attempt`, chuẩn bị lại 1,5 giây rồi chạy phần thời gian phản hồi còn lại. Click attempt cũ bị từ chối. Nếu mất mạng trong chuẩn bị thì vẫn giữ đủ thời lượng cửa sổ phản hồi chưa bắt đầu.
+Mất kết nối tạm dừng cả phòng và lưu thời gian còn lại. Battle giữ lựa chọn bí mật và cả giai đoạn thưởng. High Five giữ thứ tự người đã bấm; sau khi tất cả kết nối lại, tăng `attempt`, chuẩn bị lại 1 giây rồi chạy phần thời gian phản hồi còn lại. Click attempt cũ bị từ chối. Nếu mất mạng trong chuẩn bị thì vẫn giữ đủ thời lượng cửa sổ phản hồi chưa bắt đầu.
 
 Domain nhận clock/timing qua dependency để kiểm thử; client không gửi timestamp hoặc thời lượng. Adapter Colyseus chỉ lên một timeout cho mốc kế tiếp và kiểm tra lại match/deadline trước khi chạy. Publish/pause/end/leave/rematch/dispose hủy timer cũ. Reconnect mặc định vẫn 30 giây; hết hạn hoặc rời chủ động dùng quy tắc kết thúc phòng hiện có.
 

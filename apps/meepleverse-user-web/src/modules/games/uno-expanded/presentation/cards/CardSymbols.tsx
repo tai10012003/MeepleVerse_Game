@@ -20,7 +20,8 @@ export function UpSymbol({ corner = false }: { corner?: boolean }) {
   if (corner) return <g fill="currentColor"><path d="M12 49L50 14L88 49L78 60L50 35L22 60Z" /><path d="M12 79L50 44L88 79L78 90L50 65L22 90Z" /></g>;
   return <g stroke="#161616" strokeWidth="1.8" strokeLinejoin="round">
     {[CARD_INKS.red, CARD_INKS.yellow, CARD_INKS.green, CARD_INKS.blue].map((color, index) => <path key={color}
-      transform={`translate(0 ${index * 20})`} d="M15 19Q11 12 19 10L69 0Q76-1 77 6L84 37Q85 44 79 40L65 27L23 27Q17 27 15 19Z" fill={color} />)}
+      transform={`translate(${40 - index * 12} ${1 + index * 22}) scale(.54)`}
+      d="M12 25Q7 21 14 18L70 3Q77 1 79 8L91 48Q93 55 87 57Q83 58 80 53L66 31L18 31Q12 31 12 25Z" fill={color} />)}
   </g>;
 }
 export function SwordsSymbol() {
@@ -52,25 +53,37 @@ export function TornadoSymbol() {
     {tornadoArms.map((path, index) => <path key={index} d={path} />)}
   </g>;
 }
+/** Full-card artwork: arrows follow the oval's rim, leaving the numeral clear. */
 export function SevenSymbol({ direction }: { direction: "L" | "R" }) {
   return <g>
-    <g transform={direction === "L" ? undefined : "translate(100 0) scale(-1 1)"} fill="currentColor">
-      <path d="M15 63C4 30 29 7 61 15L60 5L83 24L57 34L59 24C35 17 15 37 23 61Z" />
-      <path transform="rotate(180 50 50)" d="M15 63C4 30 29 7 61 15L60 5L83 24L57 34L59 24C35 17 15 37 23 61Z" />
+    <g transform="rotate(28 50 72)" fill="currentColor" data-seven-arrows={direction}>
+      <g transform={direction === "L" ? undefined : "translate(100 0) scale(-1 1)"}>
+        <path d="M39 29C60 19 81 34 82 58L84 56L79 78L68 59L76 61C77 42 61 27 39 29Z" />
+        <path transform="rotate(180 50 72)" d="M39 29C60 19 81 34 82 58L84 56L79 78L68 59L76 61C77 42 61 27 39 29Z" />
+      </g>
     </g>
-    <text x="48" y="52" dominantBaseline="central" textAnchor="middle" fontSize="66" fill="currentColor" fontWeight="900" fontStyle="italic" stroke="#111" strokeWidth="1" paintOrder="stroke">7</text>
+    <text x="47" y="72" dominantBaseline="central" textAnchor="middle" fontSize="66" fill="currentColor" fontWeight="900" fontStyle="italic" stroke="#111" strokeWidth="1" paintOrder="stroke">7</text>
+  </g>;
+}
+export function SevenDirectionMark({ direction }: { direction: "L" | "R" }) {
+  return <g>
+    <g transform={direction === "L" ? undefined : "translate(100 0) scale(-1 1)"}>
+      <path d="M20 67A34 34 0 0 1 68 20M80 33A34 34 0 0 1 32 80" fill="none" stroke="currentColor" strokeWidth="7" />
+      <path d="M60 8L80 21L58 31ZM40 92L20 79L42 69Z" fill="currentColor" />
+    </g>
+    <text x="50" y="52" dominantBaseline="central" textAnchor="middle" fontSize="47" fontWeight="900" fill="currentColor">{direction}</text>
   </g>;
 }
 export function CardCluster({ divide = false, doubled = false }: { divide?: boolean; doubled?: boolean }) {
   const cards = (offsetX = 0, offsetY = 0) => <g transform={`translate(${offsetX} ${offsetY}) rotate(16 50 50)`} stroke="#171717" strokeWidth="1.3">
     {([[22, 39, "green"], [35, 22, "blue"], [59, 11, "yellow"], [49, 39, "red"]] as const).map(([x, y, color]) => <rect key={color} x={x} y={y} width="25" height="40" rx="2.5" fill={CARD_INKS[color]} />)}
   </g>;
-  return <g>{doubled ? <><g transform="translate(16 1) scale(.65)">{cards()}</g><g transform="translate(-1 43) scale(.65)">{cards()}</g></> : cards()}
+  return <g transform={doubled ? "translate(7.2 -4.3)" : divide ? "translate(-1.7 .3)" : "translate(-4.3 .3)"}>{doubled ? <><g transform="translate(16 1) scale(.65)">{cards()}</g><g transform="translate(-1 43) scale(.65)">{cards()}</g></> : cards()}
     {divide && <><path d="M10 52H91" stroke="#fff" strokeWidth="5" /><path d="M10 52H91" stroke="#171717" strokeWidth="1.2" strokeDasharray="4 3" /></>}
   </g>;
 }
 export function DiscardSymbol({ wild = false }: { wild?: boolean }) {
-  return <g stroke={wild ? "#171717" : "currentColor"} strokeWidth="2.5" strokeLinejoin="round">
+  return <g transform="translate(5.1 -2.2)" stroke={wild ? "#171717" : "currentColor"} strokeWidth="2.5" strokeLinejoin="round">
     <rect x="16" y="27" width="43" height="56" rx="3" fill={wild ? "#fff" : "currentColor"} transform="rotate(-14 38 55)" />
     <rect x="26" y="22" width="43" height="56" rx="3" fill={wild ? "#fff" : "currentColor"} transform="rotate(-6 48 50)" />
     <rect x="37" y="17" width="43" height="56" rx="3" fill={wild ? "#fff" : "currentColor"} />

@@ -18,3 +18,6 @@
 .opponent-hand { position:relative; display:block; width:min(var(--fan-max,170px),calc((var(--back-count) - 1)*var(--fan-step,15px) + var(--back-size,34px))); height:calc(var(--back-size,34px)*1.44 + 8px); pointer-events:none; }
 .opponent-hand[data-count="0"] { visibility:hidden; }
 .opponent-card-back { position:absolute; top:0; left:calc(var(--back-index)*(100% - var(--back-size,34px))/max(1,var(--back-count) - 1)); display:block; width:var(--back-size,34px); height:calc(var(--back-size,34px)*1.44); border:0; border-radius:6px; background:transparent; box-shadow:1px 2px 3px #0006; font-style:normal; transform:translateY(var(--back-rise)) rotate(var(--back-angle)); }
+
+.color-choice[aria-pressed="true"] { outline:3px solid #ffe08c; outline-offset:2px; }
+.color-dialog .form-note { margin-top:16px; font-size:13px; }

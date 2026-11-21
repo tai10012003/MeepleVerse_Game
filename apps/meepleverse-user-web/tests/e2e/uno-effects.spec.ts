@@ -1,3 +1,4 @@
+import { chooseAndConfirmColor } from "./helpers/color-picker";
 import { expect, test, type Page, type Browser, type BrowserContext } from "@playwright/test";
 async function setup(page: Page, browser: Browser, count = 2) {
   await page.goto("/games/uno-basic");
@@ -24,7 +25,7 @@ async function play(page: Page, id: string, wild = false) {
   if (await uno.getAttribute("aria-disabled") === "false") await uno.click();
   await page.locator('[data-card-id="' + id + '"]').click();
   await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
-  if (wild && await page.getByRole("dialog").count()) await page.getByRole("button", { name: "Xanh lá", exact: true }).click();
+  if (wild && await page.getByRole("dialog").count()) await chooseAndConfirmColor(page, "Xanh lá");
 }
 async function expectSlowDraw(pages: Page[], recipient: Page, count: number) {
   // Synchronize with the reveal before collecting assertions, rather than spending its dwell time on round trips.
@@ -89,9 +90,19 @@ test("effects: number card flies, lands, announces the next player and never rep
     const notice = group.pages[1]!.locator('[data-effect="badge"][data-player-id="' + actor + '"]');
     const turnNotice = page.locator('[data-effect="turn"]');
     await expect.poll(() => notice.evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [25, 50], timeout: 6000 }).toBeGreaterThan(.99);
-    await page.waitForTimeout(1200);
-    await expect.poll(() => notice.evaluate(element => Number(getComputedStyle(element).opacity)), { timeout: 500 }).toBeGreaterThan(.95);
-    await expect.poll(() => turnNotice.evaluate(element => Number(getComputedStyle(element).opacity)), { timeout: 500 }).toBeGreaterThan(.95);
+    // Earlier assertions may already consume part of the two-second notice.
+    // Inspect its actual browser timeline rather than starting a second wall-clock wait.
+    for (const bubble of [notice, turnNotice]) {
+      const hold = await bubble.evaluate(element => {
+        const effect = element.getAnimations().map(animation => animation.effect).find(effect => effect instanceof KeyframeEffect && effect.getKeyframes().some(frame => frame.opacity !== undefined)) as KeyframeEffect | undefined;
+        if (!effect) return null;
+        const frames = effect.getKeyframes().filter(frame => Number(frame.opacity) === 1);
+        const duration = Number(effect.getTiming().duration);
+        return { duration, plateau: frames.length >= 2 ? (frames.at(-1)!.computedOffset - frames[0]!.computedOffset) * duration : 0 };
+      });
+      expect(hold?.duration).toBeGreaterThanOrEqual(2000);
+      expect(hold?.plateau).toBeGreaterThanOrEqual(1600);
+    }
     await expect(page.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
     await expect(page.locator(".discard-layer")).toHaveCount(2);
     await expect(page.locator('[data-discard-card-id="play-red"]')).toHaveCount(1);
@@ -162,7 +173,7 @@ test("effects: Draw Four waits for acceptance before four cards fly to the targe
     await expect(recipient.getByTestId("my-hand-count")).toHaveText("6 lá");
     await expect(recipient.getByRole("dialog")).toHaveCount(0);
     await expect(page.getByRole("dialog", { name: "Đổi sang màu nào?" })).toBeVisible();
-    await page.getByRole("button", { name: "Xanh lá", exact: true }).click();
+    await chooseAndConfirmColor(page, "Xanh lá");
   } finally { await group.close(); }
 });
 test("effects: a voluntary +4 acceptance returns the color picker to the +4 author after the reveal", async ({ page, browser, request }) => {
@@ -178,7 +189,7 @@ test("effects: a voluntary +4 acceptance returns the color picker to the +4 auth
     await expect(recipient.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(recipient.getByRole("dialog")).toHaveCount(0);
-    await page.getByRole("button", { name: "Đỏ", exact: true }).click();
+    await chooseAndConfirmColor(page, "Đỏ");
     await expect(page.getByTestId("uno-board")).toHaveAttribute("data-my-turn", "true");
   } finally { await group.close(); }
 });

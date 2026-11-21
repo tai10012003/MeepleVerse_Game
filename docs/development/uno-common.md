@@ -52,3 +52,13 @@ Expanded step 8 reuses common standard artwork through a compatibility re-export
 Expanded 9A shares ColorChoices and discard placement (Basic compatibility exports retained), plus RoomLobby metadata. Commands and game screens stay edition-specific. See [internal Expanded table](uno-expanded-table.md).
 
 Expanded 9B keeps mini-game controllers, response drafts and public feedback in its own module. The SDK room name selects the typed event handler; Basic retains its existing visual queue. CardChoiceGrid belongs to Expanded and is shared by divide-two and Battle there. See [mini-game UI](uno-expanded-minigame-ui.md).
+
+
+9C shares responsive sizing tokens and effect geometry selectors between editions. Expanded retains typed snapshots/events and its own presentation plan, with Basic timing and visual conventions. See [animation scope](uno-expanded-animations.md).
+
+
+## Thống nhất xác nhận màu — 21/11/2026
+
+Cả Cơ bản và Mở rộng dùng thao tác chọn màu trước, bấm **Xác nhận** mới gửi lệnh. ColorChoices chỉ cập nhật lựa chọn tạm, có aria-pressed và viền cho màu đã chọn; có thể đổi màu trước khi xác nhận. ColorPicker của Cơ bản giữ lựa chọn trong vòng đời popup, khóa nút xác nhận khi chưa có màu hoặc đang gửi lệnh. Mở rộng tiếp tục yêu cầu đủ màu, mục tiêu hoặc danh sách bài tùy lá trước khi cho gửi.
+
+Luật +4 Cơ bản vẫn giữ thời điểm chọn màu hiện tại sau khi nhận phạt; thay đổi này thống nhất cách thao tác popup, không thay thứ tự xử lý luật. Sáu ca trình duyệt liên quan Wild, +4, Khiên, mục tiêu và ÷2 đạt; TypeScript/lint frontend đạt. Các luồng kiểm thử dài hiện có đã cập nhật thêm thao tác xác nhận nhưng không chạy lại toàn bộ ván trong lần sửa này.

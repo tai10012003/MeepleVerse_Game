@@ -2,7 +2,7 @@
 
 - Ngày lập: **19/11/2026**.
 - Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
-- Bước 9B: bàn và cả ba mini-game mở nội bộ tại `/dev/uno-expanded/play`; bộ bài xem tại `/dev/uno-expanded/cards`. Production chưa mở phòng Mở rộng; animation/sound cues và nghiệm thu tổng thể chờ 9C.
+- Bước 9C: bàn, ba mini-game và animation đánh/bốc mở nội bộ tại `/dev/uno-expanded/play`; kích thước theo Cơ bản, bộ bài xem tại `/dev/uno-expanded/cards`. Production chưa mở phòng Mở rộng; nghiệm thu tổng thể bằng UI còn riêng.
 - Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là lựa chọn riêng của MeepleVerse; trạng thái xác nhận theo từng bước nằm trong [bảng quyết định](uno-expanded-decisions.md). Không coi chúng là một luật gốc thống nhất cho mọi bộ ngoài thị trường.
@@ -112,7 +112,7 @@ Mô tả ngắn ở đây lấy từ S1–S4; chi tiết ghép và trường h�
 | 1. Up — S1 | Chuỗi cả bàn; số bằng hoặc tăng. Người không theo được bốc theo số cao nhất vừa đánh. |
 | 2. Battle — S2/S4 | Chọn đối thủ, so một lá; thắng bỏ thêm 2, thua bốc 2; có hòa. Nguồn khác nhau về điều kiện màu và chọn lá. |
 | 3. Tornado — S1 | Người kế bốc tới màu của lá, rồi mất lượt. |
-| 4. High Five — S2 | Trừ người đánh, người đập tay cuối bốc 2. |
+| 4. High Five — MeepleVerse | Mọi người cùng tham gia; đủ người bấm thì người cuối +2, hết giờ thì mỗi người chưa bấm +2. |
 | 5. Seven Change — S1 | Chuyền tay bài L/R; hướng tương ứng ảnh hưởng chiều đi. |
 | 6. Target +4 — S2 | Chọn người bốc 4; tiếp tục sau người bị chỉ định. |
 | 7. ×2 — S3 | Chọn màu; người kế bốc thêm bằng số lá đang cầm. |
@@ -228,11 +228,11 @@ Chỉ lá đầu công khai; các lá bốc thêm vẫn riêng tư. Không dùng
 
 ## 10. High Five trên web — D11
 
-- Người kích hoạt được miễn. Những người còn lại là tập người phải phản ứng cố định lúc tạo thử thách.
-- Đề xuất: server thông báo chuẩn bị 1,5 giây, sau đó nhận đập tay trong 8 giây. Thời gian, thứ tự nhận và kết quả do server quyết định; không tin timestamp client.
+- Tất cả người chơi, **kể cả người đánh lá**, thuộc tập phản ứng cố định lúc tạo thử thách.
+- Server thông báo chuẩn bị **1 giây**, sau đó nhận đập tay trong **5 giây**. Thời gian, thứ tự nhận và kết quả do server quyết định; không tin timestamp client.
 - Mỗi người chỉ được xác nhận một lần cho cùng `effectId`; gửi trùng không thay thứ tự. Bấm trước lúc mở bị từ chối, không giữ hàng đợi.
-- Nếu tất cả bấm: người có xác nhận cuối bốc 2. Nếu chỉ một người không bấm: người đó bốc 2. Nhiều người cùng không bấm: chọn một người trong nhóm này theo thứ tự ghế từ sau người kích hoạt, theo chiều hiện tại, làm quy tắc hòa rõ ràng.
-- Với hai người: đối thủ duy nhất là người cuối, tự nhận 2, không bắt chờ 8 giây.
+- Nếu tất cả bấm: người có xác nhận cuối bốc 2. Nếu hết giờ còn người chưa bấm: **mỗi người chưa bấm đều bốc 2**, người đã bấm không bị phạt. Không ai bấm thì tất cả cùng bốc 2.
+- Bàn hai người dùng cùng luật: người đánh cũng phải bấm, không phạt đối phương tự động ngay khi đánh.
 - Sau phạt, lượt trở về ghế sau người kích hoạt, không chuyển lượt bất thường tới người chậm nhất. Không có phản ứng Shield.
 - Đây là quy ước thích nghi trên web, không bảo đảm độ trễ mạng công bằng tuyệt đối; không giả định có thể biết thời điểm chạm thật của từng máy.
 - Mất mạng thì đóng băng thử thách cùng ván; cách tiếp tục ở mục 13. Hết ván thì hủy mọi timer/click còn chờ.
@@ -335,7 +335,7 @@ Skip Two skips two turn opportunities: for 2/3/4 players, the next actor is resp
 
 Wild Up, Wild Battle, High Five và đồng hồ mini-game đã được triển khai trong backend. Các mục trạng thái bước 5–6 ở trên là lịch sử của từng mốc; hiện mọi loại lá trong bộ 198 đều được hỗ trợ ở domain. Xem [luật, lệnh, timer và kiểm thử bước 7](../development/uno-expanded-minigames.md).
 
-D07/D08/D11/D15 và phần D12/D13 liên quan mini-game được áp dụng theo kế hoạch bước 7 đã được yêu cầu triển khai; chi tiết xác nhận nằm trong bảng quyết định. Timer mặc định: High Five chuẩn bị 1,5 giây + phản hồi 8 giây; Battle chọn số/thưởng mỗi giai đoạn 20 giây. Fallback không tự hô UNO. Giữ bí mật lựa chọn Battle tới khi giải quyết; reconnect bảo toàn lựa chọn/thứ tự và thời gian còn lại.
+D07/D08/D11/D15 và phần D12/D13 liên quan mini-game được áp dụng theo kế hoạch bước 7 đã được yêu cầu triển khai; chi tiết xác nhận nằm trong bảng quyết định. Timer hiện tại: High Five chuẩn bị 1 giây + phản hồi 5 giây; Battle chọn số/thưởng mỗi giai đoạn 20 giây. Fallback không tự hô UNO. Giữ bí mật lựa chọn Battle tới khi giải quyết; reconnect bảo toàn lựa chọn/thứ tự và thời gian còn lại.
 
 Catalog vẫn Đang phát triển, phòng Mở rộng ở production chưa bật; chưa có mặt bài, bộ điều khiển và animation Mở rộng. UNO Cơ bản giữ luật hiện tại.
 
@@ -352,3 +352,13 @@ Bước này chưa nối mặt bài với bàn Mở rộng hoặc thêm điều 
 ## Bước 9B — giao diện Up/Battle/High Five (21/11/2026)
 
 Ba lá kích hoạt được mở lại trong UI. Có đáp Up theo gợi ý server, Battle chọn kín/khóa/lật/thưởng, High Five chuẩn bị/đập tay/thứ tự. UNO, timeout, phản hồi đồng thời và reconnect dùng trạng thái authoritative hiện có. Xem [phạm vi UI và kiểm thử](../development/uno-expanded-minigame-ui.md). Mục 9A phía trên là lịch sử; không còn khóa ba lá mini-game. Catalog tiếp tục Đang phát triển.
+
+
+## Bước 9C — kích thước và animation (21/11/2026)
+
+Dùng chung mốc kích thước với Cơ bản; thêm hàng đợi đánh/bốc riêng của Mở rộng, phản hồi chức năng và âm thanh. Giữ riêng tư mặt bài và phản hồi mini-game trực tiếp. Xem [phạm vi và kiểm thử 9C](../development/uno-expanded-animations.md).
+
+
+### Cập nhật Đập tay theo phản hồi chơi thử
+
+Nút ✋ luôn nằm cạnh UNO, chỉ cho bấm khi server mở cửa sổ phản ứng. Có đếm ngược, âm báo và trạng thái đã bấm. Phần số 5 dùng cùng cách căn chữ của bài số; nhóm bốn thẻ của +4 thường được thu nhỏ 10% ở cả hai phiên bản. Đây là luật MeepleVerse được chốt sau mốc 9B, thay thế quy định miễn người đánh/tự phạt đối phương ở bàn hai người.

@@ -1,3 +1,4 @@
+import type { ExpandedVisualFrame } from "@/modules/games/uno-expanded/model/expanded-effects";
 import { isMiniFeedback, type MiniFeedbackFrame, type MiniDraw } from "@/modules/games/uno-expanded/model/mini-feedback";
 import { Client, type Room } from "@colyseus/sdk";
 import type { UnoRoomView, RoomAction, RoomActionReply, RoomGameEvents } from "@meepleverse/contracts/room";
@@ -14,10 +15,10 @@ type TransportReply = RoomActionReply | UnoExpandedActionReply;
 type Status = "idle" | "connecting" | "connected" | "reconnecting" | "disconnected";
 interface SessionState {
   status: Status; view: UnoRoomView | null; expandedView: UnoExpandedRoomView | null; error: string | null; starting: boolean; acting: boolean;
-  expandedFrames: MiniFeedbackFrame[]; expandedInteractionEpoch: number;
+  expandedVisualFrames: ExpandedVisualFrame[]; expandedFrames: MiniFeedbackFrame[]; expandedInteractionEpoch: number;
   frames: UnoVisualFrame[]; events: RoomGameEvents | null;
 }
-const initial: SessionState = { status: "idle", view: null, expandedView: null, error: null, starting: false, acting: false, frames: [], events: null, expandedFrames: [], expandedInteractionEpoch: 0 };
+const initial: SessionState = { status: "idle", view: null, expandedView: null, error: null, starting: false, acting: false, frames: [], events: null, expandedVisualFrames: [], expandedFrames: [], expandedInteractionEpoch: 0 };
 class RoomSession {
   private state = initial;
   private readonly listeners = new Set<() => void>();
@@ -25,6 +26,7 @@ class RoomSession {
   private generation = 0;
   private lastExpandedEventRevision = -1;
   private readonly visualPairs = new Map<number, { before: UnoRoomView; after: UnoRoomView }>();
+  private readonly expandedPairs = new Map<number, { before: UnoExpandedRoomView; after: UnoExpandedRoomView }>();
   private pending: Promise<string | null> | null = null;
   private snapshotWaiter: (() => void) | null = null;
   private actionWaiter: { id: string; finish: (reply: TransportReply | null) => void } | null = null;
@@ -47,11 +49,15 @@ class RoomSession {
         const previousExpanded = this.state.expandedView;
         const clearError = this.state.status !== "connected" || view.matchId !== previousExpanded?.matchId || view.game?.revision !== previousExpanded?.game?.revision;
         const resetFeedback = this.state.status !== "connected" || view.matchId !== previousExpanded?.matchId || !view.game || view.paused;
-        if (resetFeedback) this.lastExpandedEventRevision = view.game?.revision ?? -1;
+        if (resetFeedback) { this.lastExpandedEventRevision = view.game?.revision ?? -1; this.expandedPairs.clear(); }
+        else if (previousExpanded?.game && expandedView?.game && expandedView.game.revision === previousExpanded.game.revision + 1) {
+          this.expandedPairs.set(expandedView.game.revision, { before: previousExpanded, after: expandedView });
+          if (this.expandedPairs.size > 8) this.expandedPairs.delete(this.expandedPairs.keys().next().value!);
+        }
         const pausedNow = view.paused && !previousExpanded?.paused;
         this.visualPairs.clear();
         this.patch({ view: null, expandedView, status: "connected", frames: [], events: null,
-          ...(resetFeedback ? { expandedFrames: [] } : {}), expandedInteractionEpoch: this.state.expandedInteractionEpoch + Number(pausedNow),
+          ...(resetFeedback ? { expandedVisualFrames: [], expandedFrames: [] } : {}), expandedInteractionEpoch: this.state.expandedInteractionEpoch + Number(pausedNow),
           ...(!expandedView ? { error: "INVALID_ROOM_VIEW" } : clearError ? { error: null } : {}) });
         this.snapshotWaiter?.();
         return;
@@ -77,6 +83,12 @@ class RoomSession {
         if (!current() || !view || view.paused || batch.matchId !== view.matchId || !Number.isSafeInteger(batch.revision) ||
           batch.revision <= this.lastExpandedEventRevision || batch.revision > (view.game?.revision ?? -1)) return;
         this.lastExpandedEventRevision = batch.revision;
+        const pair = this.expandedPairs.get(batch.revision);
+        this.expandedPairs.delete(batch.revision);
+        if (pair) {
+          const visual: ExpandedVisualFrame = { id: `${batch.matchId}:${batch.revision}`, matchId: batch.matchId, revision: batch.revision, ...pair, events: batch.events };
+          this.patch({ expandedVisualFrames: [...this.state.expandedVisualFrames, visual].slice(-16) });
+        }
         const events = batch.events.filter(isMiniFeedback);
         if (!events.length) return;
         const frame: MiniFeedbackFrame = { id: `${batch.matchId}:${batch.revision}`, matchId: batch.matchId, revision: batch.revision, events, draws: batch.events.filter((event): event is MiniDraw => event.type === "CARDS_DRAWN") };
@@ -96,7 +108,7 @@ class RoomSession {
       });
     }
     room.onDrop(() => {
-      if (current()) { this.actionWaiter?.finish(null); this.visualPairs.clear(); this.patch({ status: "reconnecting", starting: false, acting: false, frames: [], expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1 }); }
+      if (current()) { this.actionWaiter?.finish(null); this.visualPairs.clear(); this.patch({ status: "reconnecting", starting: false, acting: false, frames: [], expandedVisualFrames: [], expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1 }); }
     });
     room.onReconnect(() => {
       if (!current()) return;
@@ -108,7 +120,7 @@ class RoomSession {
       if (!current()) return;
       this.actionWaiter?.finish(null);
       this.room = null;
-      this.patch({ status: "disconnected", starting: false, acting: false, expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1, error: "Kết nối phòng đã đóng. Bạn có thể thử kết nối lại hoặc rời phòng." });
+      this.patch({ status: "disconnected", starting: false, acting: false, expandedVisualFrames: [], expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1, error: "Kết nối phòng đã đóng. Bạn có thể thử kết nối lại hoặc rời phòng." });
     });
     room.onError((_code, message) => { if (current()) this.patch({ error: roomError(message ?? "connection failed") }); });
   }
@@ -118,7 +130,7 @@ class RoomSession {
     const generation = ++this.generation;
     this.visualPairs.clear();
     this.lastExpandedEventRevision = -1;
-    this.patch({ expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1, status: "connecting", error: null, view: null, expandedView: null, frames: [], events: null });
+    this.patch({ expandedVisualFrames: [], expandedFrames: [], expandedInteractionEpoch: this.state.expandedInteractionEpoch + 1, status: "connecting", error: null, view: null, expandedView: null, frames: [], events: null });
     const task = (async () => {
       let joined: Room | null = null;
       try {

@@ -1,6 +1,7 @@
+@import "../../uno-common/presentation/uno-sizing.css";
 
 .sr-only { position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-.uno-page { --uno-card-width:86px; --uno-card-height:124px; height:100dvh; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at center,#243e2c,#101a17 75%); }
+.uno-page { --uno-card-width:var(--table-card-width); --uno-card-height:var(--table-card-height); height:100dvh; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at center,#243e2c,#101a17 75%); }
 .uno-page .room-header { flex-shrink:0; min-height:70px; }
 .toolbar-code { color:var(--muted); font: .75rem monospace; }
 .uno-board { flex:1; min-height:0; width:min(1180px,100%); margin:0 auto; display:flex; flex-direction:column; position:relative; }
@@ -97,7 +98,7 @@
   .game-announcement { font-size:.6rem; min-height:28px; max-height:42px; padding-inline:18px; }
   .hand-label { font-size:.55rem; margin-top:5px; }
   .hand-list { padding:33px 25px 10px; min-height:142px; }
-  .uno-page { --uno-card-width:63px; --uno-card-height:93px; }
+  .uno-page { --uno-card-width:var(--table-card-width); --uno-card-height:var(--table-card-height); }
   .uno-hand-card { margin-left:-12px; }
   .uno-hand-card:not(:disabled):hover,.uno-hand-card:focus-visible,.uno-hand-card.is-selected { transform:translateY(-23px); }
   .uno-controls { padding-inline:12px; min-height:66px; }
@@ -117,7 +118,7 @@
   .opponent-top { top:0; }.opponent { padding:5px; }.opponent-avatar { display:none; }
   .draw-pile,.discard-stack { width:49px; height:69px; }
   .game-announcement { min-height:24px; max-height:24px; }
-  .hand-list { min-height:115px; padding-top:28px; }.uno-page { --uno-card-width:53px; --uno-card-height:77px; }
+  .hand-list { min-height:115px; padding-top:28px; }.uno-page { --uno-card-width:var(--table-card-width); --uno-card-height:var(--table-card-height); }
   .uno-controls { min-height:49px; padding-bottom:8px; }.action-row>.button { min-height:36px; padding-block:8px; }.uno-checkbox { margin-top:4px; }
 }
 .hand-scroll-hint { display:none; }
@@ -139,7 +140,7 @@
   .game-announcement { min-height:18px; max-height:18px; font-size:.5rem; padding-top:2px; }
   .hand-label { margin-top:2px; font-size:.5rem; }
   .hand-list { min-height:76px; padding:15px 30px 4px; }
-  .uno-page { --uno-card-width:40px; --uno-card-height:57px; }
+  .uno-page { --uno-card-width:var(--table-card-width); --uno-card-height:var(--table-card-height); }
   .uno-hand-card { margin-left:-8px; }
   .uno-hand-card .card-corner { font-size:.45rem; }
   .uno-hand-card:not(:disabled):hover,.uno-hand-card:focus-visible,.uno-hand-card.is-selected { transform:translateY(-10px); }

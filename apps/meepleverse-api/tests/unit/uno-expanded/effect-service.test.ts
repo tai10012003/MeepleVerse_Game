@@ -51,14 +51,15 @@ describe("mini-game service concurrency and frozen clocks", () => {
   });
   it("retains High Five response order, opens a fresh attempt after resume and rejects stale clicks", () => {
     const { service: s, send, setNow } = setup("high-five"); const id = s.game!.effect!.id;
-    setNow(1500); s.advanceTime(); send("b", { type: "HIGH_FIVE", effectId: id, attempt: 1 });
-    setNow(1600); s.setConnected("d", false); expect(s.game!.effect).toMatchObject({ deadline: null, remainingMs: 7900, responseOrder: ["b"] });
+    setNow(1000); s.advanceTime(); send("b", { type: "HIGH_FIVE", effectId: id, attempt: 1 });
+    setNow(1100); s.setConnected("d", false); expect(s.game!.effect).toMatchObject({ deadline: null, remainingMs: 4900, responseOrder: ["b"] });
     setNow(100000); s.setConnected("d", true);
-    expect(s.game!.effect).toMatchObject({ attempt: 2, opensAt: 101500, deadline: 109400, responseOrder: ["b"] });
+    expect(s.game!.effect).toMatchObject({ attempt: 2, opensAt: 101000, deadline: 105900, responseOrder: ["b"] });
     expect(() => send("c", { type: "HIGH_FIVE", effectId: id, attempt: 1 })).toThrow("STALE_EFFECT");
     expect(() => send("c", { type: "HIGH_FIVE", effectId: id, attempt: 2 })).toThrow("EFFECT_NOT_OPEN");
-    setNow(101500); s.advanceTime(); const revision = s.game!.revision;
+    setNow(101000); s.advanceTime(); const revision = s.game!.revision;
     expect(() => send("b", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision)).toThrow("ALREADY_RESPONDED");
+    send("a", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
     send("c", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
     send("d", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
     expect(s.game!.players[3]!.hand).toHaveLength(3); expect(s.nextDeadline).toBeNull();

@@ -26,5 +26,5 @@ export const cardGallery: CardGalleryGroup[] = [
   { key: "discard", name: "Xả màu cố định", edition: "expanded", reference: "Storm", note: "Chồng bài cùng màu với dấu × trắng.", faces: UNO_COLORS.map(color => ({ kind: "discard-color", color })) },
   { key: "wild-discard", name: "Xả màu tự chọn", edition: "expanded", reference: "Infinity", note: "Chồng bài có dấu × trên nền elip bốn màu.", faces: [{ kind: "wild-discard", color: null }] },
   { key: "random", name: "Rút ngẫu nhiên", edition: "expanded", reference: "Battle", note: "Elip bốn màu và +? ở hai góc.", faces: [{ kind: "wild-random", color: null }] },
-  { key: "draw-more", name: "Rút sáu / rút tám", edition: "expanded", reference: "MeepleVerse", note: "Phát triển từ cách thể hiện của +4; +6/+8 rõ ở hai góc bài.", faces: [{ kind: "wild-draw-six", color: null }, { kind: "wild-draw-eight", color: null }] },
+  { key: "draw-more", name: "Rút sáu / rút tám", edition: "expanded", reference: "MeepleVerse", note: "Bốn thẻ màu giống +4, ký hiệu +6/+8 ở hai góc bài.", faces: [{ kind: "wild-draw-six", color: null }, { kind: "wild-draw-eight", color: null }] },
 ];

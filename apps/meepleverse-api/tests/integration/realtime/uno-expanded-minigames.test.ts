@@ -108,12 +108,13 @@ describe("Expanded mini-games over real WebSockets", () => {
     const cmd: UnoExpandedCommand = { type: "HIGH_FIVE", effectId: effect.id, attempt: effect.attempt };
     expect((await command(players[1]!, cmd, revision)).ok).toBe(true);
     expect((await command(players[1]!, cmd, revision)).code).toBe("ALREADY_RESPONDED");
+    expect((await command(players[0]!, cmd, revision)).ok).toBe(true);
     const replies = await Promise.all([command(players[2]!, cmd, revision), command(players[3]!, cmd, revision)]); expect(replies.every(reply => reply.ok)).toBe(true);
     await Promise.all(players.map(fresh));
     const events = players[0]!.events.flatMap(batch => batch.events);
     const responses = events.filter(event => event.type === "HIGH_FIVE_RESPONSE"); const resolved = events.find(event => event.type === "HIGH_FIVE_RESOLVED");
-    expect(responses).toHaveLength(3); expect(resolved).toMatchObject({ playerId: responses[2]!.playerId });
-    for (const guest of players) expect(guest.view!.game!.self.hand).toHaveLength(guest.view!.selfPlayerId === responses[2]!.playerId ? 3 : 1);
+    expect(responses).toHaveLength(4); expect(resolved).toMatchObject({ playerId: responses[3]!.playerId });
+    for (const guest of players) expect(guest.view!.game!.self.hand).toHaveLength(guest.view!.selfPlayerId === responses[3]!.playerId ? 3 : 1);
     expect(players[0]!.view!.game!.currentPlayerId).toBe(players[1]!.view!.selfPlayerId);
   });
   it("pauses High Five across a real drop, preserves response order and rejects the old attempt after reconnect", async () => {
@@ -130,16 +131,17 @@ describe("Expanded mini-games over real WebSockets", () => {
     const resumed = restored.view!.game!.effect!; if (resumed.kind !== "high-five") throw new Error("Wrong effect");
     expect(resumed.attempt).toBe(effect.attempt + 1); expect(resumed.responseOrder).toEqual([b!.view!.selfPlayerId]);
     expect((await command(restored, { type: "HIGH_FIVE", effectId: resumed.id, attempt: resumed.attempt })).ok).toBe(true);
+    expect((await command(a!, { type: "HIGH_FIVE", effectId: resumed.id, attempt: resumed.attempt })).ok).toBe(true);
     expect((await command(d!, { type: "HIGH_FIVE", effectId: resumed.id, attempt: resumed.attempt })).ok).toBe(true);
     await fresh(d!); expect(d!.view!.game!.self.hand).toHaveLength(3); expect(d!.view!.game!.effect).toBeNull();
   }, 15000);
-  it("times out missing High Five responses with exactly one penalty", async () => {
+  it("times out missing High Five responses with a penalty for every missing player", async () => {
     scenario = "high-five"; timing.highFiveWindowMs = 100; const players = await group(); await activate(players);
     await waitFor(() => players[0]!.view?.game?.phase === "turn" && players[0]!.view.game.revision >= 3);
     await Promise.all(players.map(fresh));
     expect(players[1]!.view!.game!.self.hand).toHaveLength(3);
-    for (const guest of [players[0]!, players[2]!, players[3]!]) expect(guest.view!.game!.self.hand).toHaveLength(1);
-    expect(players[0]!.events.flatMap(batch => batch.events).filter(event => event.type === "HIGH_FIVE_RESOLVED")).toHaveLength(1);
+    for (const guest of players) expect(guest.view!.game!.self.hand).toHaveLength(3);
+    expect(players[0]!.events.flatMap(batch => batch.events).filter(event => event.type === "HIGH_FIVE_RESOLVED")).toHaveLength(4);
     const revision = players[0]!.view!.game!.revision;
     await new Promise(resolve => setTimeout(resolve, 150)); await fresh(players[0]!);
     expect(players[0]!.view!.game!.revision).toBe(revision);

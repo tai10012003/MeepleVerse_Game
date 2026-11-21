@@ -102,3 +102,8 @@ Người dùng yêu cầu bắt đầu sau kế hoạch bước 7. Áp dụng D0
 | D15 | Chọn số và thưởng Battle mỗi giai đoạn 20s; hết giờ chọn lá đầu hợp lệ. Freeze timer khi mất mạng; Battle giữ khóa, High Five giữ thứ tự và mở attempt mới sau reconnect. Chỉ BATTLE_SELECT/HIGH_FIVE nhận revision cũ không ở tương lai cùng các kiểm tra effect/slot/deadline; lệnh khác giữ revision hiện tại. |
 
 Các quyết định triển khai không tuyên bố là luật chính thức thống nhất của Storm/Battle/Infinity. Chưa mở phát hành công khai hoặc nghiệm thu giao diện Mở rộng ở mốc này.
+
+
+## Cập nhật D11 sau chơi thử — 21/11/2026
+
+Theo yêu cầu đã chốt: người kích hoạt cũng đập tay; mọi bàn 2–4 người chuẩn bị 1 giây rồi có 5 giây phản hồi. Nếu đủ người bấm, phạt người cuối +2; hết giờ, phạt mỗi người chưa bấm +2 (không ai bấm thì tất cả +2). Thay thế phương án D11 cũ về miễn người đánh, chọn duy nhất một người vắng và tự phạt ngay ở bàn hai người. Thứ tự do server quyết định, giữ cơ chế attempt/reconnect và chỉ nhận một lần mỗi người.

@@ -1,3 +1,4 @@
+import { chooseAndConfirmColor } from "./helpers/color-picker";
 import { expect, test, type Page, type Browser, type BrowserContext } from "@playwright/test";
 test.beforeEach(async ({ request }) => { await request.post("http://127.0.0.1:5101/scenario/normal"); });
 test.afterEach(async ({ request }) => { await request.post("http://127.0.0.1:5101/scenario/normal"); });
@@ -30,7 +31,7 @@ async function play(page: Page, id?: string) {
   await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
   if (kind === "wild") {
     await expect(page.getByRole("dialog", { name: "Đổi sang màu nào?" })).toBeVisible();
-    await page.getByRole("button", { name: "Đỏ", exact: true }).click();
+    await chooseAndConfirmColor(page, "Đỏ");
   }
 }
 async function expectDebt(pages: Page[], target: Page, amount: number) {
@@ -75,7 +76,7 @@ test("two real browsers play a whole game and rematch", async ({ page, browser }
       const board = actor.getByTestId("uno-board");
       const phase = await board.getAttribute("data-phase");
       const revision = Number(await actor.getByTestId("uno-screen").getAttribute("data-revision"));
-      if (phase === "choose-color" || phase === "penalty-color") await actor.getByRole("button", { name: "Đỏ", exact: true }).click();
+      if (phase === "choose-color" || phase === "penalty-color") await chooseAndConfirmColor(actor, "Đỏ");
       else if (await actor.locator(".uno-hand-card:not(:disabled)").count()) await play(actor);
       else await actor.getByRole("button", { name: phase === "draw-stack" ? /^Nhận \d+ lá$/ : phase === "drawn" ? "Bỏ lượt" : "Bốc bài", exact: true }).click();
       for (const client of group.pages) await expect(client.getByTestId("uno-screen")).toHaveAttribute("data-revision", String(revision + 1));
@@ -123,7 +124,21 @@ test("ordinary Wild still chooses color and can cancel without losing the armed 
     await page.getByRole("button", { name: "Chọn lá khác" }).click();
     await expect(uno).toHaveAttribute("aria-pressed", "true");
     await page.getByRole("button", { name: "Đánh lá bài", exact: true }).click();
-    await page.getByRole("button", { name: "Xanh dương", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Đổi sang màu nào?", exact: true });
+    const confirm = dialog.getByRole("button", { name: "Xác nhận", exact: true });
+    await expect(confirm).toBeDisabled();
+    const revision = await page.getByTestId("uno-screen").getAttribute("data-revision");
+    await dialog.getByRole("button", { name: "Đỏ", exact: true }).click();
+    await expect(confirm).toBeEnabled();
+    await expect(dialog).toBeVisible();
+    await expect(page.getByTestId("uno-screen")).toHaveAttribute("data-revision", revision!);
+    await expect(page.locator('.uno-hand-card[data-card-id="plain-wild"]')).toHaveCount(1);
+    await expect(dialog.getByRole("button", { name: "Đỏ", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await dialog.getByRole("button", { name: "Xanh dương", exact: true }).click();
+    await expect(dialog.getByRole("button", { name: "Đỏ", exact: true })).toHaveAttribute("aria-pressed", "false");
+    await expect(dialog.getByRole("button", { name: "Xanh dương", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("uno-screen")).toHaveAttribute("data-revision", revision!);
+    await confirm.click(); await expect(dialog).toHaveCount(0);
     await expect(page.getByTestId("uno-screen")).toHaveAttribute("data-animating", "false");
     await expect(page.getByTestId("my-hand-count")).toHaveText("1 lá");
     await expect(group.pages[1]!.locator('.direction-ring')).toHaveAttribute("data-color", "blue");
@@ -182,7 +197,7 @@ test("four-player +2/+4/+4 chain draws ten; only the last +4 author chooses colo
     await expect(c.getByRole("dialog", { name: "Đổi sang màu nào?" })).toBeVisible();
     for (const client of [a, b, d]) await expect(client.getByRole("dialog")).toHaveCount(0);
     await expect(d.getByTestId("uno-board")).toHaveAttribute("data-my-turn", "false");
-    await c.getByRole("button", { name: "Xanh lá", exact: true }).click();
+    await chooseAndConfirmColor(c, "Xanh lá");
     for (const client of group.pages) await expect(client.getByTestId("uno-screen")).toHaveAttribute("data-revision", "5");
     await expect(a.getByTestId("uno-board")).toHaveAttribute("data-my-turn", "true");
     await expect(a.locator('.direction-ring')).toHaveAttribute("data-color", "green");
