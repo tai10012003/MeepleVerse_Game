@@ -60,3 +60,8 @@ Từ root: `npx.cmd --yes pnpm@10.34.9 test`.
 Bao gồm setup, validation, chức năng, cộng dồn, chọn màu sau phạt, UNO, scoring,
 quyền riêng tư, realtime và 100 ván seed bảo toàn đủ 108 lá sau mỗi lệnh.
 MongoDB, phục hồi server crash, bot và timer lượt chưa được triển khai.
+
+
+## Đồng hồ lượt — 22/11/2026
+
+Mỗi lượt thường/đáp cộng dồn có 30 giây. Bốc bài và mở popup không đặt lại giờ. Hết giờ thường thì bỏ lượt, giữ lá đã bốc; đang chịu phạt thì tự nhận toàn bộ. Bước chọn màu sau +4 nếu hết giờ sẽ chọn màu theo tay người đánh để tiếp tục. Phòng mất kết nối giữ thời gian còn lại. Xem [đồng hồ và kiểm thử](../development/uno-turn-clock.md).

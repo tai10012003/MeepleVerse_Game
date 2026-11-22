@@ -1,3 +1,4 @@
+import { TurnCountdown } from "@/shared/ui/TurnCountdown";
 import type { CSSProperties, ReactNode } from "react";
 import type { UnoExpandedView, UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
 import { CardBack, OpponentHand, DirectionRing, DrawDebt } from "../../../uno-common";
@@ -11,7 +12,7 @@ export function ExpandedTable({ view, pileGame, active, onDraw, children }: { vi
     <div className="expanded-opponents">{opponents.map((opponent, index) => {
       const member = view.members.find(member => member.playerId === opponent.playerId)!;
       return <div className={`expanded-opponent seat-${opponents.length === 1 ? "top" : opponents.length === 2 ? index === 0 ? "left" : "right" : ["left", "top", "right"][index]}${opponent.playerId === game.currentPlayerId ? " is-current" : ""}`} key={opponent.playerId} data-player-id={opponent.playerId}>
-        <div className="expanded-identity"><span className="expanded-avatar">{Array.from(member.nickname)[0]?.toLocaleUpperCase("vi")}</span><strong>{member.nickname}</strong><span className="expanded-opponent-count" aria-label={`${opponent.handCount} lá`}>{opponent.handCount}</span>{!member.connected && <small>Mất mạng</small>}</div>
+        <div className="expanded-identity">{view.turnClock?.playerId === opponent.playerId && <TurnCountdown clock={view.turnClock} matchId={view.matchId} />}<span className="expanded-avatar">{Array.from(member.nickname)[0]?.toLocaleUpperCase("vi")}</span><strong>{member.nickname}</strong><span className="expanded-opponent-count" aria-label={`${opponent.handCount} lá`}>{opponent.handCount}</span>{!member.connected && <small>Mất mạng</small>}</div>
         <div className="expanded-opponent-cards"><OpponentHand count={opponent.handCount} />{game.pendingDraw > 0 && game.currentPlayerId === opponent.playerId && <DrawDebt count={game.pendingDraw} playerId={opponent.playerId} />}</div>
       </div>;
     })}</div>

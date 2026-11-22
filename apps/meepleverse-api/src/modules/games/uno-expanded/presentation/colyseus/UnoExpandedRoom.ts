@@ -9,31 +9,7 @@ export interface UnoExpandedRoomSettings extends RoomTransportSettings { gameFac
 export class UnoExpandedRoom extends GameRoom<UnoExpandedRoomAction["action"], UnoExpandedRoomView, UnoExpandedRoomSchema> {
   protected settings!: UnoExpandedRoomSettings;
   declare protected service: UnoExpandedGameService;
-  protected createService(roomId: string) { return new UnoExpandedGameService(roomId, this.settings.gameFactory, Date.now, this.settings.effectTiming); }
-  private timer: ReturnType<typeof setTimeout> | null = null;
-  private disposed = false;
-  protected onPublished(): void {
-    if (this.timer) clearTimeout(this.timer);
-    this.timer = null;
-    const deadline = this.service.nextDeadline;
-    if (this.disposed || deadline === null) return;
-    const matchId = this.service.matchId;
-    this.timer = setTimeout(() => {
-      this.timer = null;
-      if (this.disposed || this.service.matchId !== matchId || this.service.nextDeadline !== deadline) return;
-      try {
-        const transition = this.service.advanceTime();
-        if (transition) { this.publish(); this.broadcastEvents(transition); }
-        else this.onPublished();
-      } catch (error) { console.error("Expanded effect timer failed", error); }
-    }, Math.max(0, deadline - Date.now()));
-  }
-  onDispose(): void {
-    this.disposed = true;
-    if (this.timer) clearTimeout(this.timer);
-    this.timer = null;
-    super.onDispose();
-  }
+  protected createService(roomId: string) { return new UnoExpandedGameService(roomId, this.settings.gameFactory, Date.now, this.settings.effectTiming, this.settings.turnTiming); }
   protected createState() { return new UnoExpandedRoomSchema(); }
   protected syncState() { syncExpandedPublicState(this.state, this.service); }
   protected parseAction(payload: unknown) {

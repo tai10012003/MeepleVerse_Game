@@ -212,3 +212,8 @@ E067 đã có bằng chứng qua UI local. E068 được bổ sung phạm vi b�
 ## Mở chơi thử bước 12 — 21/11/2026
 
 Đã qua 12 ca UI riêng biệt: catalog hai game chơi được, artwork gameplay, mobile/404/quay lại phòng, thư viện tách khỏi luồng chơi, hướng dẫn laptop/mobile, Cơ bản và hai ván Mở rộng đủ 198 lá. Hai ván xuất phát từ trang chủ, có người vào bằng mã và người vào link mời, reconnect và rematch. Một selector catalog cũ được sửa cho hai nút Chơi ngay và chạy lại đạt. 358 test backend (30 file), TypeScript/lint workspace đạt. Xem [mở chơi thử và giới hạn](../development/uno-expanded-beta.md). Chưa triển khai hoặc nghiệm thu qua Internet.
+
+
+## Đồng hồ lượt — 22/11/2026
+
+Có deadline server 30 giây cho lượt thường/cộng dồn và 20 giây cho mỗi đáp Up; Battle và Đập tay giữ thời hạn đã chốt. Kiểm thử bổ sung gồm timeout/UNO, snapshot không đổi ngoài thời gian trôi, packet trễ, pause nhiều người, nhận phạt, rematch và UI laptop/mobile. Xem [cách chạy và phạm vi đồng hồ](../development/uno-turn-clock.md). Không thay đổi xác suất hay tác dụng Tornado trong thay đổi này.

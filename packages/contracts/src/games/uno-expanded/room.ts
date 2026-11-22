@@ -1,3 +1,4 @@
+import type { TurnClockView } from "../../room/common.js";
 import { z } from "zod";
 import type { RoomStatus, RoomMemberView, MatchOutcome, CommonRoomErrorCode, ActionReply } from "../../room/common.js";
 import type { UnoExpandedView } from "./state.js";
@@ -13,6 +14,7 @@ export const unoExpandedRoomActionSchema = z.strictObject({
 });
 export type UnoExpandedRoomAction = z.infer<typeof unoExpandedRoomActionSchema>;
 export interface UnoExpandedRoomView {
+  turnClock?: TurnClockView | null;
   gameId: "uno-expanded";
   roomId: string; revision: number; status: RoomStatus; hostId: string | null;
   paused: boolean; members: RoomMemberView[]; selfPlayerId: string;

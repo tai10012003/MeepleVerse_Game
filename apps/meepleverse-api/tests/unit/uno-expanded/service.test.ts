@@ -3,7 +3,7 @@ import { UnoExpandedGameService } from "../../../src/modules/games/uno-expanded/
 import { createExpandedGame } from "../../../src/modules/games/uno-expanded/index.js";
 import { seeded } from "../uno/fixtures.js";
 function service() {
-  const service = new UnoExpandedGameService("AB12", ids => createExpandedGame(ids, seeded(8)));
+  const service = new UnoExpandedGameService("AB12", ids => createExpandedGame(ids, seeded(8)), () => 1000);
   service.add("a", "A"); service.add("b", "B"); return service;
 }
 describe("Expanded room service", () => {

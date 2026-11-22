@@ -1,15 +1,18 @@
+import type { TurnTiming } from "../../application/turn-clock.js";
 import { randomUUID } from "node:crypto";
 import { Room, ServerError, type Client } from "@colyseus/core";
 import type { Schema } from "@colyseus/schema";
 import { roomJoinSchema, type ActionReply, type RoomMemberView, type RoomStatus } from "@meepleverse/contracts/room-common";
 import type { RoomCodePool } from "../../infrastructure/room-code-pool.js";
-export interface RoomTransportSettings { reconnectSeconds: number; codes: RoomCodePool }
+export interface RoomTransportSettings { reconnectSeconds: number; codes: RoomCodePool; turnTiming?: Partial<TurnTiming> }
 export interface GameRoomService<Action, View> {
   readonly members: RoomMemberView[];
   readonly status: RoomStatus;
   readonly revision: number;
   readonly matchId: string | null;
   readonly game: { revision: number } | null;
+  readonly nextDeadline?: number | null;
+  advanceTime?(): { state: { revision: number }; events: { public: unknown[] } } | null;
   add(playerId: string, nickname: string): void;
   setConnected(playerId: string, connected: boolean): void;
   leave(playerId: string, expired: boolean): void;
@@ -82,7 +85,33 @@ export abstract class GameRoom<Action, View, State extends Schema> extends Room<
     // ENDED rooms retain the existing group for rematches; new guests join only LOBBY.
     this.publish();
   }
-  onDispose(): void { this.settings.codes.release(this.roomId); }
+  private turnTimer: ReturnType<typeof setTimeout> | null = null;
+  private disposed = false;
+  onDispose(): void {
+    this.disposed = true;
+    if (this.turnTimer) clearTimeout(this.turnTimer);
+    this.turnTimer = null;
+    this.settings.codes.release(this.roomId);
+  }
+  private advanceDueTime(): void {
+    const deadline = this.service.nextDeadline;
+    if (deadline == null || Date.now() < deadline) return;
+    const transition = this.service.advanceTime?.();
+    if (transition) { this.publish(); this.broadcastEvents(transition); }
+  }
+  private scheduleDeadline(): void {
+    if (this.turnTimer) clearTimeout(this.turnTimer);
+    this.turnTimer = null;
+    const deadline = this.service.nextDeadline;
+    if (this.disposed || deadline == null) return;
+    const matchId = this.service.matchId;
+    this.turnTimer = setTimeout(() => {
+      this.turnTimer = null;
+      if (this.disposed || this.service.matchId !== matchId || this.service.nextDeadline !== deadline) return;
+      try { this.advanceDueTime(); this.scheduleDeadline(); }
+      catch (error) { console.error("Game deadline failed", error); }
+    }, Math.max(0, deadline - Date.now()));
+  }
   private sendView(client: Client): void {
     const id = this.identities.get(client.sessionId);
     if (id && this.service.members.some(member => member.playerId === id && member.connected)) {
@@ -93,6 +122,7 @@ export abstract class GameRoom<Action, View, State extends Schema> extends Room<
   protected publish(): void {
     this.syncState();
     for (const client of this.clients) this.sendView(client);
+    this.scheduleDeadline();
     this.onPublished();
   }
   protected broadcastEvents(transition: { state: { revision: number }; events: { public: unknown[] } }): void {
@@ -128,6 +158,8 @@ export abstract class GameRoom<Action, View, State extends Schema> extends Room<
     }
     let reply: ActionReply;
     try {
+      // Settle expired server time before accepting a packet queued at the deadline.
+      this.advanceDueTime();
       const transition = this.service.execute(playerId, action);
       // Update service synchronously; matchmaking lock is only a secondary gate.
       if (this.service.status !== "LOBBY") void this.lock().catch(console.error);

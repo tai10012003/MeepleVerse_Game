@@ -1,0 +1,8 @@
+.turn-countdown { display:inline-flex; align-items:center; justify-content:center; gap:3px; min-width:43px; padding:3px 6px; border:1px solid #bbd69388; border-radius:20px; background:#172c20; color:#dfedc8; font:700 13px/1.25 Arial,sans-serif; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.turn-countdown.is-urgent { color:#ffe4a0; border-color:#efb251; background:#523722; box-shadow:0 0 12px #efa43533; }
+.turn-countdown.is-paused { color:#b6c4ad; border-color:#768471; box-shadow:none; }
+.opponent-identity>.turn-countdown,.expanded-identity>.turn-countdown { position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%); z-index:3; }
+.self-turn-clock { display:inline-flex; align-items:center; gap:5px; margin-inline-start:8px; vertical-align:middle; }
+.self-turn-clock>.clock-avatar { display:grid; place-items:center; width:23px; height:23px; border-radius:8px; color:#172b20; background:#c8d99f; font:700 13px Arial,sans-serif; }
+
+.mini-countdown.is-urgent { color:#ffe4a0; border-color:#efb251; background:#523722; }

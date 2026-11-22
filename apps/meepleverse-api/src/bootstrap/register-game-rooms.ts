@@ -13,7 +13,7 @@ export function registerGameRooms(server: Server, settings: GameRoomRegistrySett
   server.define("uno", createUnoRoomClass(settings));
   if (settings.enableExpandedRooms !== false) {
     server.define("uno-expanded", createUnoExpandedRoomClass({
-      reconnectSeconds: settings.reconnectSeconds, codes: settings.codes, gameFactory: settings.expandedGameFactory, effectTiming: settings.expandedEffectTiming,
+      turnTiming: settings.turnTiming, reconnectSeconds: settings.reconnectSeconds, codes: settings.codes, gameFactory: settings.expandedGameFactory, effectTiming: settings.expandedEffectTiming,
     }));
   }
 }

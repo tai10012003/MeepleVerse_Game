@@ -1,3 +1,4 @@
+import type { TurnClockView } from "./common.js";
 import { z } from "zod";
 import { unoCommandSchema, type UnoView, type UnoErrorCode } from "../games/uno/index.js";
 export { roomJoinSchema } from "./common.js";
@@ -13,6 +14,7 @@ export type RoomAction = z.infer<typeof roomActionSchema>;
 import type { RoomStatus, RoomMemberView, MatchOutcome, CommonRoomErrorCode } from "./common.js";
 export type { RoomStatus, RoomMemberView, MatchOutcome, CommonRoomErrorCode, ActionReply } from "./common.js";
 export interface UnoRoomView {
+  turnClock?: TurnClockView | null;
   gameId: "uno-basic";
   roomId: string; revision: number; status: RoomStatus; hostId: string | null;
   paused: boolean; members: RoomMemberView[]; selfPlayerId: string;

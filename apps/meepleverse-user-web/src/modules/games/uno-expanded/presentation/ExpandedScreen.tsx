@@ -1,4 +1,5 @@
 "use client";
+import { TurnCountdown } from "@/shared/ui/TurnCountdown";
 import { useState, type ReactNode } from "react";
 import type { UnoExpandedCommand, UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
 import { RoomToolbar } from "@/layouts/RoomToolbar";
@@ -58,7 +59,7 @@ export function ExpandedScreen({ view, connected, reconnecting, pending, error, 
     <RoomToolbar roomId={view.roomId} gameId="uno-expanded" connected={connected} reconnecting={reconnecting} onLeave={onLeave} />
     {error && <p className="expanded-error" role="alert">{error}</p>}{!connected && !reconnecting && <button className="button secondary" onClick={onReconnect}>Thử kết nối lại</button>}
     {view.status === "ENDED" && !animating ? <>{feedbackPanel}<ExpandedResults view={view} enabled={connected && !view.paused} pending={pending} onRematch={onRematch} onLeave={onLeave} /></> : game && <main className="expanded-board" data-testid="expanded-board" data-phase={game.phase} data-my-turn={game.currentPlayerId === view.selfPlayerId}>
-      <h1 className="expanded-sr">Ván UNO Mở rộng đã bắt đầu.</h1><div className="expanded-turn-strip"><strong role="status">{text}</strong><span>{game.direction === 1 ? "↻ Thuận chiều" : "↺ Ngược chiều"}</span></div>
+      <h1 className="expanded-sr">Ván UNO Mở rộng đã bắt đầu.</h1><div className="expanded-turn-strip"><strong role="status">{text}{view.turnClock?.playerId === view.selfPlayerId && <span className="self-turn-clock"><span className="clock-avatar" aria-hidden="true">{Array.from(view.members.find(member => member.playerId === view.selfPlayerId)?.nickname ?? "?")[0]}</span><TurnCountdown clock={view.turnClock} matchId={view.matchId} audible /></span>}</strong><span>{game.direction === 1 ? "↻ Thuận chiều" : "↺ Ngược chiều"}</span></div>
       <ExpandedTable view={displayView} pileGame={pileGame ?? game} active={turn.active && !effect} onDraw={draw}>{miniPanel}</ExpandedTable>
       <ExpandedHand newCardIds={newestFrame?.matchId === view.matchId && newestFrame.events.some(event => event.type === "CARDS_DRAWN" && event.playerId === view.selfPlayerId) ? game.self.hand.filter(card => !newestFrame.before.game?.self.hand.some(old => old.id === card.id)).map(card => card.id) : []} game={displayGame!} enabled={turn.active} selectedId={turn.selected?.id} onSelect={turn.select} />
       <section className="expanded-controls" aria-label="Điều khiển lượt"><div className="expanded-actions"><button className="button secondary" disabled={!turn.active || !!effect} onClick={draw}>{game.phase === "draw-stack" ? `Nhận ${game.pendingDraw} lá` : game.phase === "drawn" ? "Bỏ lượt" : "Bốc bài"}</button><button className="button primary" disabled={!turn.active || !turn.selected} onClick={turn.play}>{effect?.kind === "up" ? "Đáp lá bài" : "Đánh lá bài"}</button></div>

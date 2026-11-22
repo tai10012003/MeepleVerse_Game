@@ -6,7 +6,7 @@ import { createGame } from "../../src/modules/games/uno/domain/rules/create-game
 import { fixture, seeded, number, wild, action } from "../unit/uno/fixtures.js";
 import { expandedBrowserFixture } from "./expanded-fixtures.js";
 let scenario = "normal";
-const runtime = createRealtimeServer({ enableExpandedRooms: true, expandedGameFactory: ids => expandedBrowserFixture(ids, scenario), gameFactory: ids => {
+const runtime = createRealtimeServer({ turnTiming: process.env.BROWSER_TURN_MS ? { turnMs: Number(process.env.BROWSER_TURN_MS), upMs: Number(process.env.BROWSER_UP_MS ?? 20000) } : undefined, enableExpandedRooms: true, expandedGameFactory: ids => expandedBrowserFixture(ids, scenario), gameFactory: ids => {
   if (scenario === "normal") return createGame(ids, seeded(17));
   const special = scenario === "effect-four" ? wild("special", "wild-draw-four") : action("special", scenario.includes("skip") ? "skip" : scenario.includes("reverse") ? "reverse" : "draw-two", scenario.includes("green") ? "green" : "red");
   const hands = scenario === "wild" ? [[wild("plain-wild"), number("a")], [number("b", "blue", 1), number("c", "green", 2)]] : scenario === "stacking" ? [[action("two", "draw-two"), number("a")], [wild("four1", "wild-draw-four"), number("b")], [wild("four2", "wild-draw-four"), number("c")], [number("d", "blue", 1), number("e", "green", 2)]] : scenario === "stacking-two" ? [[wild("four", "wild-draw-four"), number("a")], [action("two-blue", "draw-two", "blue"), number("b")], [number("c", "green", 1), number("d", "yellow", 2)]] : scenario.startsWith("effect-") ? [[special, number("stay", "blue", 3)], [number("other-red", "red", 2), number("other-green", "green", 3)], [number("third", "green", 1)]] : scenario === "challenge"

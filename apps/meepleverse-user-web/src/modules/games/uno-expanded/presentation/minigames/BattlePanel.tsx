@@ -9,7 +9,7 @@ export function BattlePanel({ view, choice, connected, feedback }: { view: UnoEx
   const effect = choice.effect!; const nameOf = (id: string) => view.members.find(member => member.playerId === id)?.nickname ?? "Người chơi";
   const lockedCard = view.game!.self.hand.find(card => card.id === choice.own?.selectedCardId);
   return <section className="mini-panel battle-panel" data-testid="battle-panel" data-stage={effect.stage} aria-label="Wild Battle">
-    <header><div><span className="eyebrow">Hai kiếm · {colorNames[effect.color]}</span><h2>{nameOf(effect.actorId)} <span aria-hidden="true">⚔</span> {nameOf(effect.targetId)}</h2></div><EffectCountdown deadline={effect.deadline} remainingMs={effect.remainingMs} paused={view.paused || !connected} /></header>
+    <header><div><span className="eyebrow">Hai kiếm · {colorNames[effect.color]}</span><h2>{nameOf(effect.actorId)} <span aria-hidden="true">⚔</span> {nameOf(effect.targetId)}</h2></div><EffectCountdown warningId={`${view.matchId}:${effect.id}:${effect.stage}`} audible={choice.active} deadline={effect.deadline} remainingMs={effect.remainingMs} paused={view.paused || !connected} /></header>
     {effect.stage === "select" ? <>
       <div className="battle-readiness">{[effect.actorId, effect.targetId].map(id => <span key={id}>{nameOf(id)} · {effect.lockedPlayerIds.includes(id) ? "Sẵn sàng" : "Đang chọn"}</span>)}</div>
       {choice.locked ? <div className="battle-locked"><div>{lockedCard && <ExpandedCardFace card={lockedCard} />}</div><p>Đã chọn bài của bạn. Đối thủ chưa thấy mặt bài.</p></div>

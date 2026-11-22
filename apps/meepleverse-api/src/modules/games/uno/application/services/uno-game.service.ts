@@ -1,3 +1,5 @@
+import { TurnClock, type TurnTiming } from "../../../../room/application/turn-clock.js";
+import { timeoutUnoTurn } from "../../domain/rules/timeout-turn.js";
 import { randomUUID } from "node:crypto";
 import type { RoomAction, RoomMemberView, RoomStatus, UnoRoomView, MatchOutcome } from "@meepleverse/contracts/room";
 import { createGame } from "../../domain/rules/create-game.js";
@@ -15,7 +17,21 @@ export class UnoGameService {
   game: UnoGame | null = null;
   matchId: string | null = null;
   outcome: MatchOutcome | null = null;
-  constructor(readonly roomId: string, private readonly factory: GameFactory = createGame) {}
+  private readonly clock: TurnClock;
+  constructor(readonly roomId: string, private readonly factory: GameFactory = createGame,
+    private readonly now: () => number = Date.now, timing: Partial<TurnTiming> = {}) { this.clock = new TurnClock(timing); }
+  get nextDeadline() { return this.status === "PLAYING" && !this.paused ? this.clock.deadline : null; }
+  private updateClock(preserve = false) {
+    if (!this.game || this.status !== "PLAYING") this.clock.clear();
+    else if (!preserve) this.clock.reset(this.game.players[this.game.currentIndex]!.id, "turn", this.now());
+  }
+  advanceTime(): Transition | null {
+    const deadline = this.nextDeadline;
+    if (deadline === null || this.now() < deadline || !this.game) return null;
+    const transition = timeoutUnoTurn(this.game);
+    this.game = transition.state; this.revision++; this.updateClock();
+    return transition;
+  }
   get paused(): boolean { return this.members.some(member => !member.connected); }
   add(playerId: string, nickname: string): void {
     requireRoom(this.status === "LOBBY", "ROOM_NOT_JOINABLE");
@@ -26,7 +42,11 @@ export class UnoGameService {
   }
   setConnected(playerId: string, connected: boolean): void {
     const member = this.members.find(member => member.playerId === playerId);
-    if (member && member.connected !== connected) { member.connected = connected; this.revision++; }
+    if (member && member.connected !== connected) {
+      const wasPaused = this.paused; member.connected = connected;
+      if (wasPaused !== this.paused) { if (this.paused) this.clock.pause(this.now()); else this.clock.resume(this.now()); }
+      this.revision++;
+    }
   }
   leave(playerId: string, expired: boolean): void {
     const index = this.members.findIndex(member => member.playerId === playerId);
@@ -39,7 +59,7 @@ export class UnoGameService {
         reason: expired ? "reconnection-expired" : "player-left", departedPlayerId: playerId,
         winnerId: this.members.length === 1 ? this.members[0]!.playerId : null,
       };
-      this.game = null;
+      this.game = null; this.clock.clear();
     }
     this.revision++;
   }
@@ -56,24 +76,29 @@ export class UnoGameService {
       this.matchId = randomUUID();
       this.status = "PLAYING";
       this.outcome = null;
+      this.updateClock();
       this.revision++;
       return null;
     }
     requireRoom(this.status === "PLAYING" && this.game, "NO_ACTIVE_GAME");
     requireRoom(action.matchId === this.matchId, "STALE_MATCH");
     requireRoom(action.expectedRevision === this.game.revision, "STALE_REVISION");
-    const transition = applyCommand(this.game, playerId, action.command);
+    requireRoom(this.clock.deadline === null || this.now() < this.clock.deadline, "STALE_REVISION");
+    const previous = this.game;
+    const transition = applyCommand(previous, playerId, action.command);
     this.game = transition.state;
     if (this.game.phase === "ended") {
       this.status = "ENDED";
       this.outcome = { reason: this.game.result!.reason === "blocked" ? "blocked" : "completed", winnerId: this.game.result!.winnerId };
     }
+    this.updateClock(action.command.type === "DRAW_CARD" && this.game.phase === "drawn" && this.game.currentIndex === previous.currentIndex);
     this.revision++;
     return transition;
   }
   view(playerId: string): UnoRoomView {
     requireRoom(this.members.some(member => member.playerId === playerId), "UNKNOWN_PLAYER");
     return {
+      turnClock: this.status === "PLAYING" ? this.clock.view(this.now()) : null,
       gameId: "uno-basic", roomId: this.roomId, revision: this.revision, status: this.status, hostId: this.hostId,
       paused: this.paused, members: structuredClone(this.members), selfPlayerId: playerId,
       matchId: this.matchId, game: this.game ? getPlayerView(this.game, playerId) : null,

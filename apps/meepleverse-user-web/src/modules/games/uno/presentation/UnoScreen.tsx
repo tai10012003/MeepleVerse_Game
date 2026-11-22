@@ -1,4 +1,5 @@
 "use client";
+import { TurnCountdown } from "@/shared/ui/TurnCountdown";
 import { CardBack, OpponentHand, DirectionRing, DrawDebt, ColorPicker } from "@/modules/games/uno-common";
 import { useState, type ReactNode, type CSSProperties } from "react";
 import type { UnoCard, UnoCommand } from "@meepleverse/contracts/uno";
@@ -70,13 +71,13 @@ export function UnoScreen(props: Props) {
       <Results view={view} enabled={connected && !view.paused} pending={pending} onRematch={props.onRematch} onLeave={props.onLeave} />
     </main> : game && <main className="uno-board" data-testid="uno-board" data-match-id={view.matchId!} data-revision={game.revision} data-my-turn={turn ? "true" : "false"} data-phase={game.phase}>
       <h1 className="sr-only">Ván chơi đã bắt đầu.</h1>
-      <div className="uno-turn-strip"><span className="turn-message" role="status">{turnText}</span><span className="direction-label">{game.direction === 1 ? "↻" : "↺"} <span>{game.direction === 1 ? "Thuận chiều" : "Ngược chiều"}</span></span></div>
+      <div className="uno-turn-strip"><span className="turn-message" role="status">{turnText}{view.turnClock?.playerId === view.selfPlayerId && <span className="self-turn-clock"><span className="clock-avatar" aria-hidden="true">{Array.from(nameOf(view.selfPlayerId))[0]}</span><TurnCountdown clock={view.turnClock} matchId={view.matchId} audible /></span>}</span><span className="direction-label">{game.direction === 1 ? "↻" : "↺"} <span>{game.direction === 1 ? "Thuận chiều" : "Ngược chiều"}</span></span></div>
       {props.error && <p role="alert" className="board-error">{props.error}</p>}
       {!connected && !reconnecting && <button className="button secondary reconnect-button" onClick={props.onReconnect}>Thử kết nối lại</button>}
       <section className="uno-table" data-opponents={opponents.length} aria-label="Bàn UNO">
         <div className="table-ring" aria-hidden="true" />
         {opponents.map((opponent, index) => <div className={"opponent opponent-" + (opponents.length === 1 ? "top" : opponents.length === 2 ? index === 0 ? "left" : "right" : ["left", "top", "right"][index]) + (game.currentPlayerId === opponent.playerId ? " current" : "")} key={opponent.playerId} data-player-id={opponent.playerId}>
-          <div className="opponent-identity"><span className="opponent-avatar">{Array.from(nameOf(opponent.playerId))[0]}</span>
+          <div className="opponent-identity">{view.turnClock?.playerId === opponent.playerId && <TurnCountdown clock={view.turnClock} matchId={view.matchId} />}<span className="opponent-avatar">{Array.from(nameOf(opponent.playerId))[0]}</span>
           <strong>{nameOf(opponent.playerId)}</strong><span className="opponent-count" aria-label={opponent.handCount + " lá"}>{opponent.handCount}</span>{!view.members.find(member => member.playerId === opponent.playerId)?.connected && <span className="opponent-offline">Mất mạng</span>}
           </div><div className="opponent-cards"><OpponentHand count={opponent.handCount} />{debtTargetId === opponent.playerId && <DrawDebt count={game.pendingDraw} playerId={opponent.playerId} />}</div>
         </div>)}

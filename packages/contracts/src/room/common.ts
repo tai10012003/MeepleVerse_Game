@@ -14,3 +14,9 @@ export interface ActionReply<Code extends string = string> {
   requestId: string | null; ok: boolean; code?: Code;
   roomRevision: number; matchId: string | null; gameRevision: number | null;
 }
+
+/** Public server clock. remainingMs is frozen when deadline is null. */
+export interface TurnClockView {
+  id: string; playerId: string; kind: "turn" | "up";
+  durationMs: number; deadline: number | null; remainingMs: number; serverNow: number;
+}

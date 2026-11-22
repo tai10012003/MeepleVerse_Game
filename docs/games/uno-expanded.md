@@ -372,3 +372,8 @@ Có nút `?` và hướng dẫn đầy đủ theo luật đang chạy tại tran
 ## Bước 12 — mở chơi thử (21/11/2026)
 
 Danh mục chuyển Mở rộng sang Chơi thử/Chơi ngay, trang game có form tạo/vào phòng. API mặc định đăng ký cả hai loại phòng; frontend tạo Mở rộng không còn phụ thuộc development. Cơ bản giữ room type/luật riêng. Ảnh đại diện hai phiên bản dùng mặt bài SVG gameplay, gồm số/chức năng nền và số/chức năng mở rộng tương ứng. Xem [cấu hình và kiểm tra](../development/uno-expanded-beta.md). Các mô tả chỉ nội bộ ở các mục bước 4–11 là lịch sử trước mốc này.
+
+
+## Đồng hồ lượt — 22/11/2026
+
+Áp dụng 30 giây cho lượt thường/đáp cộng dồn; Tăng tiến 20 giây mỗi lần đáp; Battle 20 giây mỗi giai đoạn; Đập tay vẫn chuẩn bị 1 giây + phản ứng 5 giây. Hết giờ thường bỏ lượt, đã bốc thì giữ lá, cộng dồn tự nhận phạt; Up tự đánh hợp lệ nhưng không tự hô UNO. Bốc/mở popup không reset, tạm dừng phòng giữ thời gian còn lại. Mục cũ về chưa có timer lượt/Up được thay bằng [quy tắc đồng hồ hiện tại](../development/uno-turn-clock.md).

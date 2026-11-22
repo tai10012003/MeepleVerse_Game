@@ -1,3 +1,4 @@
+import type { TurnTiming } from "../modules/room/application/turn-clock.js";
 import type { EffectTiming } from "../modules/games/uno-expanded/domain/models/effect-context.js";
 import { createServer as createHttpServer } from "node:http";
 import { Server, matchMaker } from "@colyseus/core";
@@ -9,7 +10,7 @@ import { RoomCodePool } from "../modules/room/infrastructure/room-code-pool.js";
 import type { GameFactory } from "../modules/games/uno/application/services/uno-game.service.js";
 import type { ExpandedGameFactory } from "../modules/games/uno-expanded/application/services/uno-expanded-game.service.js";
 export interface RealtimeOptions {
-  reconnectSeconds?: number; gameFactory?: GameFactory;
+  reconnectSeconds?: number; gameFactory?: GameFactory; turnTiming?: Partial<TurnTiming>;
   /** Both editions are enabled by default; a trusted server setup may explicitly disable Expanded. */
   enableExpandedRooms?: boolean; expandedGameFactory?: ExpandedGameFactory; expandedEffectTiming?: Partial<EffectTiming>;
 }
@@ -30,7 +31,7 @@ export function createRealtimeServer(options: RealtimeOptions = {}) {
   const server = new Server({ transport, gracefullyShutdown: false, greet: false });
   registerGameRooms(server, {
     reconnectSeconds: options.reconnectSeconds ?? 30, codes: new RoomCodePool(),
-    gameFactory: options.gameFactory, enableExpandedRooms: options.enableExpandedRooms, expandedGameFactory: options.expandedGameFactory, expandedEffectTiming: options.expandedEffectTiming,
+    turnTiming: options.turnTiming, gameFactory: options.gameFactory, enableExpandedRooms: options.enableExpandedRooms, expandedGameFactory: options.expandedGameFactory, expandedEffectTiming: options.expandedEffectTiming,
   });
   return { server, httpServer };
 }

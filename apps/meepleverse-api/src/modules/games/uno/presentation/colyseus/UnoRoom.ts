@@ -9,7 +9,7 @@ export interface UnoRoomSettings extends RoomTransportSettings { gameFactory?: G
 export class UnoRoom extends GameRoom<RoomAction["action"], UnoRoomView, UnoRoomSchema> {
   protected settings!: UnoRoomSettings;
   declare protected service: UnoGameService;
-  protected createService(roomId: string) { return new UnoGameService(roomId, this.settings.gameFactory); }
+  protected createService(roomId: string) { return new UnoGameService(roomId, this.settings.gameFactory, Date.now, this.settings.turnTiming); }
   protected createState() { return new UnoRoomSchema(); }
   protected syncState() { syncPublicState(this.state, this.service); }
   protected parseAction(payload: unknown) {

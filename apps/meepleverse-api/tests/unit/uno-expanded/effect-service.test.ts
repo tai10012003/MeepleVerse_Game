@@ -47,7 +47,7 @@ describe("mini-game service concurrency and frozen clocks", () => {
     setNow(200000); expect(s.advanceTime()).toBeNull(); s.setConnected("a", true);
     expect(s.nextDeadline).toBe(214999);
     send("a", { type: "BATTLE_DISCARD", effectId: id, cardIds: ["keep-a", "keep-b"], declareUno: true });
-    expect(s.game!.effect).toBeNull(); expect(s.nextDeadline).toBeNull();
+    expect(s.game!.effect).toBeNull(); expect(s.nextDeadline).toBe(230000);
   });
   it("retains High Five response order, opens a fresh attempt after resume and rejects stale clicks", () => {
     const { service: s, send, setNow } = setup("high-five"); const id = s.game!.effect!.id;
@@ -62,7 +62,7 @@ describe("mini-game service concurrency and frozen clocks", () => {
     send("a", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
     send("c", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
     send("d", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
-    expect(s.game!.players[3]!.hand).toHaveLength(3); expect(s.nextDeadline).toBeNull();
+    expect(s.game!.players[3]!.hand).toHaveLength(3); expect(s.nextDeadline).toBe(131000);
   });
   it("auto-selects and rewards after deadlines, clears abandoned timers and rejects old-match reactions", () => {
     const { service: s, setNow } = setup("battle");

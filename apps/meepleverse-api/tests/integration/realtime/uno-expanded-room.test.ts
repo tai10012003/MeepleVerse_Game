@@ -13,6 +13,15 @@ function endpointFor(runtime: ReturnType<typeof createRealtimeServer>) {
   return "http://127.0.0.1:" + address.port;
 }
 
+function expectRoomUnchanged(actual: UnoExpandedRoomView, before: UnoExpandedRoomView) {
+  const { turnClock: afterClock, ...afterState } = actual;
+  const { turnClock: beforeClock, ...beforeState } = before;
+  expect(afterState).toEqual(beforeState);
+  expect(afterClock).toEqual({ ...beforeClock, remainingMs: expect.any(Number), serverNow: expect.any(Number) });
+  expect(afterClock!.remainingMs).toBeLessThanOrEqual(beforeClock!.remainingMs);
+  expect(afterClock!.serverNow).toBeGreaterThanOrEqual(beforeClock!.serverNow);
+}
+
 describe("game registration", () => {
   it("registers both editions with the default server setup and shares unique room codes", async () => {
     const runtime = createRealtimeServer(); await runtime.server.listen(0, "127.0.0.1");
@@ -149,11 +158,11 @@ describe("internal Expanded WebSocket rooms", () => {
     expect((await send(a!, { ...command, matchId: "wrong" })).code).toBe("STALE_MATCH");
     expect((await send(a!, { ...command, expectedRevision: 9 })).code).toBe("STALE_REVISION");
     expect((await send(actor, command)).code).toBe("INVALID_PHASE");
-    expect(await fresh(a!)).toEqual(before);
+    expectRoomUnchanged(await fresh(a!), before);
     const basic = await attach(await new Client(endpoint).create("uno", { nickname: "Basic" }));
     expect((basic.view as unknown as { gameId: string }).gameId).toBe("uno-basic");
     expect(basic.room.roomId).not.toBe(a!.room.roomId);
-    expect(await fresh(a!)).toEqual(before);
+    expectRoomUnchanged(await fresh(a!), before);
   });
   it("restores the same match and hand after a drop and pauses actions while disconnected", async () => {
     const [a, b] = await group(2); await start(a!); await Promise.all([fresh(a!), fresh(b!)]);
@@ -220,7 +229,7 @@ describe("internal Expanded WebSocket rooms", () => {
     scenario = "bulk"; const [a, b, c, d] = await group(4); const players = [a!, b!, c!, d!];
     await start(a!); await Promise.all(players.map(fresh)); const initial = structuredClone(a!.view);
     expect((await command(a!, { type: "PLAY_CARD", cardId: "divide", chosenColor: "red", discardCardIds: ["secret-a", "blue-a"] })).code).toBe("INVALID_SELECTION");
-    expect(await fresh(a!)).toEqual(initial);
+    expectRoomUnchanged(await fresh(a!), initial!);
     await fresh(a!);
     const divideAction: UnoExpandedRoomAction["action"] = { type: "GAME_COMMAND", matchId: a!.view!.matchId!, expectedRevision: 0,
       command: { type: "PLAY_CARD", cardId: "divide", chosenColor: "blue", discardCardIds: ["secret-b", "secret-a"] } };
