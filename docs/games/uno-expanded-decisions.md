@@ -107,3 +107,8 @@ Các quyết định triển khai không tuyên bố là luật chính thức th
 ## Cập nhật D11 sau chơi thử — 21/11/2026
 
 Theo yêu cầu đã chốt: người kích hoạt cũng đập tay; mọi bàn 2–4 người chuẩn bị 1 giây rồi có 5 giây phản hồi. Nếu đủ người bấm, phạt người cuối +2; hết giờ, phạt mỗi người chưa bấm +2 (không ai bấm thì tất cả +2). Thay thế phương án D11 cũ về miễn người đánh, chọn duy nhất một người vắng và tự phạt ngay ở bàn hai người. Thứ tự do server quyết định, giữ cơ chế attempt/reconnect và chỉ nhận một lần mỗi người.
+
+
+## Điều chỉnh D06 và UI UNO/Battle — 22/11/2026
+
+Theo phản hồi đã chốt, Skip Two bàn hai người chỉ cấm đối thủ và trả lượt cho người đánh. Bàn ba/bốn người giữ luật cũ. Thay quy định D06 ban đầu “bỏ cả lượt đối thủ và người đánh” ở bàn hai người. D12 giữ phạt UNO chủ động: bổ sung dự báo/nút hô ngay tại popup xả/chia và chọn bài Battle, không tự khai báo. D10 Random không đổi. Chỉ thu gọn kết quả Battle sau khi giao dịch hoàn tất, giữ thời hạn chọn thưởng 20 giây.

@@ -39,19 +39,24 @@ test("expanded 9B: Battle keeps choices secret and preserves an unlocked draft w
     for (const observer of [b!, c!]) expect(await observer!.locator("body").innerHTML()).not.toContain('"secret-a"');
     await expect(c!.getByTestId("battle-panel").locator("[data-choice-card-id]")).toHaveCount(0);
     await a!.getByTestId("battle-panel").locator('[data-choice-card-id="secret-a"]').click();
-    await b!.getByRole("button", { name: "Hô UNO", exact: true }).click();
+    await b!.getByTestId("battle-panel").getByRole("button", { name: "Hô UNO cho lựa chọn", exact: true }).click();
     await b!.getByTestId("battle-panel").locator('[data-choice-card-id="secret-b"]').click(); await b!.getByRole("button", { name: "Chọn lá bài", exact: true }).click(); await nextRevision(a!, 2);
     await expect(a!.getByTestId("battle-panel").locator('[data-choice-card-id="secret-a"]')).toHaveAttribute("aria-pressed", "true");
     await expect(b!.getByText("Đã chọn bài của bạn. Đối thủ chưa thấy mặt bài.")).toBeVisible();
     await a!.getByRole("button", { name: "Chọn lá bài", exact: true }).click(); await expect(c!.getByTestId("battle-panel")).toHaveAttribute("data-stage", "reward");
     await expect(c!.locator(".battle-revealed .expanded-card-face")).toHaveCount(2);
     await expect(c!.locator(".battle-penalties")).toContainText("Guest1 bốc 2 lá");
+    await a!.waitForTimeout(1700); // Completed-result compaction must not close an unfinished reward choice.
+    await expect(a!.getByTestId("battle-panel")).toHaveAttribute("data-stage", "reward");
     await a!.reload(); await expect(a!.getByTestId("battle-panel")).toHaveAttribute("data-stage", "reward");
     await expect(a!.getByRole("button", { name: "Hô UNO", exact: true })).toHaveAttribute("aria-pressed", "false");
     await a!.getByTestId("battle-panel").locator('[data-choice-card-id="reward-a"]').click(); await expect(a!.getByRole("button", { name: "Xác nhận bỏ bài thưởng" })).toBeDisabled();
-    await a!.getByTestId("battle-panel").locator('[data-choice-card-id="reward-b"]').click(); await a!.getByRole("button", { name: "Hô UNO", exact: true }).click();
+    await a!.getByTestId("battle-panel").locator('[data-choice-card-id="reward-b"]').click(); await a!.getByTestId("battle-panel").getByRole("button", { name: "Hô UNO cho lựa chọn", exact: true }).click();
     await c!.screenshot({ path: info.outputPath("battle-revealed-mobile.png") });
     await a!.getByRole("button", { name: "Xác nhận bỏ bài thưởng" }).click(); await nextRevision(b!, 6); // includes timed pause/resume revisions
+    await expect(a!.getByTestId("mini-feedback")).toHaveAttribute("data-compact", "true", { timeout: 2500 });
+    await expect(a!.locator(".expanded-center")).toBeVisible();
+    await expect(a!.getByTestId("mini-feedback").locator(".battle-revealed")).toHaveCount(0);
     await expect(a!.getByTestId("expanded-hand-count")).toHaveText("1 lá"); await expect(b!.getByTestId("expanded-hand-count")).toHaveText("3 lá");
     await expect(a!.getByTestId("mini-feedback")).toContainText("Host thắng Battle"); expect(group.errors).toEqual([]);
   } finally { await group.close(); }
@@ -72,7 +77,7 @@ test("expanded 9B: Battle timeout is resolved by the server and its reveal is no
   await request.post("http://127.0.0.1:5101/scenario/expanded-battle-timeout"); const group = await joinRoom(browser); const a = group.pages[0]!;
   try {
     await expect(a.getByRole("heading", { name: "Bạn thắng rồi!" })).toBeVisible();
-    await expect(a.getByTestId("mini-feedback")).toContainText("Host thắng Battle");
+    await expect(a.getByTestId("mini-feedback")).toHaveCount(0);
     await a.reload(); await expect(a.getByRole("heading", { name: "Bạn thắng rồi!" })).toBeVisible(); await expect(a.getByTestId("mini-feedback")).toHaveCount(0); expect(group.errors).toEqual([]);
   } finally { await group.close(); }
 });

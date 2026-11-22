@@ -52,10 +52,11 @@ export async function playExpandedCard(page:Page, card:HeldCard, cards:HeldCard[
  await page.locator(`.expanded-hand-card[data-card-id="${card.id}"]`).click();
  if(declareUno) await armExpandedUno(page);
  await page.getByRole('button',{name:/^(Đánh lá bài|Đáp lá bài)$/}).click();
- if(card.color!=='wild') return;
+ const coloredUno = card.kind==='discard-color' && cards.filter(held=>held.id!==card.id && held.color!==card.color).length===1;
+ if(card.color!=='wild' && !coloredUno) return;
  const dialog=page.getByRole('dialog'); await expect(dialog).toBeVisible();
- await expect(dialog.getByRole('button',{name:'Xác nhận',exact:true})).toBeDisabled();
- await dialog.getByRole('button',{name:colorLabels[majorityColor(cards)],exact:true}).click();
+ if(card.color==='wild') await expect(dialog.getByRole('button',{name:'Xác nhận',exact:true})).toBeDisabled();
+ if(card.color==='wild') await dialog.getByRole('button',{name:colorLabels[majorityColor(cards)],exact:true}).click();
  const targets=dialog.locator('.expanded-targets button'); if(await targets.count()) {if(options.target) await dialog.getByRole("button",{name:options.target,exact:true}).click();else await targets.first().click();}
  if(card.kind==='wild-divide-two') {
   const required=Math.floor((cards.length-1)/2);

@@ -45,7 +45,7 @@ Trừ khi nói khác, bốn ghế A→B→C→D theo chiều +1, đủ kho bốc
 | E023 | Đánh lá xả khi không có lá phụ cùng màu | Hợp lệ theo D05, chỉ bỏ lá kích hoạt. |
 | E024 | Seven Change L/R với bốn tay khác nhau | Mỗi người nhận đúng tay của một ghế, không nhân bản; màu giữ theo lá; chiều và người đi sau đúng D06. |
 | E025 | Chuyền nhận một lá | Không phạt UNO; trạng thái UNO cũ không bám theo tay được chuyển. |
-| E026 | Skip Two với 2/3/4 người | Lần lượt tới đối thủ/người đánh/ghế thứ tư theo D06. |
+| E026 | Skip Two với 2/3/4 người | Lần lượt tới người đánh/người đánh/ghế thứ tư; bàn hai người chỉ cấm đối thủ (cập nhật 22/11/2026). |
 
 ## D. Up và Battle
 
@@ -217,3 +217,13 @@ E067 đã có bằng chứng qua UI local. E068 được bổ sung phạm vi b�
 ## Đồng hồ lượt — 22/11/2026
 
 Có deadline server 30 giây cho lượt thường/cộng dồn và 20 giây cho mỗi đáp Up; Battle và Đập tay giữ thời hạn đã chốt. Kiểm thử bổ sung gồm timeout/UNO, snapshot không đổi ngoài thời gian trôi, packet trễ, pause nhiều người, nhận phạt, rematch và UI laptop/mobile. Xem [cách chạy và phạm vi đồng hồ](../development/uno-turn-clock.md). Không thay đổi xác suất hay tác dụng Tornado trong thay đổi này.
+
+
+## Rà soát UNO, Skip Two và Battle — 22/11/2026
+
+Bổ sung năm ca UI xả cố định/tự chọn với hô hoặc cố tình không hô và Skip Two hai người. Chạy cùng các ca ÷2, xả hết về đích, Up, Battle khóa bí mật/chọn thưởng/bỏ qua UNO; xác minh kết quả thu gọn sau 1,5 giây nhưng bước thưởng chưa xong không đóng. Cập nhật unit/WebSocket Skip Two cho cả 2/3/4 người và hai chiều. Xem [bảng rà soát các đường giảm bài](../development/uno-expanded-uno-review.md).
+
+
+## Kết thúc ván không phát lại popup mini-game — 22/11/2026
+
+MiniFeedback chỉ tồn tại khi ván còn PLAYING; xóa buffer phản hồi và bỏ qua phản hồi mini-game khi đã ENDED, giữ animation đánh/bốc cuối. Kiểm tra thắng bằng lá số sau Battle/Đập tay, lá Đập tay cuối, Battle tự kết thúc bằng timeout, reload/rematch và tình huống Battle còn chờ thưởng. Xem [nguyên nhân và ca tái hiện](../development/uno-expanded-uno-review.md).

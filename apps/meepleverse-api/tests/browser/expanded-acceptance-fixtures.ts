@@ -1,6 +1,6 @@
 import type { UnoExpandedCard as Card } from "@meepleverse/contracts/uno-expanded";
 import { createExpandedDeck, type UnoExpandedGame } from "../../src/modules/games/uno-expanded/index.js";
-export const ACCEPTANCE_CASES = ["tornado","random-number","random-function","multiply","divide","discard-color","wild-discard","seven-left","seven-right","skip-two","target","stack","uno","rapid","final-six","skip","reverse"] as const;
+export const ACCEPTANCE_CASES = ["tornado","random-number","random-function","multiply","divide","discard-color","wild-discard","seven-left","seven-right","skip-two","target","stack","uno","rapid","final-six","final-high-five","skip","reverse"] as const;
 export const ACCEPTANCE_SCENARIOS = ACCEPTANCE_CASES.map(name => "expanded-accept-"+name);
 /** Test-only arrangements use all 198 real card faces; nothing enters production bootstraps. */
 export function expandedAcceptanceFixture(ids:readonly string[],scenario:string):UnoExpandedGame {
@@ -30,6 +30,7 @@ export function expandedAcceptanceFixture(ids:readonly string[],scenario:string)
   case "stack":activation=take("activate","draw-two","red");break;
   case "uno":activation=number("activate","red",6);break;
   case "final-six":activation=black("activate","wild-draw-six");break;
+  case "final-high-five":activation=take("activate","high-five","red");break;
   case "skip":case "reverse":activation=take("activate",name,"red");break;
   default:activation=black("activate","wild");
  }
@@ -40,7 +41,7 @@ export function expandedAcceptanceFixture(ids:readonly string[],scenario:string)
   hands[0]=[activation,number("side-number","red",6),take("side-skip","skip","red"),hands[0]![1]!];
  }
  if(name==="uno") {deck.push(hands[0]!.pop()!);}
- if(name==="final-six") {deck.push(...hands[0]!.splice(1));}
+ if(name==="final-six"||name==="final-high-five") {deck.push(...hands[0]!.splice(1));}
  if(name==="stack") {
   hands[0]!.push(black("shield","wild-shield"));
   hands[1]=[black("four","wild-draw-four"),take("held-two","draw-two","blue")];

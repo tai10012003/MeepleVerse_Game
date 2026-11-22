@@ -170,7 +170,7 @@ Ví dụ, chiều hiện tại A→B→C→D:
 - L: mỗi người chuyển bài sang ghế kế trong thứ tự đó; đặt chiều +1. R: chuyển về ghế trước; đặt chiều -1. Chuyền đồng thời sau khi lá kích hoạt rời tay.
 - Sau chuyền, lượt tới ghế kế người kích hoạt theo chiều mới. Không chạy lại chức năng của các lá nhận được.
 - Nhận một lá do chuyền không tự bị phạt quên UNO; trạng thái UNO đã chuẩn bị trước đó hết hiệu lực.
-- Với hai người: chuyền L/R đều trao đổi hai tay bài; Skip Two đề xuất bỏ hai cơ hội lượt liên tiếp theo vòng, nên tới đối thủ sau khi đã bỏ lượt của đối thủ rồi của người đánh. Với ba người: Skip Two trả lượt cho người đánh. Với bốn người: bỏ hai đối thủ kế, tới người thứ tư.
+- Với hai người: chuyền L/R đều trao đổi hai tay bài; Skip Two chỉ cấm đối thủ và trả lượt cho người đánh. Với ba người: Skip Two trả lượt cho người đánh. Với bốn người: bỏ hai đối thủ kế, tới người thứ tư.
 
 ## 7. Wild Up — D07
 
@@ -377,3 +377,8 @@ Danh mục chuyển Mở rộng sang Chơi thử/Chơi ngay, trang game có form
 ## Đồng hồ lượt — 22/11/2026
 
 Áp dụng 30 giây cho lượt thường/đáp cộng dồn; Tăng tiến 20 giây mỗi lần đáp; Battle 20 giây mỗi giai đoạn; Đập tay vẫn chuẩn bị 1 giây + phản ứng 5 giây. Hết giờ thường bỏ lượt, đã bốc thì giữ lá, cộng dồn tự nhận phạt; Up tự đánh hợp lệ nhưng không tự hô UNO. Bốc/mở popup không reset, tạm dừng phòng giữ thời gian còn lại. Mục cũ về chưa có timer lượt/Up được thay bằng [quy tắc đồng hồ hiện tại](../development/uno-turn-clock.md).
+
+
+## Cập nhật Skip Two, UNO và Battle — 22/11/2026
+
+Skip Two ở bàn hai người chỉ cấm đối thủ, trả lượt cho người đánh; bàn ba/bốn người giữ bỏ hai đối thủ kế. Quy tắc này thay phần D06 cũ cho bàn hai người. Xả màu cố định làm còn một lá mở popup xác nhận/UNO; xả tự chọn và ÷2 dùng cùng nhắc tại popup. Battle có UNO cạnh bước chọn lá so và chọn thưởng, mỗi bước chuẩn bị riêng. Kết quả đã giải quyết thu gọn sau 1,5 giây; không đóng bước chọn thưởng đang chờ. Random giữ nguyên: lá đầu lật công khai vẫn vào tay người nhận. Xem [rà soát UNO và kiểm thử](../development/uno-expanded-uno-review.md).

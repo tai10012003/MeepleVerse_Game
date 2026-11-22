@@ -35,7 +35,7 @@
 
 /* Mini-game controls replace the center only while there is actual panel content. */
 .expanded-minigame-slot { position:absolute; inset:94px 0 4px; z-index:4; display:flex; justify-content:center; align-items:center; pointer-events:none; }
-.expanded-minigame-slot:empty { display:none; }.expanded-table:has(.mini-panel) .expanded-center { visibility:hidden; }
+.expanded-minigame-slot:empty { display:none; }.expanded-table:has(.mini-panel:not(.is-compact)) .expanded-center { visibility:hidden; }
 .mini-panel { pointer-events:auto; width:min(620px,100%); max-height:100%; overflow:auto; padding:18px; border:1px solid #8baf6b66; border-radius:17px; background:#15291ff5; box-shadow:0 10px 35px #0004; scrollbar-width:thin; font-family:Arial,sans-serif; }
 .mini-panel header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }.mini-panel h2 { font-size:1.15rem; letter-spacing:-.025em; margin-top:6px; }.mini-panel h3 { font-size:.9rem; margin-top:12px; }.mini-panel p { font-size:.8rem; }.mini-panel>small { display:block; color:var(--muted); font-size:.65rem; line-height:1.6; margin-top:10px; }
 .mini-countdown { flex:none; border:1px solid #899e63; border-radius:99px; padding:7px 11px; color:#e9d792; font-weight:800; font-size:.8rem; font-variant-numeric:tabular-nums; }
@@ -220,3 +220,14 @@
  .expanded-high-five { width:60px; height:60px; }
  .expanded-controls { min-height:70px; }
 }
+
+/* Completed Battle feedback yields the center after 1.5s; reward choices remain a full panel. */
+.expanded-minigame-slot:has(.mini-feedback.is-compact) { align-items:flex-end; }
+.mini-feedback.is-compact { width:fit-content; max-width:100%; padding:8px 14px; border-radius:14px; }
+.mini-feedback.is-compact h2 { font-size:13px; margin:0; }
+.mini-feedback.is-compact p { font-size:13px; margin:3px 0 0; }
+.expanded-choice-uno>div { min-width:0; }
+.expanded-choice-uno strong,.expanded-choice-uno p,.expanded-choice-uno button { font-size:13px; }
+.expanded-choice-uno p { margin:5px 0; }
+.expanded-choice-uno button { flex:none; min-height:44px; padding:9px 13px; }
+.expanded-uno-reminder { grid-column:1/-1; margin:0; text-align:center; color:#ffe2a0; font-size:13px; }

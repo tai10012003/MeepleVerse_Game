@@ -35,7 +35,7 @@ export function useExpandedTurn(view: UnoExpandedRoomView, connected: boolean, p
   }
   function play() {
     if (!active || !selected || !draft) return;
-    if (selected.color === null) update({ editing: true }); else submit();
+    if (selected.color === null || selected.kind === "discard-color" && needsUno) update({ editing: true }); else submit();
   }
   return { active, selected, draft, remaining, needsUno, armed, canArm, required, validOptions,
     dialogOpen: !!selected && !!draft?.editing && connected && !view.paused,

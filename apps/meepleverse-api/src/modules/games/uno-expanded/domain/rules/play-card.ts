@@ -68,7 +68,7 @@ export function playExpandedCard(game: UnoExpandedGame, actorId: string, command
   }
   game.phase = "turn";
   const forcedDraw = resolveExpandedDrawEffect(game, card, actorId, target, random, events);
-  let steps = card.kind === "skip-two" ? 3 : forcedDraw || card.kind === "skip" ? 2 : 1;
+  let steps = card.kind === "skip-two" ? (game.players.length === 2 ? 2 : 3) : forcedDraw || card.kind === "skip" ? 2 : 1;
   if (card.kind === "reverse") {
     game.direction = game.direction === 1 ? -1 : 1;
     if (game.players.length === 2) steps = 2;

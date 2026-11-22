@@ -272,7 +272,7 @@ describe("internal Expanded WebSocket rooms", () => {
     scenario = "skip-two"; const players = await group(count); await start(players[0]!);
     expect((await command(players[0]!, { type: "PLAY_CARD", cardId: "skip" })).ok).toBe(true);
     await Promise.all(players.map(fresh));
-    const target = count === 2 ? 1 : count === 3 ? 0 : 3;
+    const target = count <= 3 ? 0 : 3;
     for (const player of players) {
       expect(player.view!.game!.currentPlayerId).toBe(players[target]!.view!.selfPlayerId);
       expect(player.view!.game!.pendingDraw).toBe(0); expect(player.view!.game!.revision).toBe(1);

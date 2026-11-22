@@ -5,6 +5,12 @@ import { seeded } from "../unit/uno/fixtures.js";
 const num = (id: string, color: "red" | "blue" | "green" | "yellow" = "red", value = 5): Card => ({ id, kind: "number", color, value });
 const wild = (id: string, kind: Extract<Card, { color: null }>["kind"] = "wild"): Card => ({ id, kind, color: null });
 export function expandedBrowserFixture(ids: readonly string[], scenario: string): UnoExpandedGame {
+  if (scenario === "expanded-battle-last") {
+    const game = expandedBrowserFixture(ids, "expanded-battle");
+    const last = game.players[0]!.hand.find(card => card.id === "keep-a");
+    if (last?.kind === "number") last.color = "red";
+    return game;
+  }
   if (scenario.startsWith("expanded-accept-")) return expandedAcceptanceFixture(ids, scenario);
   if (scenario.startsWith("expanded-full-")) return createExpandedGame(ids, seeded(Number(scenario.split("-").at(-1))));
   if (!scenario.startsWith("expanded-")) return createExpandedGame(ids, seeded(17));

@@ -63,7 +63,7 @@ for (const declareUno of [true, false]) test(`expanded 9A: divide selection is e
     const dialog = a!.getByRole("dialog"); await dialog.getByRole("button", { name: "Xanh lá", exact: true }).click();
     await expect(dialog.getByRole("button", { name: "Xác nhận" })).toBeDisabled(); await dialog.locator('[data-choice-card-id="return-blue"]').click();
     await expect(dialog.locator('[data-choice-card-id="keep-red"]')).toBeDisabled();
-    if (declareUno) await dialog.getByRole("button", { name: "Hô UNO", exact: true }).click();
+    if (declareUno) await dialog.getByRole("button", { name: "Hô UNO cho lựa chọn", exact: true }).click();
     await dialog.getByRole("button", { name: "Xác nhận" }).click(); await nextRevision(b!, 1);
     await expect(a!.getByTestId("expanded-hand-count")).toHaveText(`${declareUno ? 1 : 3} lá`);
     await expect(b!.locator('[data-card-id="return-blue"]')).toHaveCount(0); await expect(a!.locator('[data-card-id="b-green"]')).toHaveCount(0);

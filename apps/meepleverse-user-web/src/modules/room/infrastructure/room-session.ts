@@ -57,7 +57,8 @@ class RoomSession {
         const pausedNow = view.paused && !previousExpanded?.paused;
         this.visualPairs.clear();
         this.patch({ view: null, expandedView, status: "connected", frames: [], events: null,
-          ...(resetFeedback ? { expandedVisualFrames: [], expandedFrames: [] } : {}), expandedInteractionEpoch: this.state.expandedInteractionEpoch + Number(pausedNow),
+          ...(resetFeedback ? { expandedVisualFrames: [] } : {}),
+          ...((resetFeedback || view.status === "ENDED") ? { expandedFrames: [] } : {}), expandedInteractionEpoch: this.state.expandedInteractionEpoch + Number(pausedNow),
           ...(!expandedView ? { error: "INVALID_ROOM_VIEW" } : clearError ? { error: null } : {}) });
         this.snapshotWaiter?.();
         return;
@@ -89,6 +90,8 @@ class RoomSession {
           const visual: ExpandedVisualFrame = { id: `${batch.matchId}:${batch.revision}`, matchId: batch.matchId, revision: batch.revision, ...pair, events: batch.events };
           this.patch({ expandedVisualFrames: [...this.state.expandedVisualFrames, visual].slice(-16) });
         }
+        // Final card/draw animations may still finish, but completed matches never enqueue mini-game popups.
+        if (view.status !== "PLAYING" || view.game?.phase === "ended") return;
         const events = batch.events.filter(isMiniFeedback);
         if (!events.length) return;
         const frame: MiniFeedbackFrame = { id: `${batch.matchId}:${batch.revision}`, matchId: batch.matchId, revision: batch.revision, events, draws: batch.events.filter((event): event is MiniDraw => event.type === "CARDS_DRAWN") };

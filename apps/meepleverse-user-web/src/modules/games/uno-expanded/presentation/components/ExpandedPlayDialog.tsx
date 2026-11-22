@@ -1,4 +1,5 @@
 "use client";
+import { UnoChoicePrompt } from "./UnoChoicePrompt";
 import { useEffect, useId, useRef } from "react";
 import type { UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
 import { ColorChoices } from "../../../uno-common/presentation/components/ColorChoices";
@@ -15,8 +16,8 @@ export function ExpandedPlayDialog({ view, turn }: { view: UnoExpandedRoomView; 
     {card.color === null && <section aria-label="Chọn màu"><h3>Chọn màu tiếp theo</h3><ColorChoices disabled={!turn.active} value={choice.color} onChoose={color => turn.update({ color })} />{choice.color && <p className="form-note">Đã chọn {colorNames[choice.color]}.</p>}</section>}
     {(card.kind === "wild-target-four" || card.kind === "wild-battle" && game.self.hand.length > 1) && <section aria-label={card.kind === "wild-battle" ? "Chọn đối thủ" : "Chọn người nhận"}><h3>{card.kind === "wild-battle" ? "Bạn muốn đấu với ai?" : "Ai nhận +4?"}</h3><div className="expanded-targets">{view.members.filter(member => member.playerId !== view.selfPlayerId).map(member => <button type="button" key={member.playerId} aria-pressed={choice.target === member.playerId} disabled={!turn.active} onClick={() => turn.update({ target: member.playerId })}>{member.nickname}</button>)}</div></section>}
     {card.kind === "wild-divide-two" && <section aria-label="Chọn bài chia hai"><h3>Chọn {turn.required} lá để bỏ</h3><p className="form-note" role="status">Đã chọn {choice.ids.length}/{turn.required}. Những lá này được đưa xuống đáy chồng bốc.</p><CardChoiceGrid cards={game.self.hand.filter(held => held.id !== card.id)} selectedIds={choice.ids} limit={turn.required} disabled={!turn.active} onToggle={id => turn.update({ ids: choice.ids.includes(id) ? choice.ids.filter(value => value !== id) : [...choice.ids, id] })} /></section>}
-    {turn.remaining !== null && <p className="expanded-reduction">Sau nước đánh: còn <strong>{turn.remaining} lá</strong>.</p>}
-    {turn.needsUno && <div className="expanded-choice-uno"><button type="button" className={turn.armed ? "is-armed" : ""} aria-pressed={turn.armed} disabled={!turn.active} onClick={turn.toggleUno}>Hô UNO{turn.armed ? " · Đã hô" : ""}</button><p>Chưa hô UNO thì server tự phạt bốc 2 lá.</p></div>}
+    {turn.remaining !== null && !turn.needsUno && <p className="expanded-reduction">Sau nước đánh: còn <strong>{turn.remaining} lá</strong>.</p>}
+    {turn.needsUno && <UnoChoicePrompt remaining={1} armed={turn.armed} disabled={!turn.active} onToggle={turn.toggleUno} />}
     <div className="dialog-actions"><button type="button" className="button secondary" disabled={!turn.active} onClick={turn.cancel}>Chọn lá khác</button><button type="button" className="button primary" disabled={!turn.active || !turn.validOptions} onClick={turn.submit}>Xác nhận</button></div>
   </dialog>;
 }

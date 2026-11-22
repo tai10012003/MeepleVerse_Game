@@ -1,3 +1,4 @@
+import { UnoChoicePrompt } from "../components/UnoChoicePrompt";
 import { miniDrawTotals, type MiniFeedbackFrame } from "../../model/mini-feedback";
 import type { UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
 import type { BattleChoice } from "../../application/useBattleChoice";
@@ -21,7 +22,7 @@ export function BattlePanel({ view, choice, connected, feedback }: { view: UnoEx
       <p>{effect.winnerId ? `${nameOf(effect.winnerId)} thắng Battle.` : "Battle hòa."}</p>
       {choice.own?.rewardCount ? <><h3>Chọn {choice.required} lá thưởng để bỏ</h3><CardChoiceGrid cards={choice.cards} selectedIds={choice.selectedIds} limit={choice.required} disabled={!choice.active} onToggle={choice.toggle} /></> : <p>Chờ người thắng chọn bài thưởng.</p>}
     </>}
-    {choice.canArm && <p className="mini-uno-note">{choice.armed ? "Đã hô UNO cho lựa chọn này." : "Còn một lá sau lựa chọn: bấm nút UNO phía dưới trước khi xác nhận."}</p>}
+    {choice.canArm && <UnoChoicePrompt remaining={1} armed={choice.armed} disabled={!choice.active} onToggle={choice.toggleUno} />}
     {choice.active && <div className="mini-actions"><span>{choice.selectedIds.length}/{choice.required} lá</span><button type="button" className="button primary" disabled={!choice.ready} onClick={choice.submit}>{effect.stage === "select" ? "Chọn lá bài" : "Xác nhận bỏ bài thưởng"}</button></div>}
     <small>Hết giờ, server chọn bài hợp lệ giúp lượt chơi tiếp tục; không tự hô UNO.</small>
   </section>;

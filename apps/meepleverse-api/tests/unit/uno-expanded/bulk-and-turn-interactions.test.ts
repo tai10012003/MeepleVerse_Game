@@ -6,7 +6,7 @@ describe("Expanded bulk moves and turn interactions", () => {
   for (const count of [2, 3, 4]) it.each([1, -1] as const)(`Skip Two skips two opportunities with ${count} seats in direction %i`, direction => {
     const game = fixture([[colored("skip", "skip-two"), num("keep-a"), num("keep-b")], ...Array.from({ length: count - 1 }, (_, i) => [num("other-" + i)])], stock(5)); game.direction = direction;
     const next = play(game, "skip").state;
-    expect(next.currentIndex).toBe(count === 2 ? 1 : count === 3 ? 0 : direction === 1 ? 3 : 1);
+    expect(next.currentIndex).toBe(count === 2 ? 0 : count === 3 ? 0 : direction === 1 ? 3 : 1);
     expect(next.direction).toBe(direction); expect(next.players.every((player, i) => player.hand.length === game.players[i]!.hand.length - (i === 0 ? 1 : 0))).toBe(true);
     conserved(game, next);
   });
