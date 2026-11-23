@@ -70,3 +70,8 @@ Test UNO: xem docs/games/uno.md.
 Mở http://localhost:3000 rồi chọn Chơi ngay, hoặc vào http://localhost:3000/games/uno-expanded. Tạo phòng và mời bằng mã/link giống Cơ bản. Trang `/dev/uno-expanded/play` chỉ giữ cho công việc nội bộ, không còn là lối vào bắt buộc.
 
 Nếu API đang chạy từ trước thay đổi script, Ctrl+C rồi chạy lại `npm run dev:api`. Lỗi `provided room name "uno-expanded" not defined` nghĩa là tiến trình cũ chưa đăng ký Mở rộng. Xem [mở chơi thử](uno-expanded-beta.md). Bước này chưa triển khai lên server thật.
+
+
+## Chơi qua Internet bằng forward port
+
+Forward cả web 3000 và API 5000; dùng URL API HTTPS, thêm web origin vào CORS và hostname web vào NEXT_DEV_ALLOWED_ORIGINS. Xem [hướng dẫn port forwarding](port-forwarding.md). Việc forward không tự chạy các ứng dụng local.

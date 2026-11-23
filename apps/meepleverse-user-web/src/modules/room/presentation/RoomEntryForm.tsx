@@ -1,16 +1,21 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { useRoomSession } from "../application/useRoomSession";
+const subscribeReady = () => () => {};
+const clientReady = () => true;
+const serverReady = () => false;
 export function RoomEntryForm({ inviteCode, gameId = "uno-basic" }: { inviteCode?: string; gameId?: "uno-basic" | "uno-expanded" }) {
   const router = useRouter();
+  const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   const state = useRoomSession(inviteCode);
   const [mode, setMode] = useState<"create" | "join">(inviteCode ? "join" : "create");
   const [nickname, setNickname] = useState("");
   const [code, setCode] = useState(inviteCode ?? "");
   const [error, setError] = useState<string | null>(null);
   const busy = state.status === "connecting" || state.status === "reconnecting";
+  const disabled = !ready || busy;
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(null);
     if (!nickname.trim() || nickname.trim().length > 24) { setError("Nhập tên hiển thị từ 1 đến 24 ký tự nhé."); return; }
@@ -29,15 +34,15 @@ export function RoomEntryForm({ inviteCode, gameId = "uno-basic" }: { inviteCode
     <span className="eyebrow">{inviteCode ? "Bạn được mời vào phòng " + inviteCode : "Sẵn sàng tụ họp?"}</span>
     <h2>{inviteCode ? "Vào hội thôi." : "Bắt đầu cuộc vui."}</h2>
     {!inviteCode && <div className="mode-tabs" role="group" aria-label="Chọn cách vào chơi">
-      <button type="button" aria-pressed={mode === "create"} disabled={busy} onClick={() => { setMode("create"); setError(null); }}>Tạo phòng</button>
-      <button type="button" aria-pressed={mode === "join"} disabled={busy} onClick={() => { setMode("join"); setError(null); }}>Vào bằng mã</button>
+      <button type="button" aria-pressed={mode === "create"} disabled={disabled} onClick={() => { setMode("create"); setError(null); }}>Tạo phòng</button>
+      <button type="button" aria-pressed={mode === "join"} disabled={disabled} onClick={() => { setMode("join"); setError(null); }}>Vào bằng mã</button>
     </div>}
-    <form onSubmit={submit} aria-busy={busy}>
+    <form onSubmit={submit} aria-busy={disabled}>
       <label htmlFor="nickname">Mọi người gọi bạn là gì?</label>
-      <input id="nickname" name="nickname" autoComplete="nickname" maxLength={24} required placeholder="Tên của bạn" value={nickname} disabled={busy} onChange={event => setNickname(event.target.value)} />
-      {mode === "join" && <><label htmlFor="room-code">Mã phòng</label><input id="room-code" name="roomCode" className="code-input" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={4} minLength={4} pattern="[A-Z0-9]{4}" required placeholder="A1B2" value={code} disabled={busy} onChange={event => setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))} /></>}
+      <input id="nickname" name="nickname" autoComplete="nickname" maxLength={24} required placeholder="Tên của bạn" value={nickname} disabled={disabled} onChange={event => setNickname(event.target.value)} />
+      {mode === "join" && <><label htmlFor="room-code">Mã phòng</label><input id="room-code" name="roomCode" className="code-input" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={4} minLength={4} pattern="[A-Z0-9]{4}" required placeholder="A1B2" value={code} disabled={disabled} onChange={event => setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))} /></>}
       {(error || state.error) && <p className="error-message" role="alert">{error ?? state.error}</p>}
-      <button className="button primary full" type="submit" disabled={busy}>{busy ? "Đang kết nối…" : mode === "create" ? gameId === "uno-expanded" ? "Tạo phòng UNO Mở rộng" : "Tạo phòng UNO" : "Vào phòng"} <span aria-hidden="true">↗</span></button>
+      <button className="button primary full" type="submit" disabled={disabled}>{!ready ? "Đang tải…" : busy ? "Đang kết nối…" : mode === "create" ? gameId === "uno-expanded" ? "Tạo phòng UNO Mở rộng" : "Tạo phòng UNO" : "Vào phòng"} <span aria-hidden="true">↗</span></button>
       <p className="form-note">Không cần tài khoản. Chỉ cần một cái tên.</p>
     </form>
   </section>;
