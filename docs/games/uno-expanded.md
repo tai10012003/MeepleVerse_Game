@@ -275,7 +275,7 @@ Chỉ lá đầu công khai; các lá bốc thêm vẫn riêng tư. Không dùng
 - Giữ cơ chế phòng hiện có: mất kết nối giữ ghế tối đa 30 giây, tạm dừng toàn ván. Hết thời gian hoặc rời chủ động xử lý kết thúc ván do người rời như Cơ bản; không xóa ghế rồi tiếp tục bỏ qua hiệu ứng của người đó.
 - Snapshot phục hồi match/revision, tay bài, lượt, màu/chiều, chuỗi phạt, `effectId`, người phải đáp và các lựa chọn đã khóa được phép xem. Không phát lại hiệu ứng cũ hoặc chạy lại lần bốc đã hoàn tất.
 - Timer hiệu ứng lưu thời gian còn lại khi tạm dừng. Sau reconnect, High Five có lại 1,5 giây chuẩn bị cho những người chưa bấm; thứ tự các xác nhận hợp lệ trước đó giữ nguyên. Gói tin của một lần thử trước không được tính lại.
-- Đề xuất thời hạn lựa chọn mới (Battle khóa lá / chọn thưởng) 20 giây. Hết hạn chọn lá hợp lệ đầu tiên theo thứ tự tay bài mà server giữ; chọn thưởng dùng đủ số lượng còn có thể bỏ. Không dùng thời gian của animation làm hạn nghiệp vụ.
+- Đề xuất thời hạn lựa chọn mới (Battle khóa lá / chọn thưởng) 30 giây. Hết hạn chọn lá hợp lệ đầu tiên theo thứ tự tay bài mà server giữ; chọn thưởng dùng đủ số lượng còn có thể bỏ. Không dùng thời gian của animation làm hạn nghiệp vụ.
 - Không thêm timer cho lượt thường ở bước đặc tả này. Chọn màu/mục tiêu/xả/÷2 là phần chuẩn bị chưa gửi, chưa làm ván đổi phase; hủy UI không cần rollback server.
 - Auto-action có event và revision riêng khi thực sự thay đổi game; không tự hô UNO thay người dùng. Thử thách có ID chống thao tác đến muộn, retry không lặp hình phạt.
 - Chưa có phục hồi ván sau server crash, lưu MongoDB, nhiều tiến trình hoặc xử lý đồng bộ giữa nhiều máy chủ.
@@ -335,7 +335,7 @@ Skip Two skips two turn opportunities: for 2/3/4 players, the next actor is resp
 
 Wild Up, Wild Battle, High Five và đồng hồ mini-game đã được triển khai trong backend. Các mục trạng thái bước 5–6 ở trên là lịch sử của từng mốc; hiện mọi loại lá trong bộ 198 đều được hỗ trợ ở domain. Xem [luật, lệnh, timer và kiểm thử bước 7](../development/uno-expanded-minigames.md).
 
-D07/D08/D11/D15 và phần D12/D13 liên quan mini-game được áp dụng theo kế hoạch bước 7 đã được yêu cầu triển khai; chi tiết xác nhận nằm trong bảng quyết định. Timer hiện tại: High Five chuẩn bị 1 giây + phản hồi 5 giây; Battle chọn số/thưởng mỗi giai đoạn 20 giây. Fallback không tự hô UNO. Giữ bí mật lựa chọn Battle tới khi giải quyết; reconnect bảo toàn lựa chọn/thứ tự và thời gian còn lại.
+D07/D08/D11/D15 và phần D12/D13 liên quan mini-game được áp dụng theo kế hoạch bước 7 đã được yêu cầu triển khai; chi tiết xác nhận nằm trong bảng quyết định. Timer hiện tại: High Five chuẩn bị 1 giây + phản hồi 5 giây; Battle chọn số/thưởng mỗi giai đoạn 30 giây. Fallback không tự hô UNO. Giữ bí mật lựa chọn Battle tới khi giải quyết; reconnect bảo toàn lựa chọn/thứ tự và thời gian còn lại.
 
 Catalog vẫn Đang phát triển, phòng Mở rộng ở production chưa bật; chưa có mặt bài, bộ điều khiển và animation Mở rộng. UNO Cơ bản giữ luật hiện tại.
 
@@ -376,7 +376,7 @@ Danh mục chuyển Mở rộng sang Chơi thử/Chơi ngay, trang game có form
 
 ## Đồng hồ lượt — 22/11/2026
 
-Áp dụng 30 giây cho lượt thường/đáp cộng dồn; Tăng tiến 20 giây mỗi lần đáp; Battle 20 giây mỗi giai đoạn; Đập tay vẫn chuẩn bị 1 giây + phản ứng 5 giây. Hết giờ thường bỏ lượt, đã bốc thì giữ lá, cộng dồn tự nhận phạt; Up tự đánh hợp lệ nhưng không tự hô UNO. Bốc/mở popup không reset, tạm dừng phòng giữ thời gian còn lại. Mục cũ về chưa có timer lượt/Up được thay bằng [quy tắc đồng hồ hiện tại](../development/uno-turn-clock.md).
+Áp dụng 60 giây cho lượt thường/đáp cộng dồn; Tăng tiến 30 giây mỗi lần đáp; Battle 30 giây mỗi giai đoạn; Đập tay vẫn chuẩn bị 1 giây + phản ứng 5 giây. Hết giờ thường bỏ lượt, đã bốc thì giữ lá, cộng dồn tự nhận phạt; Up tự đánh hợp lệ nhưng không tự hô UNO. Bốc/mở popup không reset, tạm dừng phòng giữ thời gian còn lại. Mục cũ về chưa có timer lượt/Up được thay bằng [quy tắc đồng hồ hiện tại](../development/uno-turn-clock.md).
 
 
 ## Cập nhật Skip Two, UNO và Battle — 22/11/2026

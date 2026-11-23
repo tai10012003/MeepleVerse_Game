@@ -64,4 +64,4 @@ MongoDB, phục hồi server crash, bot và timer lượt chưa được triển
 
 ## Đồng hồ lượt — 22/11/2026
 
-Mỗi lượt thường/đáp cộng dồn có 30 giây. Bốc bài và mở popup không đặt lại giờ. Hết giờ thường thì bỏ lượt, giữ lá đã bốc; đang chịu phạt thì tự nhận toàn bộ. Bước chọn màu sau +4 nếu hết giờ sẽ chọn màu theo tay người đánh để tiếp tục. Phòng mất kết nối giữ thời gian còn lại. Xem [đồng hồ và kiểm thử](../development/uno-turn-clock.md).
+Mỗi lượt thường/đáp cộng dồn có 60 giây. Bốc bài và mở popup không đặt lại giờ. Hết giờ thường thì bỏ lượt, giữ lá đã bốc; đang chịu phạt thì tự nhận toàn bộ. Bước chọn màu sau +4 nếu hết giờ sẽ chọn màu theo tay người đánh để tiếp tục. Phòng mất kết nối giữ thời gian còn lại. Xem [đồng hồ và kiểm thử](../development/uno-turn-clock.md).

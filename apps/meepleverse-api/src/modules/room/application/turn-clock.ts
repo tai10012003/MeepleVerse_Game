@@ -1,6 +1,6 @@
 import type { TurnClockView } from "@meepleverse/contracts/room-common";
 export interface TurnTiming { turnMs: number; upMs: number }
-export const DEFAULT_TURN_TIMING: Readonly<TurnTiming> = Object.freeze({ turnMs: 30000, upMs: 20000 });
+export const DEFAULT_TURN_TIMING: Readonly<TurnTiming> = Object.freeze({ turnMs: 60000, upMs: 30000 });
 /** Application clock: independent of card rules and driven by a trusted server time source. */
 export class TurnClock {
   private sequence = 0;

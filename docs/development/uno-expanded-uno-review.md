@@ -4,7 +4,7 @@ Ngày: 22/11/2026.
 
 ## Thay đổi đã chốt
 
-- Skip Two: bàn hai người chỉ cấm đối thủ, người đánh tiếp tục với lượt mới đủ 30 giây. Bàn ba người trả lượt cho người đánh; bàn bốn người tới ghế thứ tư. Cả hai chiều đều áp dụng.
+- Skip Two: bàn hai người chỉ cấm đối thủ, người đánh tiếp tục với lượt mới đủ 60 giây. Bàn ba người trả lượt cho người đánh; bàn bốn người tới ghế thứ tư. Cả hai chiều đều áp dụng.
 - Random +?: không đổi. Người nhận giữ lá lật đầu, số N thì bốc thêm N, chức năng không tự chạy; chỉ lá đầu công khai.
 - Battle hoàn tất: hiện kết quả đầy đủ 1,5 giây, thu thành thông báo nhỏ thêm tối đa 4 giây rồi ẩn. Khi thu gọn, bàn và các lá đánh hiện lại; không tiếp tục che giữa bàn. Nút Tiếp tục có thể đóng sớm. Thời hạn/phần chọn lá thưởng chưa xong giữ nguyên.
 

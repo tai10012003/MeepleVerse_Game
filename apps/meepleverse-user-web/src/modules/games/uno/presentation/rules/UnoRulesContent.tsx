@@ -16,7 +16,7 @@ export function UnoRulesContent() {
       <li>Game chọn người chia bài ngẫu nhiên; ghế kế tiếp đi đầu, ban đầu theo chiều kim đồng hồ. Theo dõi avatar sáng và thông báo lượt.</li>
     </ol></section>
     <section><h3>3. Đến lượt mình làm gì?</h3><p>Mỗi lượt thường, bạn đánh <strong>1 lá</strong> cùng màu, cùng số hoặc cùng biểu tượng với lá trên cùng của bàn. Lá Wild và +4 có thể đánh bất kể màu.</p>
-      <p><strong>Mỗi lượt có 30 giây.</strong> Bốc bài hoặc mở popup không đặt lại giờ. Hết giờ thì mất lượt, giữ lá đã bốc; đang chịu cộng dồn thì tự nhận toàn bộ phạt rồi mất lượt. Nếu hết giờ chọn màu sau +4, game chọn màu theo tay bài còn lại để tiếp tục. Còn 5 giây sẽ đổi màu đồng hồ và phát âm báo cho người đến lượt.</p>
+      <p><strong>Mỗi lượt có 60 giây.</strong> Bốc bài hoặc mở popup không đặt lại giờ. Hết giờ thì mất lượt, giữ lá đã bốc; đang chịu cộng dồn thì tự nhận toàn bộ phạt rồi mất lượt. Nếu hết giờ chọn màu sau +4, game chọn màu theo tay bài còn lại để tiếp tục. Còn 5 giây sẽ đổi màu đồng hồ và phát âm báo cho người đến lượt.</p>
       <div className="uno-rules-example">Trên bàn là <strong>đỏ 5</strong>: bạn có thể đánh một lá đỏ, một lá số 5 màu khác, Wild hoặc +4.</div>
       <ul><li>Bấm chọn lá rồi bấm <strong>Đánh lá bài</strong>. Lá hợp lệ được gợi ý nâng lên; lá không hợp lệ bị làm mờ. Viền vàng chỉ lá đang chọn.</li>
       <li>Không đánh được hoặc muốn giữ bài? Bấm <strong>Bốc bài</strong> để rút đúng 1 lá, kể cả khi đang có lá đánh được.</li>

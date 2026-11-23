@@ -36,7 +36,7 @@ Lệnh qua phòng giữ envelope `matchId`, `expectedRevision`, `requestId`. Eff
 
 ## Timer và reconnect
 
-Battle có 20 giây cho chọn số và thêm 20 giây cho chọn thưởng. Hết giờ, server giữ lựa chọn đã khóa, tự lấy lá hợp lệ đầu tiên theo thứ tự tay; thưởng tự lấy đúng số lá đầu tiên. Không tự hô UNO hộ người chơi. Đây là phương án tránh kẹt ván, không tối ưu chiến thuật hộ người vắng mặt.
+Battle có 60 giây cho chọn số và thêm 30 giây cho chọn thưởng. Hết giờ, server giữ lựa chọn đã khóa, tự lấy lá hợp lệ đầu tiên theo thứ tự tay; thưởng tự lấy đúng số lá đầu tiên. Không tự hô UNO hộ người chơi. Đây là phương án tránh kẹt ván, không tối ưu chiến thuật hộ người vắng mặt.
 
 Mất kết nối tạm dừng cả phòng và lưu thời gian còn lại. Battle giữ lựa chọn bí mật và cả giai đoạn thưởng. High Five giữ thứ tự người đã bấm; sau khi tất cả kết nối lại, tăng `attempt`, chuẩn bị lại 1 giây rồi chạy phần thời gian phản hồi còn lại. Click attempt cũ bị từ chối. Nếu mất mạng trong chuẩn bị thì vẫn giữ đủ thời lượng cửa sổ phản hồi chưa bắt đầu.
 

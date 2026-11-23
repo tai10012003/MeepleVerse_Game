@@ -63,7 +63,7 @@ Trừ khi nói khác, bốn ghế A→B→C→D theo chiều +1, đủ kho bốc
 | E036 | Battle: cả hai không có số màu chọn | Người kích hoạt +3, đối thủ +2 theo D08; không lộ toàn bộ tay để chứng minh. |
 | E037 | Battle: đổi lá sau khóa, người ngoài tham gia | Từ chối, giữ lựa chọn hợp lệ trước đó. |
 | E038 | Battle: hai người khóa gần đồng thời cùng global revision | Không làm người thứ hai mất quyền chỉ vì revision người thứ nhất; effect/slot được kiểm tra độc lập. |
-| E039 | Battle: timeout chọn lá/chọn thưởng | Sau 20 giây chọn phương án hợp lệ theo D15; không tự hô UNO, không kẹt ván. |
+| E039 | Battle: timeout chọn lá/chọn thưởng | Sau 30 giây chọn phương án hợp lệ theo D15; không tự hô UNO, không kẹt ván. |
 
 ## E. Rút đặc biệt và đập tay
 
@@ -216,7 +216,7 @@ E067 đã có bằng chứng qua UI local. E068 được bổ sung phạm vi b�
 
 ## Đồng hồ lượt — 22/11/2026
 
-Có deadline server 30 giây cho lượt thường/cộng dồn và 20 giây cho mỗi đáp Up; Battle và Đập tay giữ thời hạn đã chốt. Kiểm thử bổ sung gồm timeout/UNO, snapshot không đổi ngoài thời gian trôi, packet trễ, pause nhiều người, nhận phạt, rematch và UI laptop/mobile. Xem [cách chạy và phạm vi đồng hồ](../development/uno-turn-clock.md). Không thay đổi xác suất hay tác dụng Tornado trong thay đổi này.
+Có deadline server 60 giây cho lượt thường/cộng dồn và 30 giây cho mỗi đáp Up; Battle và Đập tay giữ thời hạn đã chốt. Kiểm thử bổ sung gồm timeout/UNO, snapshot không đổi ngoài thời gian trôi, packet trễ, pause nhiều người, nhận phạt, rematch và UI laptop/mobile. Xem [cách chạy và phạm vi đồng hồ](../development/uno-turn-clock.md). Không thay đổi xác suất hay tác dụng Tornado trong thay đổi này.
 
 
 ## Rà soát UNO, Skip Two và Battle — 22/11/2026

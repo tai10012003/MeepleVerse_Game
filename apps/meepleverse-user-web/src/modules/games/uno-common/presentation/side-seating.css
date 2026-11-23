@@ -1,0 +1,58 @@
+/* Side seats share one compact layout across both UNO editions. */
+:is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) {
+  --side-seat-width: clamp(112px, 12cqw, 164px);
+}
+:is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) :is(.opponent-left, .opponent-right, .seat-left, .seat-right) {
+  top: calc((100% + var(--felt-top) - var(--felt-bottom)) / 2);
+  width: var(--side-seat-width);
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transform: translateY(-50%);
+}
+:is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) :is(.opponent-left, .opponent-right, .seat-left, .seat-right) .opponent-hand {
+  --fan-step: 14px;
+  --fan-max: calc(var(--side-seat-width) - 18px);
+}
+:is(.uno-table, .expanded-table):is([data-opponents="2"], [data-opponents="3"]) :is(.draw-dock, .expanded-draw) {
+  left: 20%;
+}
+:is(.uno-table, .expanded-table):is([data-opponents="2"], [data-opponents="3"]) :is(.pile-area, .expanded-center) {
+  width: min(440px, calc(100cqw - 2 * var(--side-seat-width) - 28px));
+}
+:is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) :is(.opponent-left, .opponent-right, .seat-left, .seat-right) .draw-debt {
+  top: calc(100% + 4px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+/* Wide desktop tables have room for the same fan spread as the top seat. */
+@media (min-width: 1200px) and (min-height: 621px) {
+  :is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) {
+    --side-seat-width: 228px;
+  }
+  :is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) :is(.opponent-left, .opponent-right, .seat-left, .seat-right) .opponent-hand {
+    --fan-step: 24px;
+    --fan-max: 210px;
+  }
+}
+@media (max-width: 900px) {
+  :is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) { --side-seat-width: clamp(72px, 23cqw, 104px); }
+  :is(.uno-table, .expanded-table)[data-opponents="3"] { --felt-top: 100px; }
+  :is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) :is(.opponent-left, .opponent-right, .seat-left, .seat-right) { gap: 8px; }
+  :is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) :is(.opponent-left, .opponent-right, .seat-left, .seat-right) .opponent-hand {
+    --fan-step: 8px;
+    --fan-max: calc(var(--side-seat-width) - 12px);
+  }
+  :is(.uno-table, .expanded-table):is([data-opponents="2"], [data-opponents="3"]) :is(.draw-dock, .expanded-draw) { left: 0; }
+  :is(.uno-table, .expanded-table):is([data-opponents="2"], [data-opponents="3"]) :is(.pile-area, .expanded-center) {
+    width: min(300px, calc(100cqw - 2 * var(--side-seat-width) - 20px));
+    max-height: 220px;
+  }
+}
+@media (max-height: 500px) {
+  :is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) { --side-seat-width: 76px; }
+  :is(.uno-table, .expanded-table)[data-opponents="3"] { --felt-top: 65px; }
+  :is(.uno-table, .expanded-table)[data-opponents]:not([data-opponents="1"]) :is(.opponent-left, .opponent-right, .seat-left, .seat-right) { gap: 4px; }
+  :is(.uno-table, .expanded-table):is([data-opponents="2"], [data-opponents="3"]) :is(.draw-dock, .expanded-draw) { left: 20%; }
+}

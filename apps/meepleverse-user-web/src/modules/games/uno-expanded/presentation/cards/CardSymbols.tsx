@@ -74,13 +74,19 @@ export function SevenDirectionMark({ direction }: { direction: "L" | "R" }) {
     <text x="50" y="52" dominantBaseline="central" textAnchor="middle" fontSize="47" fontWeight="900" fill="currentColor">{direction}</text>
   </g>;
 }
+/** Four-color packets follow the physical multiply/divide card reference. */
 export function CardCluster({ divide = false, doubled = false }: { divide?: boolean; doubled?: boolean }) {
-  const cards = (offsetX = 0, offsetY = 0) => <g transform={`translate(${offsetX} ${offsetY}) rotate(16 50 50)`} stroke="#171717" strokeWidth="1.3">
-    {([[22, 39, "green"], [35, 22, "blue"], [59, 11, "yellow"], [49, 39, "red"]] as const).map(([x, y, color]) => <rect key={color} x={x} y={y} width="25" height="40" rx="2.5" fill={CARD_INKS[color]} />)}
+  const packet = (cut = false) => <g transform="rotate(18 50 50)" strokeLinejoin="round">
+    {([[38, 49, "yellow"], [60, 29, "green"], [38, 7, "blue"], [16, 29, "red"]] as const).map(([x, y, color]) => <g key={color}>
+      <rect x={x} y={y} width="26" height="44" rx="2.5" fill={CARD_INKS[color]} stroke="#252525" strokeWidth="1.8" />
+      <rect x={x + 1.2} y={y + 1.2} width="23.6" height="41.6" rx="1.5" fill="none" stroke="#fffdf8" strokeWidth=".8" />
+    </g>)}
+    {cut && <path d="M15 49L87 49" fill="none" stroke="#fffdf8" strokeWidth="3.8" />}
   </g>;
-  return <g transform={doubled ? "translate(7.2 -4.3)" : divide ? "translate(-1.7 .3)" : "translate(-4.3 .3)"}>{doubled ? <><g transform="translate(16 1) scale(.65)">{cards()}</g><g transform="translate(-1 43) scale(.65)">{cards()}</g></> : cards()}
-    {divide && <><path d="M10 52H91" stroke="#fff" strokeWidth="5" /><path d="M10 52H91" stroke="#171717" strokeWidth="1.2" strokeDasharray="4 3" /></>}
-  </g>;
+  return doubled ? <g transform="translate(4 -1)">
+    <g transform="translate(32 0) scale(.6)">{packet()}</g>
+    <g transform="translate(-2 42) scale(.6)">{packet()}</g>
+  </g> : packet(divide);
 }
 export function DiscardSymbol({ wild = false }: { wild?: boolean }) {
   return <g transform="translate(5.1 -2.2)" stroke={wild ? "#171717" : "currentColor"} strokeWidth="2.5" strokeLinejoin="round">

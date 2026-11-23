@@ -79,18 +79,18 @@ describe("Wild Battle", () => {
     expect(() => act(state, "p0", { type: "BATTLE_SELECT", effectId: id, cardId: "keep-a" })).toThrow("CARD_NOT_PLAYABLE");
     expect(() => act(state, "p2", { type: "BATTLE_SELECT", effectId: id, cardId: "observer" })).toThrow("NOT_YOUR_TURN");
     expect(() => act(state, "p0", { type: "BATTLE_SELECT", effectId: "old", cardId: "secret-nine" })).toThrow("STALE_EFFECT");
-    expect(() => act(state, "p0", { type: "BATTLE_SELECT", effectId: id, cardId: "secret-nine" }, 20000)).toThrow("EFFECT_EXPIRED");
+    expect(() => act(state, "p0", { type: "BATTLE_SELECT", effectId: id, cardId: "secret-nine" }, 30000)).toThrow("EFFECT_EXPIRED");
     expect(() => act(state, "p0", { type: "BATTLE_SELECT", effectId: id, cardId: "secret-nine", declareUno: true })).toThrow("INVALID_UNO_CALL");
     expect(state).toEqual(before);
   });
   it("times out missing choices/rewards deterministically and never declares UNO on behalf of a player", () => {
     const { original, state } = setup(); const id = effectId(state);
     const locked = act(state, "p0", { type: "BATTLE_SELECT", effectId: id, cardId: "secret-nine" }).state;
-    expect(tick(locked, 19999)).toBeNull();
-    const selected = tick(locked, 20000)!;
+    expect(tick(locked, 29999)).toBeNull();
+    const selected = tick(locked, 30000)!;
     expect(selected.state.players[1]!.hand).toHaveLength(5); // missed UNO (2) plus Battle loss (2)
     expect(selected.state.phase).toBe("battle-discard");
-    const rewarded = tick(selected.state, 40000)!;
+    const rewarded = tick(selected.state, 60000)!;
     expect(rewarded.state.players[0]!.hand).toHaveLength(3); // auto reward 3 -> 1, missed UNO -> 3
     expect(rewarded.state.effect).toBeNull(); expect(rewarded.events.public.some(event => event.type === "UNO_CALLED")).toBe(false); conserved(original, rewarded.state);
   });

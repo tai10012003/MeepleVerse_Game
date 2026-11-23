@@ -14,6 +14,7 @@ import { UnoEffects } from "./animations/UnoEffects";
 import { planEffects, type UnoVisualFrame, type UnoPresentation } from "../model/uno-effects";
 import "./uno.css";
 import "./table-seating.css";
+import "@/modules/games/uno-common/presentation/side-seating.css";
 
 interface Props {
   view: UnoRoomView; connected: boolean; reconnecting: boolean; pending: boolean; error: string | null;

@@ -17,6 +17,7 @@ import { MiniFeedback } from "./minigames/MiniFeedback";
 import { ExpandedEffects } from "./animations/ExpandedEffects";
 import type { ExpandedVisualFrame, ExpandedPresentation } from "../model/expanded-effects";
 import "./expanded-table.css";
+import "@/modules/games/uno-common/presentation/side-seating.css";
 export function ExpandedScreen({ view, connected, reconnecting, pending, error, frames, feedback, interactionEpoch, onCommand, onRematch, onLeave, onReconnect, children }: {
   view: UnoExpandedRoomView; connected: boolean; reconnecting: boolean; pending: boolean; error: string | null;
   frames: ExpandedVisualFrame[]; feedback: MiniFeedbackFrame[]; interactionEpoch: number;

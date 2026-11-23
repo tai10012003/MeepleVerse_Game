@@ -32,22 +32,22 @@ describe("mini-game service concurrency and frozen clocks", () => {
     const { service: s, send, setNow } = setup("battle"); const id = s.game!.effect!.id;
     send("a", { type: "BATTLE_SELECT", effectId: id, cardId: "secret-a" });
     setNow(5000); s.setConnected("c", false); expect(s.nextDeadline).toBeNull();
-    expect(s.game!.effect).toMatchObject({ deadline: null, remainingMs: 15000 });
+    expect(s.game!.effect).toMatchObject({ deadline: null, remainingMs: 25000 });
     setNow(8000); s.setConnected("d", false);
     setNow(100000); expect(s.advanceTime()).toBeNull();
     s.setConnected("c", true); expect(s.nextDeadline).toBeNull();
-    s.setConnected("d", true); expect(s.nextDeadline).toBe(115000);
+    s.setConnected("d", true); expect(s.nextDeadline).toBe(125000);
     expect(s.view("a").game!.self.battle!.selectedCardId).toBe("secret-a");
     expect(JSON.stringify(s.view("b"))).not.toContain('"secret-a"');
     expect(() => send("a", { type: "BATTLE_SELECT", effectId: id, cardId: "secret-a" })).toThrow("ALREADY_RESPONDED");
-    setNow(114999); send("b", { type: "BATTLE_SELECT", effectId: id, cardId: "secret-b", declareUno: true });
-    expect(s.game!.phase).toBe("battle-discard"); expect(s.nextDeadline).toBe(134999);
-    setNow(120000); s.setConnected("a", false);
-    expect(s.game!.effect).toMatchObject({ stage: "reward", remainingMs: 14999, deadline: null });
+    setNow(124999); send("b", { type: "BATTLE_SELECT", effectId: id, cardId: "secret-b", declareUno: true });
+    expect(s.game!.phase).toBe("battle-discard"); expect(s.nextDeadline).toBe(154999);
+    setNow(130000); s.setConnected("a", false);
+    expect(s.game!.effect).toMatchObject({ stage: "reward", remainingMs: 24999, deadline: null });
     setNow(200000); expect(s.advanceTime()).toBeNull(); s.setConnected("a", true);
-    expect(s.nextDeadline).toBe(214999);
+    expect(s.nextDeadline).toBe(224999);
     send("a", { type: "BATTLE_DISCARD", effectId: id, cardIds: ["keep-a", "keep-b"], declareUno: true });
-    expect(s.game!.effect).toBeNull(); expect(s.nextDeadline).toBe(230000);
+    expect(s.game!.effect).toBeNull(); expect(s.nextDeadline).toBe(260000);
   });
   it("retains High Five response order, opens a fresh attempt after resume and rejects stale clicks", () => {
     const { service: s, send, setNow } = setup("high-five"); const id = s.game!.effect!.id;
@@ -62,12 +62,12 @@ describe("mini-game service concurrency and frozen clocks", () => {
     send("a", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
     send("c", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
     send("d", { type: "HIGH_FIVE", effectId: id, attempt: 2 }, revision);
-    expect(s.game!.players[3]!.hand).toHaveLength(3); expect(s.nextDeadline).toBe(131000);
+    expect(s.game!.players[3]!.hand).toHaveLength(3); expect(s.nextDeadline).toBe(161000);
   });
   it("auto-selects and rewards after deadlines, clears abandoned timers and rejects old-match reactions", () => {
     const { service: s, setNow } = setup("battle");
-    setNow(20000); expect(s.advanceTime()!.events.public).toContainEqual({ type: "TURN_CHANGED", playerId: "a", phase: "battle-discard" }); expect(s.game!.phase).toBe("battle-discard");
-    setNow(40000); expect(s.advanceTime()!.events.public).toContainEqual({ type: "TURN_CHANGED", playerId: "b", phase: "turn" }); expect(s.game!.effect).toBeNull();
+    setNow(30000); expect(s.advanceTime()!.events.public).toContainEqual({ type: "TURN_CHANGED", playerId: "a", phase: "battle-discard" }); expect(s.game!.phase).toBe("battle-discard");
+    setNow(60000); expect(s.advanceTime()!.events.public).toContainEqual({ type: "TURN_CHANGED", playerId: "b", phase: "turn" }); expect(s.game!.effect).toBeNull();
     const hf = setup("high-five"); const oldMatch = hf.service.matchId!; const oldId = hf.service.game!.effect!.id;
     hf.service.leave("d", false); expect(hf.service.status).toBe("ENDED"); expect(hf.service.nextDeadline).toBeNull();
     expect(hf.service.advanceTime()).toBeNull();

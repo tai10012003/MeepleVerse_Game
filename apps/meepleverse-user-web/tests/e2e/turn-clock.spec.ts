@@ -1,7 +1,7 @@
 import { expect, test, type Browser } from "@playwright/test";
 import { joinRoom, play, confirmColor } from "./helpers/expanded-room";
-const turnMs = Number(process.env.BROWSER_TURN_MS ?? 30000);
-const upMs = Number(process.env.BROWSER_UP_MS ?? 20000);
+const turnMs = Number(process.env.BROWSER_TURN_MS ?? 60000);
+const upMs = Number(process.env.BROWSER_UP_MS ?? 30000);
 test.beforeEach(() => { test.setTimeout(Math.max(45000, turnMs + 25000, upMs + 25000)); });
 async function basicPair(browser: Browser) {
   const contexts=await Promise.all([browser.newContext({viewport:{width:1366,height:768}}),browser.newContext({viewport:{width:375,height:812}})]);

@@ -36,7 +36,7 @@ Ngày: 19/11/2026. Đi cùng [đặc tả luật](uno-expanded.md).
 | D12 | Hô UNO khi thay đổi nhiều lá? | Bất kỳ hành động bỏ chủ động từ >=2 xuống 1 cần khai báo; quên +2. Chuyền cho nhau không phạt. Battle kiểm tra ở lúc thật sự bỏ, không lúc giữ chỗ. | Nút UNO cần hỗ trợ kết quả xả/chia/so, không chỉ sáng khi tay hiện có đúng hai lá. |
 | D13 | Thắng khi còn hiệu ứng chưa xong? | Kiểm tra ở ranh giới giao dịch. Lá cuối hiệu ứng không rút thì thắng, bỏ hiệu ứng còn lại; lá cuối bắt rút hoặc Shield cuối đang chuyển chuỗi thì hoàn tất phần rút bắt buộc rồi tính điểm. Battle đang chạy giải quyết thưởng/phạt rồi mới xét hết bài. | Không chuyền tay rỗng để thắng hộ người khác. Nếu cùng hết trong Battle: ưu tiên người thắng Battle; nếu hòa và cùng hết thì hòa ván. |
 | D14 | Thiếu bài/tính điểm? | Bốc tối đa hữu hạn, không tạo lá. Blocked chỉ xét vòng lượt thường bị kẹt. Số thuần theo số, chức năng màu 20, đen 50. | High Five/Seven Change có giá trị 5/7 để đáp số nhưng tính 20 điểm chức năng. |
-| D15 | Reconnect/timer/phản hồi đồng thời? | Giữ 30 giây; đóng băng timer. Battle chọn/nhận thưởng hạn 20 giây với fallback hợp lệ. Phản hồi High Five/Battle không bị loại chỉ vì người khác vừa phản hồi tăng revision. | Cần effectId + trạng thái từng người + dedup request; không dùng strict global revision đơn thuần cho phản hồi đồng thời. Lượt thường giữ kiểm tra revision hiện tại. |
+| D15 | Reconnect/timer/phản hồi đồng thời? | Giữ 30 giây; đóng băng timer. Battle chọn/nhận thưởng hạn 30 giây với fallback hợp lệ. Phản hồi High Five/Battle không bị loại chỉ vì người khác vừa phản hồi tăng revision. | Cần effectId + trạng thái từng người + dedup request; không dùng strict global revision đơn thuần cho phản hồi đồng thời. Lượt thường giữ kiểm tra revision hiện tại. |
 
 ## 3. Bảng tương tác đề xuất
 
@@ -111,4 +111,4 @@ Theo yêu cầu đã chốt: người kích hoạt cũng đập tay; mọi bàn 
 
 ## Điều chỉnh D06 và UI UNO/Battle — 22/11/2026
 
-Theo phản hồi đã chốt, Skip Two bàn hai người chỉ cấm đối thủ và trả lượt cho người đánh. Bàn ba/bốn người giữ luật cũ. Thay quy định D06 ban đầu “bỏ cả lượt đối thủ và người đánh” ở bàn hai người. D12 giữ phạt UNO chủ động: bổ sung dự báo/nút hô ngay tại popup xả/chia và chọn bài Battle, không tự khai báo. D10 Random không đổi. Chỉ thu gọn kết quả Battle sau khi giao dịch hoàn tất, giữ thời hạn chọn thưởng 20 giây.
+Theo phản hồi đã chốt, Skip Two bàn hai người chỉ cấm đối thủ và trả lượt cho người đánh. Bàn ba/bốn người giữ luật cũ. Thay quy định D06 ban đầu “bỏ cả lượt đối thủ và người đánh” ở bàn hai người. D12 giữ phạt UNO chủ động: bổ sung dự báo/nút hô ngay tại popup xả/chia và chọn bài Battle, không tự khai báo. D10 Random không đổi. Chỉ thu gọn kết quả Battle sau khi giao dịch hoàn tất, giữ thời hạn chọn thưởng 30 giây.
