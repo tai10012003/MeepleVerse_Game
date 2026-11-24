@@ -10,7 +10,7 @@ async function openGuide(page: Page) {
   return { trigger, dialog };
 }
 for (const viewport of viewports) {
-  test(`expanded guide: ${viewport.name} introduction explains all 14 groups and stays readable`, async ({ page }, info) => {
+  test(`expanded guide: ${viewport.name} introduction explains 14 active groups and Card Swap preview`, async ({ page }, info) => {
     await page.setViewportSize(viewport);
     await page.goto("/");
     await page.locator('article[data-game-id="uno-expanded"]').getByRole("button", { name: label, exact: true }).click();
@@ -22,7 +22,20 @@ for (const viewport of viewports) {
     await expect(page.getByRole("button", { name: "Tạo phòng UNO Mở rộng", exact: true })).toBeEnabled();
     const { trigger, dialog } = await openGuide(page);
     await expect(dialog.getByRole("table")).toHaveAccessibleName("Thành phần bộ 198 lá");
-    await expect(dialog.locator("[data-rule-group]")).toHaveCount(14);
+    await expect(dialog.locator("[data-rule-group]")).toHaveCount(15);
+    const preview = dialog.locator('[data-rule-group="15"]');
+    await expect(preview).toHaveAttribute("data-rule-status", "preview");
+    await expect(preview).toContainText("Chưa có trong bộ bài hiện tại");
+    await expect(preview).toContainText("người đánh chọn màu bất kỳ");
+    await preview.scrollIntoViewIfNeeded();
+    await expect(preview.getByRole("img")).toBeVisible();
+    await preview.screenshot({path:info.outputPath(`card-swap-${viewport.name}.png`)});
+    if (viewport.name === "laptop") {
+      const face = preview.locator('[data-card-preview="card-swap"]');
+      await face.evaluate(element => element.setAttribute("style", "width:240px; position:fixed; left:20px; top:20px; z-index:10000"));
+      await face.screenshot({path:info.outputPath("card-swap-artwork-large.png")});
+      await face.evaluate(element => element.removeAttribute("style"));
+    }
     await expect(dialog).toContainText("112 lá số thuần + 32 chức năng nền + 54 lá mở rộng = 198 lá");
     await expect(dialog).toContainText("không xóa phạt");
     await expect(dialog).toContainText("Không nhân tổng cộng dồn");
@@ -38,8 +51,8 @@ for (const viewport of viewports) {
     });
     expect(metrics).toEqual({ fits: true, overflows: false, minFont: 13 });
     await page.screenshot({ path: info.outputPath(`expanded-guide-${viewport.name}.png`) });
-    await dialog.getByRole("link", { name: "14 nhóm chức năng", exact: true }).click();
-    await expect(dialog.getByRole("heading", { name: "3. Nhận diện 14 nhóm chức năng", exact: true })).toBeInViewport();
+    await dialog.getByRole("link", { name: "Chức năng", exact: true }).click();
+    await expect(dialog.getByRole("heading", { name: "3. Nhận diện chức năng", exact: true })).toBeInViewport();
     const body = dialog.getByLabel("Nội dung hướng dẫn luật chơi");
     await body.evaluate(element => { element.scrollTop = element.scrollHeight; });
     await expect(dialog.getByRole("button", { name: "Đóng hướng dẫn luật chơi" })).toBeInViewport();
