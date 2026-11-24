@@ -24,7 +24,7 @@ export async function settledExpanded(pages:Page[], total?:number) {
  await expect.poll(async () => {
   views=await Promise.all(pages.map(expandedSnapshot));
   return views.every(view => !view.animating && view.revision===views[0]!.revision && view.phase===views[0]!.phase && view.status===views[0]!.status);
- }, {timeout:20000, intervals:[50,100,200]}).toBe(true);
+ }, {timeout:30000, intervals:[50,100,200]}).toBe(true);
  for(const view of views) {
   expect(view.error).toBe(''); expect(view.leakedFaces).toBe(0); expect(view.match).toBe(views[0]!.match);
   for(const key of ['stock','discards','debt','color','direction','current'] as const) expect(view[key],key).toBe(views[0]![key]);

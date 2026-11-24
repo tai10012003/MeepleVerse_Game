@@ -14,7 +14,7 @@ export function expandedBrowserFixture(ids: readonly string[], scenario: string)
   if (scenario.startsWith("expanded-accept-")) return expandedAcceptanceFixture(ids, scenario);
   if (scenario.startsWith("expanded-full-")) return createExpandedGame(ids, seeded(Number(scenario.split("-").at(-1))));
   if (!scenario.startsWith("expanded-")) return createExpandedGame(ids, seeded(17));
-  const hands: Card[][] = scenario.startsWith("expanded-swap") ? [
+  const hands: Card[][] = scenario === "expanded-tornado-exhaust" ? [[{id:"storm",kind:"tornado",color:"red"}],[num("held")]] : scenario === "expanded-random-zero" ? [[wild("random","wild-random"),num("actor-keep"),num("actor-more")],[num("held")]] : scenario.startsWith("expanded-swap") ? [
     ...(scenario.endsWith("drawn") ? [[num("actor-red", "red", 9),num("actor-blue", "blue", 2)]] :
       scenario.endsWith("final") ? [[wild("swap", "wild-card-swap")]] :
       [[wild("swap", "wild-card-swap"),num("actor-red", "red", 9),...(scenario.endsWith("two") ? [] : [num("actor-blue", "blue", 2)])]]),
@@ -34,9 +34,12 @@ export function expandedBrowserFixture(ids: readonly string[], scenario: string)
     : [[{ id: "discard", kind: "discard-color", color: "red" }, num("a-red", "red", 9)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]];
   const stock = [num("draw-red", "red", 1), ...Array.from({ length: 24 }, (_, i) => num(`stock-${i}`, "yellow", i % 10))];
   if (scenario === "expanded-swap-drawn") stock[0] = wild("drawn-swap", "wild-card-swap");
+  if (scenario === "expanded-tornado-exhaust") stock.splice(0,stock.length,num("storm-blue","blue"),wild("storm-black"));
+  if (scenario === "expanded-random-zero") stock[0] = num("random-zero","blue",0);
   const game: UnoExpandedGame = { gameId: "uno-expanded", rulesVersion: "uno-expanded-v2", revision: 0, phase: "turn", players: ids.map((id, i) => ({ id, hand: hands[i] ?? [num(`fallback-${i}`)] })),
     dealerIndex: ids.length - 1, currentIndex: 0, direction: 1, activeColor: "red", drawPile: stock.reverse(), discardPile: [num("top", "red", 5)],
     drawnCardId: null, pendingDraw: 0, blockedTurns: 0, result: null, effectSequence: 0, effect: null };
+  if (scenario === "expanded-tornado-exhaust") game.discardPile = [wild("old-wild")];
   // Short deadlines only in trusted test fixtures; production timing and rules are unchanged.
   if (scenario === "expanded-battle-timeout") {
     const state = applyExpandedCommand(game, ids[0]!, { type: "PLAY_CARD", cardId: "battle", chosenColor: "red", targetPlayerId: ids[1]!, declareUno: true }, seeded(17)).state;

@@ -1,5 +1,5 @@
 import { playSound, type Sound } from "@/shared/audio/audio";
-import { DRAW_STAGGER, NOTICE_DURATION, type ExpandedEffectPlan, type ExpandedVisualFrame } from "../../model/expanded-effects";
+import { publicDrawEnd, DRAW_STAGGER, NOTICE_DURATION, type ExpandedEffectPlan, type ExpandedVisualFrame } from "../../model/expanded-effects";
 /** Schedule from the same accepted frame as the animations; cancel with its scene. */
 export function scheduleExpandedAudio(frame: ExpandedVisualFrame, plan: ExpandedEffectPlan, speed: number, reduced: boolean) {
   const timers: ReturnType<typeof setTimeout>[] = [];
@@ -15,13 +15,16 @@ export function scheduleExpandedAudio(frame: ExpandedVisualFrame, plan: Expanded
   for (const draw of plan.draws) {
     // Cap audible draws to keep large stacked penalties comfortable.
     const count = reduced ? 1 : Math.min(draw.count, 8);
-    for (let index = 0; index < count; index++) at(time(draw.delay + index * DRAW_STAGGER), "draw");
+    for (let index = 0; index < count; index++) {
+      const seconds=index<draw.publicCards.length ? draw.delay+index*draw.revealStep : publicDrawEnd(draw)+(index-draw.publicCards.length)*DRAW_STAGGER;
+      at(draw.publicCards.length ? seconds*(reduced?1:speed) : time(seconds),"draw");
+    }
     if (draw.context) at(time(draw.delay), "penalty");
   }
   if (frame.events.some(event => event.type === "UNO_CALLED")) at(time(.65), "uno");
   if (frame.events.some(event => event.type === "COLOR_CHOSEN") && !plan.played) at(0, "wild");
-  if (plan.turnId === frame.after.selfPlayerId) at(reduced && plan.draws.length ? NOTICE_DURATION + .2 : time(plan.turnDelay), "turn");
+  if (plan.turnId === frame.after.selfPlayerId) at(plan.draws.some(draw=>draw.publicCards.length) ? plan.turnDelay*(reduced?1:speed) : reduced && plan.draws.length ? NOTICE_DURATION + .2 : time(plan.turnDelay), "turn");
   const ended = frame.events.find(event => event.type === "GAME_ENDED");
-  if (ended) at(time(.75), ended.winnerId === frame.after.selfPlayerId ? "win" : "lose");
+  if (ended) at(plan.draws.some(draw=>draw.publicCards.length) ? Math.max(.75,plan.turnDelay-.2)*(reduced?1:speed) : time(.75), ended.winnerId === frame.after.selfPlayerId ? "win" : "lose");
   return () => timers.forEach(clearTimeout);
 }

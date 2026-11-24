@@ -10,7 +10,7 @@ export interface ExpandedPresentation { frame: ExpandedVisualFrame; landed: bool
 export interface ExpandedEffectPlan {
  played: Extract<UnoExpandedEvent, { type: "CARD_PLAYED" }> | undefined;
  swap: Extract<UnoExpandedEvent, { type: "HANDS_SWAPPED" }> | undefined;
- draws: { playerId: string; count: number; cards: UnoExpandedCard[]; delay: number; context?: string }[];
+ draws: { playerId: string; count: number; cards: UnoExpandedCard[]; delay: number; context?: string; publicCards: UnoExpandedCard[]; publicKind?: "random" | "tornado"; publicColor?: UnoColor; revealStep: number }[];
  badges: { playerId: string | null; symbol: string; label: string; color?: UnoColor | null; tone: "skip" | "reverse" | "wild" | "uno" | "play" | "draw"; delay: number }[];
  turnId: string | null; turnLabel: string; turnDelay: number; duration: number;
 }
@@ -33,19 +33,31 @@ export function planExpandedEffects(frame: ExpandedVisualFrame): ExpandedEffectP
  const totals = new Map<string, number>();
  for (const event of frame.events) if (event.type === "CARDS_DRAWN") totals.set(event.playerId, (totals.get(event.playerId) ?? 0) + event.count);
  const reveal = frame.events.find(event => event.type === "RANDOM_REVEALED");
- if (reveal?.type === "RANDOM_REVEALED") {
-  const badge = badges.find(item => item.playerId === played?.playerId);
-  const detail = `Lật ${expandedCardName(reveal.card)} · ${name(reveal.playerId)} nhận ${totals.get(reveal.playerId) ?? 0} lá`;
-  if (badge) badge.label += " · " + detail;
-  else badges.push({ playerId: reveal.playerId, symbol: "+?", tone: "wild", color: after?.activeColor, delay: base, label: detail });
- }
+ const tornado = frame.events.find(event => event.type === "TORNADO_REVEALED");
  const oldIds = new Set(before?.self.hand.map(card => card.id));
- const draws = [...totals].filter(([,count]) => count > 0).map(([playerId,count]) => ({ playerId, count,
-  cards: playerId === after?.self.playerId ? after.self.hand.filter(card => !oldIds.has(card.id)).slice(0,count) : [], delay: base + .12,
-  context: frame.events.some(event => event.type === "UNO_PENALTY" && event.playerId === playerId) ? "Quên hô UNO" : undefined }));
- const drawEnd = Math.max(0,...draws.map(draw => draw.delay + DRAW_DURATION + Math.max(0,Math.min(draw.count,8)-1)*DRAW_STAGGER));
+ const draws: ExpandedEffectPlan["draws"] = [...totals].filter(([,count]) => count > 0).map(([playerId,count]) => {
+  const publicCards = tornado?.playerId === playerId ? tornado.cards : reveal?.playerId === playerId ? [reveal.card] : [];
+  return { playerId, count, publicCards, revealStep: Math.min(1.2,20 / Math.max(1,publicCards.length)),
+    publicKind: tornado?.playerId === playerId ? "tornado" : reveal?.playerId === playerId ? "random" : undefined,
+    publicColor: tornado?.playerId === playerId ? tornado.color : undefined,
+    cards: playerId === after?.self.playerId ? after.self.hand.filter(card => !oldIds.has(card.id)).slice(0,count) : [], delay: base + .12,
+    context: frame.events.some(event => event.type === "UNO_PENALTY" && event.playerId === playerId) ? "Quên hô UNO" : undefined };
+ });
+ // Finish a separate UNO penalty before the public sequence uses the center.
+ const otherEnd = Math.max(0,...draws.filter(draw=>!draw.publicCards.length).map(draw=>expandedDrawArrival(draw,draw.count-1)));
+ for(const draw of draws) if(draw.publicCards.length && otherEnd) draw.delay=Math.max(draw.delay,otherEnd+.2);
+ const drawEnd = Math.max(0,...draws.map(draw=>expandedDrawArrival(draw,draw.count-1)));
  const turnId = after?.phase !== "ended" && !after?.effect && after?.phase !== "drawn" && before?.currentPlayerId !== after?.currentPlayerId ? after?.currentPlayerId ?? null : null;
  const turnDelay = swap ? SWAP_DELAY + SWAP_DURATION + .15 : draws.length ? drawEnd + .2 : played ? .58 : 0;
  return { played, swap, draws, badges, turnId, turnLabel: turnId === frame.after.selfPlayerId ? "Đến lượt bạn!" : turnId ? "Đến lượt " + name(turnId) : "", turnDelay,
   duration: Math.max(swap ? SWAP_DELAY + SWAP_DURATION : 0, played ? .68 : .15, badges.length ? base + NOTICE_DURATION : 0, drawEnd, turnId ? turnDelay + NOTICE_DURATION : 0) };
+}
+
+export function publicDrawEnd(draw: ExpandedEffectPlan["draws"][number]): number {
+ return draw.delay + draw.publicCards.length * draw.revealStep;
+}
+/** One timeline drives flight, hand/count arrival and turn notices on all clients. */
+export function expandedDrawArrival(draw: ExpandedEffectPlan["draws"][number], index: number): number {
+ if(index < draw.publicCards.length) return draw.delay + (index+1)*draw.revealStep;
+ return publicDrawEnd(draw) + DRAW_DURATION + Math.min(index-draw.publicCards.length,7)*DRAW_STAGGER;
 }

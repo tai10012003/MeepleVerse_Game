@@ -1,10 +1,11 @@
 "use client";
+import { PublicDrawSequence } from "./PublicDrawSequence";
 import { SwapSequence } from "./SwapSequence";
 import { scheduleExpandedAudio } from "./expanded-audio";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
-import { SWAP_DELAY, SWAP_DURATION, DRAW_DURATION, DRAW_STAGGER, NOTICE_DURATION, planExpandedEffects, type ExpandedVisualFrame, type ExpandedEffectPlan, type ExpandedPresentation } from "../../model/expanded-effects";
+import { expandedDrawArrival, publicDrawEnd, SWAP_DELAY, SWAP_DURATION, DRAW_DURATION, DRAW_STAGGER, NOTICE_DURATION, planExpandedEffects, type ExpandedVisualFrame, type ExpandedEffectPlan, type ExpandedPresentation } from "../../model/expanded-effects";
 import { cacheGeometry, effectGeometry, playerPoint, type EffectGeometry, type GeometryCache } from "../../../uno/presentation/animations/effect-geometry";
 import { discardPlacement } from "../../../uno-common/model/discard-layout";
 import { expandedCardName } from "../../model/card-presentation";
@@ -19,6 +20,7 @@ function SceneView({ scene }: { scene: Scene }) {
   const { frame, plan, geometry: geo, reduced, speed } = scene;
   const duration = (value: number) => reduced ? .12 : value * speed;
   const delay = (value: number) => reduced ? 0 : value * speed;
+  const hasPublic=plan.draws.some(draw=>draw.publicCards.length>0);
   const playStart = plan.played ? (plan.played.playerId === frame.after.selfPlayerId ? geo.cardOrigins.get(plan.played.card.id) : undefined) ?? playerPoint(geo, plan.played.playerId) : geo.discard;
   const screenPoint = (point: { x: number; y: number }) => ({ x: Math.max(35, Math.min(innerWidth - 35, point.x)), y: Math.max(75, Math.min(innerHeight - 80, point.y)) });
   return <div className="uno-effects" data-testid="expanded-effects" data-frame-id={frame.id} data-reduced-motion={reduced ? "true" : "false"} aria-hidden="true">
@@ -53,13 +55,19 @@ function SceneView({ scene }: { scene: Scene }) {
       data-effect="turn" data-player-id={plan.turnId} style={{ left: Math.max(95, Math.min(innerWidth - 95, geo.notices.get(plan.turnId)?.x ?? geo.turn.x)), top: Math.min(innerHeight - 90, (geo.notices.get(plan.turnId)?.y ?? geo.turn.y) + (plan.turnId === frame.after.selfPlayerId ? -50 : 55)) }}
       initial={{ opacity: 0, scale: reduced ? 1 : .85, y: reduced ? 0 : 10 }}
       animate={{ opacity: [0, 1, 1, 0], scale: reduced ? 1 : [.85, 1.05, 1, 1], y: reduced ? 0 : [10, 0, 0, -8] }}
-      transition={{ delay: reduced && plan.draws.length ? NOTICE_DURATION + .2 : delay(plan.turnDelay), duration: NOTICE_DURATION, times: [0, .075, .925, 1] }}>
+      transition={{ delay: hasPublic ? plan.turnDelay*(reduced?1:speed) : reduced && plan.draws.length ? NOTICE_DURATION + .2 : delay(plan.turnDelay), duration: NOTICE_DURATION, times: [0, .075, .925, 1] }}>
       <i />{plan.turnId === frame.after.selfPlayerId && frame.after.game?.phase === "turn" ? "Đến lượt bạn!" : plan.turnLabel}
     </motion.div>}
   </div>;
 }
 
 function DrawSequence({ draw, scene }: { draw: ExpandedEffectPlan["draws"][number]; scene: Scene }) {
+  if(!draw.publicCards.length) return <PrivateDrawSequence draw={draw} scene={scene}/>;
+  const extras=draw.count-draw.publicCards.length;
+  return <><PublicDrawSequence draw={draw} geometry={scene.geometry} speed={scene.speed} reduced={scene.reduced}/>
+    {extras>0 && <PrivateDrawSequence draw={{...draw,count:extras,cards:[],publicCards:[],delay:publicDrawEnd(draw)}} scene={scene} publicExtras/>}</>;
+}
+function PrivateDrawSequence({ draw, scene, publicExtras=false }: { draw: ExpandedEffectPlan["draws"][number]; scene: Scene; publicExtras?:boolean }) {
   const { frame, geometry: geo, speed } = scene;
   const self = draw.playerId === frame.after.selfPlayerId;
   const separate = !self && scene.plan.draws.length > 1;
@@ -70,7 +78,7 @@ function DrawSequence({ draw, scene }: { draw: ExpandedEffectPlan["draws"][numbe
   const reveal = separate ? { x: Math.max(width, Math.min(innerWidth - width, seat.x)), y: Math.max(height / 2 + 80, Math.min(innerHeight - height, seat.y)) }
     : { x: innerWidth / 2, y: Math.max(height / 2 + 80, Math.min(innerHeight * .48, geo.discard.y + 20)) };
   const miniResult = frame.events.some(event => event.type === "UP_ENDED" || event.type === "BATTLE_RESOLVED" || event.type === "HIGH_FIVE_RESOLVED");
-  const drawLabel = self && !miniResult ? draw.count === 1 && draw.cards[0] ? "Vừa bốc · " + expandedCardName(draw.cards[0]) : "Bạn vừa bốc " + draw.count + " lá" : "";
+  const drawLabel = self && !miniResult && !publicExtras ? draw.count === 1 && draw.cards[0] ? "Vừa bốc · " + expandedCardName(draw.cards[0]) : "Bạn vừa bốc " + draw.count + " lá" : "";
   const caption = [draw.context, drawLabel].filter(Boolean).join(" · ");
   return <>
     {!scene.reduced && Array.from({ length: Math.min(draw.count, 8) }, (_, index) => {
@@ -135,7 +143,7 @@ export function ExpandedEffects({ frames, view, onComplete, onPresent }: { frame
         await new Promise<void>(resolve => {
           const arrivals = plan.draws.flatMap(draw => Array.from({ length: draw.count }, (_, index) => setTimeout(() => {
             progress.arrived[draw.playerId] = index + 1; publish();
-          }, minimize ? 0 : Math.ceil((draw.delay + DRAW_DURATION + Math.min(index, 7) * DRAW_STAGGER) * speed * 1000))));
+          }, minimize && !draw.publicCards.length ? 0 : Math.ceil(expandedDrawArrival(draw,index) * (minimize?1:speed) * 1000))));
           const swapTimers = plan.swap && !minimize ? [
             setTimeout(() => { progress.swapStage = "flying"; publish(); }, Math.ceil(SWAP_DELAY * speed * 1000)),
             setTimeout(() => { progress.swapStage = "arrived"; publish(); }, Math.ceil((SWAP_DELAY + SWAP_DURATION) * speed * 1000)),
@@ -143,7 +151,7 @@ export function ExpandedEffects({ frames, view, onComplete, onPresent }: { frame
           const clearArrivals = () => [...arrivals, ...swapTimers].forEach(clearTimeout);
           const landing = setTimeout(() => { progress.landed = true; publish(); }, minimize ? 0 : Math.ceil(.48 * speed * 1000));
           const noticeEnd = Math.max(0, ...(minimize && plan.draws.length ? [NOTICE_DURATION] : []), ...plan.badges.map(badge => (minimize ? 0 : badge.delay * speed) + NOTICE_DURATION), plan.turnId ? (minimize ? (plan.draws.length ? NOTICE_DURATION + .2 : 0) : plan.turnDelay * speed) + NOTICE_DURATION : 0);
-          const sceneDuration = Math.max(minimize ? .125 : plan.duration * speed, noticeEnd);
+          const sceneDuration = Math.max(minimize ? plan.draws.some(draw=>draw.publicCards.length) ? plan.duration : .125 : plan.duration * speed, noticeEnd);
           const timer = setTimeout(() => { clearTimeout(landing); clearArrivals(); stopAudio(); resolve(); }, Math.ceil(sceneDuration * 1000) + 45);
           cancelScene.current = () => { clearTimeout(timer); clearTimeout(landing); clearArrivals(); stopAudio(); resolve(); };
         });

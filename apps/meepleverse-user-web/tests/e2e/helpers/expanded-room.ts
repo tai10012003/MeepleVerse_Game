@@ -1,6 +1,6 @@
 import { expect, type Browser, type Page } from "@playwright/test";
-export async function joinRoom(browser: Browser, count = 2, options: { discover?: boolean; joinByCode?: boolean } = {}) {
-  const contexts = await Promise.all(Array.from({ length: count }, (_, index) => browser.newContext({ viewport: index === 0 ? { width: 1366, height: 900 } : { width: 375, height: 812 } })));
+export async function joinRoom(browser: Browser, count = 2, options: { discover?: boolean; joinByCode?: boolean; reducedMotion?: "reduce" | "no-preference" } = {}) {
+  const contexts = await Promise.all(Array.from({ length: count }, (_, index) => browser.newContext({ reducedMotion: options.reducedMotion ?? "no-preference", viewport: index === 0 ? { width: 1366, height: 900 } : { width: 375, height: 812 } })));
   const pages = await Promise.all(contexts.map(context => context.newPage())); const errors: string[] = [];
   pages.forEach(page => page.on("pageerror", error => errors.push(error.message)));
   try {

@@ -8,7 +8,7 @@ for(const scenario of cases) test(`expanded acceptance: ${scenario} settles acro
  try {
   const before=await settledExpanded(pages,202);const color=majorityColor(before[0]!.cards);
   await playExpandedCard(a,before[0]!.cards.find(card=>card.id==='activate')!,before[0]!.cards,scenario!=='uno',{target:scenario==='target'?'Guest3':undefined,rapid:scenario==='rapid'});
-  if(scenario.startsWith('random')) for(const page of pages) await expect(page.locator('[data-effect="badge"]')).toContainText(scenario==='random-number'?'Lật Vàng · 3':'Lật +8');
+  if(scenario.startsWith('random')) for(const page of pages) await expect(page.locator('[data-effect="public-caption"]')).toContainText(scenario==='random-number'?'Vàng · 3':'+8');
   let after=await settledExpanded(pages,202);expect(after[0]!.revision).toBe(1);
   if(['random-number','random-function','tornado','multiply'].includes(scenario)) {
    const amount=scenario==='random-function'?1:scenario==='multiply'?before[1]!.count:4;

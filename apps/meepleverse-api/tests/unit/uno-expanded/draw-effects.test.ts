@@ -8,7 +8,8 @@ describe("Expanded forced draws", () => {
     const result = play(game, "tornado", { declareUno: true }); const next = result.state;
     expect(next.players[1]!.hand.map(card => card.id)).toEqual(["b", "w", "shield", "red", "stop"]);
     expect(next.direction).toBe(1); expect(next.currentIndex).toBe(2); expect(next.drawPile.at(-1)!.id).toBe("untouched");
-    expect(JSON.stringify(result.events)).not.toContain('"stop"'); expect(JSON.stringify(result.events)).not.toContain('"shield"'); conserved(game, next);
+    expect(result.events.public).toContainEqual({ type:"TORNADO_REVEALED", playerId:"p1", color:"green", cards:next.players[1]!.hand.slice(1) });
+    expect(JSON.stringify(result.events)).not.toContain('"untouched"'); expect(JSON.stringify(result.events)).not.toContain('"b"'); conserved(game, next);
   });
   it("Tornado recycles old discards once, preserves its top and terminates when the color does not exist", () => {
     const game = fixture([[colored("tornado", "tornado", "green"), num("keep")], [num("b")]], [black("wild"), num("red")], num("top", "green"));
@@ -19,7 +20,9 @@ describe("Expanded forced draws", () => {
     exhausted.activeColor = "green";
     const result = play(exhausted, "tornado", { declareUno: true });
     expect(result.state.drawPile).toEqual([]); expect(result.state.players[1]!.hand).toHaveLength(4);
-    expect(result.state.phase).toBe("turn"); expect(result.state.currentIndex).toBe(0); conserved(exhausted, result.state);
+    expect(result.state.phase).toBe("turn"); expect(result.state.currentIndex).toBe(0);
+    expect(result.events.public.find(event=>event.type==="TORNADO_REVEALED")).toMatchObject({cards:result.state.players[1]!.hand.slice(1)});
+    conserved(exhausted, result.state);
   });
   it.each([0, 5, 9])("Random retains a revealed %i and draws that many additional private cards", value => {
     const game = fixture([[black("random", "wild-random"), num("keep")], [num("b")], [num("c")]], [num("reveal", "blue", value), ...stock(12)]);

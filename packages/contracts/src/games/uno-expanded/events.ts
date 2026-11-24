@@ -11,6 +11,7 @@ export type UnoExpandedEvent =
   | { type: "CARDS_DRAWN"; playerId: string; count: number; reason: UnoExpandedDrawReason }
   | { type: "PENALTY_UPDATED"; playerId: string; count: number }
   | { type: "DRAW_PENALTY_ACCEPTED"; playerId: string; requestedCount: number; count: number }
+  | { type: "TORNADO_REVEALED"; playerId: string; color: UnoColor; cards: UnoExpandedCard[] }
   | { type: "RANDOM_REVEALED"; playerId: string; card: UnoExpandedCard }
   | { type: "DRAW_EFFECT_RESOLVED"; playerId: string; actorId: string; kind: "tornado" | "wild-random" | "wild-multiply-two"; count: number }
   | { type: "COLOR_DISCARDED"; playerId: string; color: UnoColor; cards: UnoExpandedCard[] }

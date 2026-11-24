@@ -54,7 +54,7 @@ describe("internal Expanded WebSocket rooms", () => {
   interface Guest { room: Room; view: UnoExpandedRoomView | null; replies: UnoExpandedActionReply[]; events: UnoExpandedGameEvents[] }
   let runtime: ReturnType<typeof createRealtimeServer>; let endpoint = "";
   const guests: Guest[] = [];
-  let scenario: "normal" | "stacking" | "effects" | "finish" | "bulk" | "skip-two" | "bulk-finish" | "swap" = "normal";
+  let scenario: "normal" | "stacking" | "effects" | "finish" | "bulk" | "skip-two" | "bulk-finish" | "swap" | "tornado-reveal" = "normal";
   async function attach(room: Room) {
     const guest: Guest = { room, view: null, replies: [], events: [] }; guests.push(guest);
     room.reconnection.enabled = false; room.onError(() => {});
@@ -85,6 +85,12 @@ describe("internal Expanded WebSocket rooms", () => {
     runtime = createRealtimeServer({ enableExpandedRooms: true, reconnectSeconds: 0.6,
       expandedGameFactory: ids => {
         if (scenario === "normal") return createExpandedGame(ids, seeded(29));
+        if (scenario === "tornado-reveal") {
+          const game=fixture([[colored("storm","tornado","green"),num("actor-private")],
+            ...ids.slice(1).map((_,i)=>[num(`held-private-${i}`)])],
+            [num("revealed-blue","blue"),black("revealed-wild"),num("revealed-stop","green"),num("stock-private")],num("top","green"));
+          game.players.forEach((p,i)=>{p.id=ids[i]!;});return game;
+        }
         if (scenario === "swap") {
           const game = fixture([[black("swap-card", "wild-card-swap"),num("actor-secret-a"),num("actor-secret-b")],
             ...ids.slice(1).map((_,i)=>[num(`guest-secret-${i}`)])],stock(10));
@@ -204,6 +210,23 @@ describe("internal Expanded WebSocket rooms", () => {
     for (const guest of [a!, c!, d!]) {
       for (const card of restored.view!.game!.self.hand) expect(JSON.stringify(guest.view)).not.toContain('"' + card.id + '"');
       for (const card of stock(40)) expect(JSON.stringify(guest.events)).not.toContain('"' + card.id + '"');
+    }
+  });
+  it("broadcasts Tornado draws in order to every client without exposing old hands or remaining stock",async()=>{
+    scenario="tornado-reveal";const players=await group(3);await start(players[0]!);
+    const commandPayload={type:"GAME_COMMAND" as const,matchId:players[0]!.view!.matchId!,expectedRevision:0,
+      command:{type:"PLAY_CARD" as const,cardId:"storm",declareUno:true}};
+    expect((await send(players[0]!,commandPayload,"storm-once")).ok).toBe(true);
+    expect((await send(players[0]!,commandPayload,"storm-once")).ok).toBe(true);
+    await Promise.all(players.map(fresh));
+    for(const guest of players){
+      await waitFor(()=>guest.events.some(batch=>batch.events.some(event=>event.type==="TORNADO_REVEALED")));
+      const reveals=guest.events.flatMap(batch=>batch.events).filter(event=>event.type==="TORNADO_REVEALED");
+      expect(reveals).toHaveLength(1);expect(reveals[0]!.cards.map(card=>card.id)).toEqual(["revealed-blue","revealed-wild","revealed-stop"]);
+      const publicData=JSON.stringify({events:guest.events,schema:guest.room.state.toJSON()});
+      for(const id of ["actor-private","held-private-0","held-private-1","stock-private"])expect(publicData).not.toContain(id);
+      expect(guest.view!.game!.currentPlayerId).toBe(players[2]!.view!.selfPlayerId);
+      expect(guest.view!.game!.players[1]!.handCount).toBe(4);
     }
   });
   it("broadcasts only the Random reveal while resolving Random and x2 atomically", async () => {

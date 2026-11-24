@@ -9,13 +9,16 @@ export function resolveExpandedDrawEffect(game: UnoExpandedGame, card: UnoExpand
   switch (card.kind) {
     case "tornado": {
       // Every physical card can enter this hand at most once. No matching color => finite exhaustion.
+      const revealed: UnoExpandedCard[] = [];
       const available = game.drawPile.length + Math.max(0, game.discardPile.length - 1);
       for (let i = 0; i < available; i++) {
         const [drawn] = takeExpandedCards(game, target.id, 1, random);
         if (!drawn) break;
+        revealed.push(structuredClone(drawn));
         count++;
         if (drawn.color === card.color) break;
       }
+      if (revealed.length) events.public.push({ type: "TORNADO_REVEALED", playerId: target.id, color: card.color, cards: revealed });
       events.public.push({ type: "CARDS_DRAWN", playerId: target.id, count, reason: "tornado" });
       break;
     }

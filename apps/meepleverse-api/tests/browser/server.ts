@@ -23,7 +23,7 @@ const runtime = createRealtimeServer({ turnTiming: process.env.BROWSER_TURN_MS ?
 } });
 const control = createServer((req, res) => {
   const requested = req.url?.split("/").at(-1);
-  if (req.method === "POST" && [...ACCEPTANCE_SCENARIOS, "expanded-swap", "expanded-swap-two", "expanded-swap-final", "expanded-swap-drawn", "expanded-battle-last", "expanded-full-17", "expanded-full-21", "expanded-effect-skip", "expanded-effect-reverse", "expanded-up", "expanded-battle", "expanded-battle-timeout", "expanded-high-five", "expanded-high-five-timeout", "expanded-draw", "expanded-stack", "expanded-target", "expanded-divide", "expanded-discard", "normal", "wild", "table", "stacking", "stacking-two", "challenge", "draw", "uno", "effect-skip", "effect-reverse", "effect-two", "effect-four", "effect-skip-green", "effect-reverse-green"].includes(requested ?? "")) {
+  if (req.method === "POST" && [...ACCEPTANCE_SCENARIOS, "expanded-tornado-exhaust", "expanded-random-zero", "expanded-swap", "expanded-swap-two", "expanded-swap-final", "expanded-swap-drawn", "expanded-battle-last", "expanded-full-17", "expanded-full-21", "expanded-effect-skip", "expanded-effect-reverse", "expanded-up", "expanded-battle", "expanded-battle-timeout", "expanded-high-five", "expanded-high-five-timeout", "expanded-draw", "expanded-stack", "expanded-target", "expanded-divide", "expanded-discard", "normal", "wild", "table", "stacking", "stacking-two", "challenge", "draw", "uno", "effect-skip", "effect-reverse", "effect-two", "effect-four", "effect-skip-green", "effect-reverse-green"].includes(requested ?? "")) {
     scenario = requested!;
     res.writeHead(200).end("OK");
   } else res.writeHead(404).end();

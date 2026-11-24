@@ -219,7 +219,7 @@ Các mô tả nguồn khác nhau. Đề xuất chọn biến thể **S4 có đi�
 
 ### 9.1. Tornado
 
-D09 đề xuất chỉ đánh được lên lá cùng màu hoặc lá Tornado khác; trường hợp trùng biểu tượng khác màu được xem như đối chiếu biểu tượng thông thường. Bốc đến **màu cố định của lá vừa đánh**, giữ cả lá khiến dừng và bỏ lượt.
+D09 đề xuất chỉ đánh được lên lá cùng màu hoặc lá Tornado khác; trường hợp trùng biểu tượng khác màu được xem như đối chiếu biểu tượng thông thường. Bốc đến **màu cố định của lá vừa đánh**, giữ cả lá khiến dừng và bỏ lượt. Lật từng lá thực sự bốc được theo thứ tự cho cả bàn xem, gồm cả lá đúng màu làm dừng; không công khai các lá chưa bốc trong kho.
 
 Nguồn S1 chỉ nói màu tương ứng, còn S4 cho phép lá đổi màu giúp dừng. Đề xuất v1 lấy cách hẹp: **chỉ lá có đúng màu mới dừng**, lá đen không dừng; phải review D09, không coi đây là dữ kiện thống nhất của nguồn.
 
@@ -311,7 +311,7 @@ Các hiệu ứng bốc hữu hạn/xả/chuyền giải quyết nguyên tử tr
 - Giao thức vẫn cần requestId, matchId và revision. Lệnh đánh/nhận phạt/chọn thưởng cần expectedRevision hiện tại. Riêng khóa lá Battle và đập tay được xét bằng effectId, lần thử, phase và slot riêng của người gửi: không từ chối chỉ vì một người khác vừa phản hồi làm global revision tăng. Server vẫn tăng revision cho chuyển trạng thái được chấp nhận; UI không tự retry mù quáng ý định trên tay bài cũ.
 - Phản hồi đồng thời không được bypass kiểm tra phase, quyền sở hữu, deadline hoặc dedup. Sau timeout/resolve/rematch, mọi effectId cũ vô hiệu; không chấp nhận phản hồi muộn bằng lý do cho phép revision cũ.
 - Phân biệt thông tin công khai (mục tiêu, số bài, tổng phạt, deadline, màu, chiều, thứ tự phản ứng) với private (tay bài, thứ tự kho, ID bí mật Battle, các lá ÷2 đặt dưới kho).
-- Chỉ công khai lá đầu Random và các lá Battle sau lúc lật theo luật; không broadcast toàn bộ state domain để tiện làm hiệu ứng.
+- Công khai lá đầu Random, từng lá bốc bởi Tornado và các lá Battle sau lúc lật theo luật; không broadcast toàn bộ state domain để tiện làm hiệu ứng.
 - Retry, reload, mất mạng không sinh thêm lần bốc, thưởng hoặc ghi nhận đập tay.
 
 ## 15. Điều kiện hoàn thành bước 1
@@ -396,3 +396,8 @@ Skip Two ở bàn hai người chỉ cấm đối thủ, trả lượt cho ngư�
 ## Card Swap — bộ 202 lá, 24/11/2026
 
 Phiên bản hiện tại `uno-expanded-v2`: 202 lá, 15 nhóm mở rộng (thêm 4 Card Swap), 156 lá mang màu và 46 lá đen. Các mục trạng thái triển khai 198 lá bên trên là lịch sử. Đã có luật server, popup đối thủ/màu, animation đổi tay úp và hướng dẫn mục 15. Tham khảo [phạm vi và kiểm tra](../development/uno-card-swap.md).
+
+
+### Cập nhật hiển thị lượt bốc công khai
+
+Random +? lật duy nhất lá đầu cho mọi người; các lá bổ sung bay úp, chỉ người nhận thấy khi vào tay. Tornado lật từng lá đã bốc theo thứ tự, kể cả Wild và lá đúng màu cuối cùng. Server gửi bản sao các lá thực nhận qua `TORNADO_REVEALED`; không gửi phần kho chưa bốc hoặc tay bài cũ. Giao diện chỉ dựng mặt lá hiện tại, giữ bài mới ngoài tay tới khi lá tới người nhận; chế độ giảm chuyển động vẫn giữ thông tin công khai tuần tự. Mỗi lá thường có 1,2 giây; chuỗi dài rút ngắn nhịp để phần lật không vượt 20 giây. Luật rút bài, mất lượt và tính điểm giữ nguyên.
