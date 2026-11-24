@@ -2,8 +2,8 @@ import type { CSSProperties } from "react";
 import type { UnoExpandedView } from "@meepleverse/contracts/uno-expanded";
 import { DrawDebt } from "../../../uno-common";
 import { ExpandedCardFace, expandedCardName } from "../cards";
-export function ExpandedHand({ game, enabled, selectedId, newCardIds = [], onSelect }: { game: UnoExpandedView; enabled: boolean; selectedId?: string; newCardIds?: string[]; onSelect: (id: string) => void }) {
-  return <section className="expanded-hand" data-suggesting={enabled} aria-label="Tay bài của bạn"><div className="expanded-hand-status"><span className="expanded-hand-count" data-testid="expanded-hand-count" aria-label={`${game.self.hand.length} lá trên tay`}>{game.self.hand.length}<span className="expanded-sr"> lá</span></span>{game.pendingDraw > 0 && game.currentPlayerId === game.self.playerId && <DrawDebt count={game.pendingDraw} playerId={game.self.playerId} />}</div>
+export function ExpandedHand({ game, enabled, selectedId, newCardIds = [], onSelect, transferring = false }: { game: UnoExpandedView; transferring?: boolean; enabled: boolean; selectedId?: string; newCardIds?: string[]; onSelect: (id: string) => void }) {
+  return <section className="expanded-hand" data-suggesting={enabled} data-transferring={transferring} aria-label="Tay bài của bạn"><div className="expanded-hand-status"><span className="expanded-hand-count" data-testid="expanded-hand-count" aria-label={`${game.self.hand.length} lá trên tay`}>{game.self.hand.length}<span className="expanded-sr"> lá</span></span>{game.pendingDraw > 0 && game.currentPlayerId === game.self.playerId && <DrawDebt count={game.pendingDraw} playerId={game.self.playerId} />}</div>
     <div className="expanded-hand-scroll" tabIndex={0} aria-label="Cuộn ngang để xem tay bài"><div className="expanded-hand-list">{game.self.hand.map((card,index) => {
       const playable = game.self.playableCardIds.includes(card.id);
       return <button type="button" key={card.id} className={`expanded-hand-card${newCardIds.includes(card.id) ? " is-new" : ""}${selectedId === card.id ? " is-selected" : ""}${enabled ? playable ? " is-suggested" : " is-blocked" : ""}`}

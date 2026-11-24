@@ -8,7 +8,7 @@ export function scheduleExpandedAudio(frame: ExpandedVisualFrame, plan: Expanded
   const time = (seconds: number) => reduced ? 0 : seconds * speed;
   if (plan.played) {
     at(time(.48), "play");
-    const action: Record<string, Sound> = { skip: "skip", reverse: "reverse", wild: "wild", "wild-draw-four": "penalty", "draw-two": "penalty", "wild-draw-six": "penalty", "wild-draw-eight": "penalty", "wild-target-four": "penalty", "wild-shield": "wild", "wild-multiply-two": "penalty", "wild-divide-two": "wild", "skip-two": "skip", tornado: "penalty", "wild-random": "penalty" };
+    const action: Record<string, Sound> = { skip: "skip", reverse: "reverse", wild: "wild", "wild-draw-four": "penalty", "draw-two": "penalty", "wild-draw-six": "penalty", "wild-draw-eight": "penalty", "wild-target-four": "penalty", "wild-shield": "wild", "wild-multiply-two": "penalty", "wild-divide-two": "wild", "skip-two": "skip", tornado: "penalty", "wild-random": "penalty", "wild-card-swap": "wild" };
     const sound = action[plan.played.card.kind];
     if (sound) at(time(.55), sound);
   }

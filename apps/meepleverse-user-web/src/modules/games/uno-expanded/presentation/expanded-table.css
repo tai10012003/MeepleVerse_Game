@@ -231,3 +231,11 @@
 .expanded-choice-uno p { margin:5px 0; }
 .expanded-choice-uno button { flex:none; min-height:44px; padding:9px 13px; }
 .expanded-uno-reminder { grid-column:1/-1; margin:0; text-align:center; color:#ffe2a0; font-size:13px; }
+
+/* Keep layout anchors and count badges stable while the private hands travel. */
+.expanded-hand[data-transferring="true"] .expanded-hand-list,
+.expanded-opponent-cards[data-transferring="true"] .opponent-hand { visibility:hidden; }
+.expanded-targets button:has(small) { display:flex; align-items:center; justify-content:center; gap:8px; }
+.expanded-targets button small { font-size:13px; opacity:.85; }
+.swap-packet-card { position:absolute; inset:0; }
+.swap-packet-count { position:absolute; right:-12px; bottom:-8px; z-index:6; min-width:25px; padding:3px 6px; border-radius:8px; background:#fff5d6; color:#15271d; font-size:14px; font-weight:800; text-align:center; box-shadow:0 2px 8px #0006; }

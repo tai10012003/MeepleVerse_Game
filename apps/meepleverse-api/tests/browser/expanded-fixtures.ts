@@ -14,7 +14,12 @@ export function expandedBrowserFixture(ids: readonly string[], scenario: string)
   if (scenario.startsWith("expanded-accept-")) return expandedAcceptanceFixture(ids, scenario);
   if (scenario.startsWith("expanded-full-")) return createExpandedGame(ids, seeded(Number(scenario.split("-").at(-1))));
   if (!scenario.startsWith("expanded-")) return createExpandedGame(ids, seeded(17));
-  const hands: Card[][] = scenario.startsWith("expanded-effect-") ? [[{ id: "action", kind: scenario.endsWith("skip") ? "skip" : "reverse", color: "red" }, num("a-keep", "blue", 1), num("a-other", "green", 2)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]] : scenario === "expanded-up" ? [[wild("up", "wild-up"), num("a-low", "blue", 1), num("a-zero", "blue", 0)],
+  const hands: Card[][] = scenario.startsWith("expanded-swap") ? [
+    ...(scenario.endsWith("drawn") ? [[num("actor-red", "red", 9),num("actor-blue", "blue", 2)]] :
+      scenario.endsWith("final") ? [[wild("swap", "wild-card-swap")]] :
+      [[wild("swap", "wild-card-swap"),num("actor-red", "red", 9),...(scenario.endsWith("two") ? [] : [num("actor-blue", "blue", 2)])]]),
+    ...ids.slice(1).map((_,i)=> i === ids.length-2 ? [num("target-secret", "yellow", 8)] : [num(`observer-${i}-red`,"red",4),num(`observer-${i}-blue`,"blue",7)]),
+  ] : scenario.startsWith("expanded-effect-") ? [[{ id: "action", kind: scenario.endsWith("skip") ? "skip" : "reverse", color: "red" }, num("a-keep", "blue", 1), num("a-other", "green", 2)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]] : scenario === "expanded-up" ? [[wild("up", "wild-up"), num("a-low", "blue", 1), num("a-zero", "blue", 0)],
     [{ id: "five", kind: "high-five", color: "red", value: 5 }, num("b-low", "green", 1)], [{ id: "seven", kind: "seven-change-left", color: "yellow", value: 7 }, num("c-low", "green", 1)]]
     : scenario === "expanded-battle" ? [[wild("battle", "wild-battle"), num("secret-a", "red", 9), num("reward-a", "blue", 1), num("reward-b", "blue", 2), num("keep-a", "blue", 3)],
       [num("secret-b", "red", 3), num("keep-b", "blue", 4)], [num("observer", "green", 5)]]
@@ -28,6 +33,7 @@ export function expandedBrowserFixture(ids: readonly string[], scenario: string)
     : scenario === "expanded-divide" ? [[wild("divide", "wild-divide-two"), num("keep-red", "red", 9), num("return-blue", "blue", 2)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]]
     : [[{ id: "discard", kind: "discard-color", color: "red" }, num("a-red", "red", 9)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]];
   const stock = [num("draw-red", "red", 1), ...Array.from({ length: 24 }, (_, i) => num(`stock-${i}`, "yellow", i % 10))];
+  if (scenario === "expanded-swap-drawn") stock[0] = wild("drawn-swap", "wild-card-swap");
   const game: UnoExpandedGame = { gameId: "uno-expanded", rulesVersion: "uno-expanded-v2", revision: 0, phase: "turn", players: ids.map((id, i) => ({ id, hand: hands[i] ?? [num(`fallback-${i}`)] })),
     dealerIndex: ids.length - 1, currentIndex: 0, direction: 1, activeColor: "red", drawPile: stock.reverse(), discardPile: [num("top", "red", 5)],
     drawnCardId: null, pendingDraw: 0, blockedTurns: 0, result: null, effectSequence: 0, effect: null };

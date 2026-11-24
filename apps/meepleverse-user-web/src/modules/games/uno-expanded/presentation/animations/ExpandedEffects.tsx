@@ -1,9 +1,10 @@
 "use client";
+import { SwapSequence } from "./SwapSequence";
 import { scheduleExpandedAudio } from "./expanded-audio";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { UnoExpandedRoomView } from "@meepleverse/contracts/uno-expanded";
-import { DRAW_DURATION, DRAW_STAGGER, NOTICE_DURATION, planExpandedEffects, type ExpandedVisualFrame, type ExpandedEffectPlan, type ExpandedPresentation } from "../../model/expanded-effects";
+import { SWAP_DELAY, SWAP_DURATION, DRAW_DURATION, DRAW_STAGGER, NOTICE_DURATION, planExpandedEffects, type ExpandedVisualFrame, type ExpandedEffectPlan, type ExpandedPresentation } from "../../model/expanded-effects";
 import { cacheGeometry, effectGeometry, playerPoint, type EffectGeometry, type GeometryCache } from "../../../uno/presentation/animations/effect-geometry";
 import { discardPlacement } from "../../../uno-common/model/discard-layout";
 import { expandedCardName } from "../../model/card-presentation";
@@ -34,6 +35,7 @@ function SceneView({ scene }: { scene: Scene }) {
         initial={{ opacity: 0, scale: .25 }} animate={{ opacity: [0, .8, 0], scale: [.25, 1.1, 2.2] }}
         transition={{ delay: delay(.41), duration: duration(.35) }} />
     </>}
+    {!reduced && plan.swap && <SwapSequence swap={plan.swap} geometry={geo} speed={speed} />}
     {plan.draws.map((draw, index) => <DrawSequence key={index} draw={draw} scene={scene} />)}
     {plan.badges.map((badge, index) => {
       const origin = screenPoint((badge.playerId ? geo.notices.get(badge.playerId) : undefined) ?? playerPoint(geo, badge.playerId));
@@ -125,7 +127,7 @@ export function ExpandedEffects({ frames, view, onComplete, onPresent }: { frame
         const plan = planExpandedEffects(frame);
         const speed = queue.current.length > 3 ? .55 : 1;
         const minimize = motionPreference.current;
-        const progress: ExpandedPresentation = { frame, landed: !plan.played || minimize, arrived: {} };
+        const progress: ExpandedPresentation = { frame, landed: !plan.played || minimize, swapStage: minimize ? "arrived" : "waiting", arrived: {} };
         const publish = () => onPresent({ ...progress, arrived: { ...progress.arrived } });
         publish();
         setScene({ frame, plan, geometry: effectGeometry(cache.current, frame, anchors), speed, reduced: minimize });
@@ -134,7 +136,11 @@ export function ExpandedEffects({ frames, view, onComplete, onPresent }: { frame
           const arrivals = plan.draws.flatMap(draw => Array.from({ length: draw.count }, (_, index) => setTimeout(() => {
             progress.arrived[draw.playerId] = index + 1; publish();
           }, minimize ? 0 : Math.ceil((draw.delay + DRAW_DURATION + Math.min(index, 7) * DRAW_STAGGER) * speed * 1000))));
-          const clearArrivals = () => arrivals.forEach(clearTimeout);
+          const swapTimers = plan.swap && !minimize ? [
+            setTimeout(() => { progress.swapStage = "flying"; publish(); }, Math.ceil(SWAP_DELAY * speed * 1000)),
+            setTimeout(() => { progress.swapStage = "arrived"; publish(); }, Math.ceil((SWAP_DELAY + SWAP_DURATION) * speed * 1000)),
+          ] : [];
+          const clearArrivals = () => [...arrivals, ...swapTimers].forEach(clearTimeout);
           const landing = setTimeout(() => { progress.landed = true; publish(); }, minimize ? 0 : Math.ceil(.48 * speed * 1000));
           const noticeEnd = Math.max(0, ...(minimize && plan.draws.length ? [NOTICE_DURATION] : []), ...plan.badges.map(badge => (minimize ? 0 : badge.delay * speed) + NOTICE_DURATION), plan.turnId ? (minimize ? (plan.draws.length ? NOTICE_DURATION + .2 : 0) : plan.turnDelay * speed) + NOTICE_DURATION : 0);
           const sceneDuration = Math.max(minimize ? .125 : plan.duration * speed, noticeEnd);

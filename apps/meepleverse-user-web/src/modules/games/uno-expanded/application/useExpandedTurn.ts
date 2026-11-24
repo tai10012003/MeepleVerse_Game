@@ -12,13 +12,16 @@ export function useExpandedTurn(view: UnoExpandedRoomView, connected: boolean, p
     game.currentPlayerId === view.selfPlayerId && ["turn", "drawn", "draw-stack", "up"].includes(game.phase);
   const draft = choice?.scope === scope ? choice : null;
   const selected = game && draft ? game.self.hand.find(card => card.id === draft.cardId && game.self.playableCardIds.includes(card.id)) : undefined;
-  const remaining = game && selected ? remainingAfterPlay(game.self.hand, selected, draft?.color) : null;
-  const needsUno = !!game && game.self.hand.length >= 2 && remaining === 1;
+  const swap = selected?.kind === "wild-card-swap";
+  const needsTarget = selected?.kind === "wild-target-four" || ((selected?.kind === "wild-battle" || swap) && game!.self.hand.length > 1);
+  const target = game?.players.find(player => player.playerId === draft?.target && player.playerId !== view.selfPlayerId);
+  const remaining = swap && game!.self.hand.length > 1 ? target?.handCount ?? null : game && selected ? remainingAfterPlay(game.self.hand, selected, draft?.color) : null;
+  const needsUno = !swap && !!game && game.self.hand.length >= 2 && remaining === 1;
   const armed = unoScope === scope;
-  const canArm = active && (!!game && game.self.hand.length === 2 || needsUno);
+  const canArm = active && !swap && (!!game && game.self.hand.length === 2 || needsUno);
   const required = selected?.kind === "wild-divide-two" ? Math.floor((game!.self.hand.length - 1) / 2) : 0;
   const validOptions = !!selected && !!draft && (selected.color !== null || !!draft.color) &&
-    ((selected.kind !== "wild-target-four" && (selected.kind !== "wild-battle" || game!.self.hand.length === 1)) || view.members.some(member => member.playerId === draft.target && member.playerId !== view.selfPlayerId)) &&
+    (!needsTarget || !!target) &&
     (selected.kind !== "wild-divide-two" || draft.ids.length === required);
   function update(value: Partial<Pick<Choice, "editing" | "color" | "target" | "ids">>) {
     if (draft && active) setChoice({ ...draft, ...value });
@@ -30,14 +33,14 @@ export function useExpandedTurn(view: UnoExpandedRoomView, connected: boolean, p
     }
     onCommand({ type: "PLAY_CARD", cardId: selected.id, declareUno: needsUno && armed,
       ...(selected.color === null ? { chosenColor: draft.color! } : {}),
-      ...((selected.kind === "wild-target-four" || selected.kind === "wild-battle" && game!.self.hand.length > 1) ? { targetPlayerId: draft.target! } : {}),
+      ...(needsTarget ? { targetPlayerId: draft.target! } : {}),
       ...(selected.kind === "wild-divide-two" ? { discardCardIds: draft.ids } : {}) });
   }
   function play() {
     if (!active || !selected || !draft) return;
     if (selected.color === null || selected.kind === "discard-color" && needsUno) update({ editing: true }); else submit();
   }
-  return { active, selected, draft, remaining, needsUno, armed, canArm, required, validOptions,
+  return { active, selected, draft, remaining, needsUno, armed, canArm, required, validOptions, needsTarget,
     dialogOpen: !!selected && !!draft?.editing && connected && !view.paused,
     select: (cardId: string) => { if (active && game?.self.playableCardIds.includes(cardId)) setChoice({ scope, cardId, editing: false, ids: [] }); },
     toggleUno: () => { if (canArm) setUnoScope(armed ? null : scope); },
