@@ -12,7 +12,3 @@
 .expanded-rules-face>.expanded-card-face { width:54px; }
 .expanded-rules-face:has(>svg+svg)>.expanded-card-face { width:30px; }
 @media(max-width:640px) { .expanded-rules-cards>li { grid-template-columns:48px minmax(0,1fr); gap:12px; padding:12px; }.expanded-rules-face { width:48px; }.expanded-rules-face>.expanded-card-face { width:44px; }.expanded-rules-face:has(>svg+svg)>.expanded-card-face { width:22px; } }
-
-.expanded-rules-cards>li[data-rule-status="preview"] { border-color:#d6ac62; background:#e9b66b08; }
-.expanded-rules-cards .expanded-rules-preview-label { display:inline-block; margin:0 0 10px; padding:4px 9px; border:1px solid #d6ac6266; border-radius:12px; color:#f8e1b2; font-weight:700; }
-.expanded-rules-cards .expanded-rules-preview-note { margin-top:10px; color:#bccab4; }

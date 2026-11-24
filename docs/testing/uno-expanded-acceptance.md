@@ -227,3 +227,9 @@ Bổ sung năm ca UI xả cố định/tự chọn với hô hoặc cố tình k
 ## Kết thúc ván không phát lại popup mini-game — 22/11/2026
 
 MiniFeedback chỉ tồn tại khi ván còn PLAYING; xóa buffer phản hồi và bỏ qua phản hồi mini-game khi đã ENDED, giữ animation đánh/bốc cuối. Kiểm tra thắng bằng lá số sau Battle/Đập tay, lá Đập tay cuối, Battle tự kết thúc bằng timeout, reload/rematch và tình huống Battle còn chờ thưởng. Xem [nguyên nhân và ca tái hiện](../development/uno-expanded-uno-review.md).
+
+## Nghiệm thu Card Swap / bộ 202 lá — 24/11/2026
+
+Bản hiện tại là `uno-expanded-v2`, gồm 202 lá và 15 nhóm mở rộng. Các kết quả 198 lá bên trên là lịch sử. Đã cập nhật fixtures và phép đối chiếu tổng bài của các kiểm tra UI sang 202; phần Cơ bản vẫn 108 lá.
+
+Đạt 404 test backend và 10 ca UI tập trung: Card Swap với đủ 202 lá, thư viện 61 mẫu, hướng dẫn/sảnh/bàn laptop/mobile và hai ván bốn client seed 17/21 tới kết quả, reconnect, rematch. Hướng dẫn mục 15 nêu rõ 4 lá đang chơi, chọn màu/mục tiêu, lá cuối thắng không đổi và nhận tay một lá không phạt UNO. Các ca hiệu ứng thường ở bước 2 tiếp tục là bằng chứng cho animation; hai ván dài dùng giảm chuyển động. Xem [phạm vi và lệnh nghiệm thu](../development/uno-card-swap.md).

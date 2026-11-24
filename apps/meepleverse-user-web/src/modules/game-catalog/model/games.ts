@@ -16,8 +16,8 @@ export const catalogGames: readonly CatalogGame[] = [
   },
   {
     id: "uno-expanded", name: "UNO Mở rộng", subtitle: "Thêm thử thách, thêm bất ngờ.",
-    description: "198 lá, 14 nhóm chức năng mới: cộng dồn tới +8, Khiên, xả màu và các mini-game. Dành cho hội đã quen UNO.",
-    status: "available", artwork: "expanded", tags: ["2–4 người", "198 lá", "14 nhóm mới"],
+    description: "202 lá, 15 nhóm chức năng mới: cộng dồn tới +8, Khiên, đổi tay bài, xả màu và các mini-game. Dành cho hội đã quen UNO.",
+    status: "available", artwork: "expanded", tags: ["2–4 người", "202 lá", "15 nhóm mới"],
   },
 ];
 

@@ -1,6 +1,6 @@
 import type { UnoExpandedCard as Card } from "@meepleverse/contracts/uno-expanded";
 import { createExpandedDeck, type UnoExpandedGame } from "../../src/modules/games/uno-expanded/index.js";
-export const ACCEPTANCE_CASES = ["tornado","random-number","random-function","multiply","divide","discard-color","wild-discard","seven-left","seven-right","skip-two","target","stack","uno","rapid","final-six","final-high-five","skip","reverse"] as const;
+export const ACCEPTANCE_CASES = ["swap","tornado","random-number","random-function","multiply","divide","discard-color","wild-discard","seven-left","seven-right","skip-two","target","stack","uno","rapid","final-six","final-high-five","skip","reverse"] as const;
 export const ACCEPTANCE_SCENARIOS = ACCEPTANCE_CASES.map(name => "expanded-accept-"+name);
 /** Test-only arrangements use all 202 real card faces; nothing enters production bootstraps. */
 export function expandedAcceptanceFixture(ids:readonly string[],scenario:string):UnoExpandedGame {
@@ -17,6 +17,7 @@ export function expandedAcceptanceFixture(ids:readonly string[],scenario:string)
  const top=number("top",name==="seven-right"?"blue":"red",5);
  let activation:Card;
  switch(name) {
+  case "swap":activation=black("activate","wild-card-swap");break;
   case "tornado":activation=take("activate","tornado","red");break;
   case "random-number":case "random-function":activation=black("activate","wild-random");break;
   case "multiply":activation=black("activate","wild-multiply-two");break;

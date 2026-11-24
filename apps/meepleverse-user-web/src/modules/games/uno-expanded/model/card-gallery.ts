@@ -27,4 +27,5 @@ export const cardGallery: CardGalleryGroup[] = [
   { key: "wild-discard", name: "Xả màu tự chọn", edition: "expanded", reference: "Infinity", note: "Chồng bài có dấu × trên nền elip bốn màu.", faces: [{ kind: "wild-discard", color: null }] },
   { key: "random", name: "Rút ngẫu nhiên", edition: "expanded", reference: "Battle", note: "Elip bốn màu và +? ở hai góc.", faces: [{ kind: "wild-random", color: null }] },
   { key: "draw-more", name: "Rút sáu / rút tám", edition: "expanded", reference: "MeepleVerse", note: "Bốn thẻ màu giống +4, ký hiệu +6/+8 ở hai góc bài.", faces: [{ kind: "wild-draw-six", color: null }, { kind: "wild-draw-eight", color: null }] },
+  { key: "card-swap", name: "Đổi tay bài · Card Swap", edition: "expanded", reference: "Infinity", note: "Hai bàn tay cầm bài đối hướng. Đổi toàn bộ tay với một đối thủ rồi chọn màu; bộ có 4 lá.", faces: [{ kind: "wild-card-swap", color: null }] },
 ];

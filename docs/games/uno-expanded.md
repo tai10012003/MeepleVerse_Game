@@ -1,16 +1,16 @@
-# UNO Mở rộng — đặc tả luật v1
+# UNO Mở rộng — đặc tả luật v2
 
 - Ngày lập: **19/11/2026**.
-- Game ID: `uno-expanded`; rules ID dự kiến: `uno-expanded-v1`.
+- Game ID: `uno-expanded`; rules ID hiện tại: `uno-expanded-v2`.
 - Bước 12: đã mở nhãn Chơi thử, tạo/vào phòng tại `/games/uno-expanded` và đăng ký API mặc định cho cả hai phiên bản; xem [luồng chơi thử](../development/uno-expanded-beta.md). Đã có [nghiệm thu local bước 10](../development/uno-expanded-full-game-acceptance.md) và hướng dẫn bước 11. Chưa triển khai server thật; kiểm thử người thật sau deploy còn riêng.
-- Phạm vi đã xác nhận: **198 lá, 2–4 người, chia 7 lá; 14 mục mở rộng / 15 loại lá mới**.
+- Phạm vi đã xác nhận: **202 lá, 2–4 người, chia 7 lá; 15 mục mở rộng / 16 loại lá mới**.
 - [UNO Cơ bản](uno.md) tiếp tục dùng 108 lá và `uno-house-v3`; tài liệu này không sửa luật Cơ bản.
 - Các quy ước ghép bộ mang mã **Dxx** là lựa chọn riêng của MeepleVerse; trạng thái xác nhận theo từng bước nằm trong [bảng quyết định](uno-expanded-decisions.md). Không coi chúng là một luật gốc thống nhất cho mọi bộ ngoài thị trường.
 - Xem [tình huống nghiệm thu](../testing/uno-expanded-acceptance.md) để triển khai và kiểm tra từng nhánh.
 
 > Shared foundation: [UNO common modules](../development/uno-common.md). Basic now uses the shared mechanics and UI primitives; Expanded draw/defense, bulk-discard/turn-control and mini-games are implemented internally; see [step 7](../development/uno-expanded-minigames.md).
 
-> Internal room foundation: [setup, protocol and verification](../development/uno-expanded-foundation.md). The 198-card match supports internal base turns and draw/defense rules; see [step 5](../development/uno-expanded-draw-defense.md).
+> Internal room foundation: [setup, protocol and verification](../development/uno-expanded-foundation.md). The 202-card match supports internal base turns and draw/defense rules; see [step 5](../development/uno-expanded-draw-defense.md).
 
 ## 1. Nguồn và cách sử dụng
 
@@ -22,7 +22,7 @@
 | S4 | [Thủ Thuật Chơi — các lá mở rộng](https://thuthuatchoi.com/cac-quan-bai-mo-rong-trong-tro-choi-uno.html) | Mô tả chi tiết các biến thể Battle và Random |
 | S5 | [H2 Rubik — sản phẩm Battle](https://rubikonline.vn/uno-battle-ban-mo-rong-uno) | Một cách giải thích Random khác bài hướng dẫn S2 |
 
-Các tài liệu này mô tả những bộ mở rộng không chính thức và có chỗ khác nhau. Không có một tài liệu nguồn thống nhất cho đúng bộ kết hợp 198 lá. Khi nguồn mâu thuẫn, phải dùng lựa chọn có mã Dxx, không âm thầm ghép luật.
+Các tài liệu này mô tả những bộ mở rộng không chính thức và có chỗ khác nhau. Không có một tài liệu nguồn thống nhất cho đúng bộ kết hợp 202 lá. Khi nguồn mâu thuẫn, phải dùng lựa chọn có mã Dxx, không âm thầm ghép luật.
 
 Những ý tưởng trước đây **đã được thay thế**: đấu số riêng hai người, số tăng nghiêm ngặt/9 thắng ngay; đấu màu đối đáp tới hết màu; Khiên xóa mọi phạt; ×2/÷2 nhân/chia tổng phạt. Không triển khai các ý tưởng này trong v1.
 
@@ -41,7 +41,7 @@ Những ý tưởng trước đây **đã được thay thế**: đấu số ri�
 | wild-draw-four | +4 | — | 4 |
 | subtotal-base | Tổng phần nền | — | 144 |
 
-### 2.2. Phần mở rộng: 54 lá
+### 2.2. Phần mở rộng: 58 lá
 
 | STT | key dự kiến | Loại | Màu / phân bố | Tổng |
 | --- | --- | --- | --- | ---: |
@@ -60,27 +60,28 @@ Những ý tưởng trước đây **đã được thay thế**: đấu số ri�
 | 13 | wild-random | Rút ngẫu nhiên +? | Đen | 4 |
 | 14a | wild-draw-six | +6 | Đen | 2 |
 | 14b | wild-draw-eight | +8 | Đen | 2 |
-| subtotal-expanded | — | Tổng phần mở rộng | — | 54 |
+| 15 | wild-card-swap | Đổi tay bài | Đen | 4 |
+| subtotal-expanded | — | Tổng phần mở rộng | — | 58 |
 
 Số lượng là cấu hình MeepleVerse đã chọn, không khẳng định trùng toàn bộ một bản in ngoài thị trường. Dùng các số lượng tham khảo Storm/Infinity, nhưng không nhập nguyên tất cả lá của ba gói.
 
 ### 2.3. Bất biến bộ bài
 
-- **112 lá số thuần + 32 chức năng nền + 54 mở rộng = 198 lá**.
-- High Five/Seven Change mang giá trị số nhưng đã nằm trong 54; không đếm lại thành lá số thuần.
-- Mỗi màu có 39 lá vật lý: 28 số thuần + 6 chức năng nền + 5 mở rộng. Tổng 156 lá có màu và 42 lá đen.
+- **112 lá số thuần + 32 chức năng nền + 58 mở rộng = 202 lá**.
+- High Five/Seven Change mang giá trị số nhưng đã nằm trong 58; không đếm lại thành lá số thuần.
+- Mỗi màu có 39 lá vật lý: 28 số thuần + 6 chức năng nền + 5 mở rộng. Tổng 156 lá có màu và 46 lá đen.
 - Mỗi lá có ID duy nhất; không dùng màu/loại/số làm ID chung cho các bản sao.
-- Sau mọi chuyển trạng thái, tổng ID trong các tay bài, chồng bốc và chồng bỏ vẫn đúng 198, không trùng ID. Lá chọn bí mật trong Battle chỉ được đánh dấu giữ chỗ, không tạo thêm bản sao vật lý.
+- Sau mọi chuyển trạng thái, tổng ID trong các tay bài, chồng bốc và chồng bỏ vẫn đúng 202, không trùng ID. Lá chọn bí mật trong Battle chỉ được đánh dấu giữ chỗ, không tạo thêm bản sao vật lý.
 - Lá đầu ván chỉ là số thuần 0–9; không mở bằng High Five/Seven Change dù chúng có giá trị số.
 
 ### 2.4. Cấu hình đã triển khai — bước 2
 
 - Kiểu bài dùng chung: `@meepleverse/contracts/uno-expanded`, tách khỏi `UnoCard` của Cơ bản. `UnoExpandedCard` tái sử dụng bài cơ bản và bổ sung các biến thể mới; High Five bắt buộc giá trị 5, Seven Change bắt buộc 7 và ràng buộc đúng màu L/R.
 - Cấu hình: `apps/meepleverse-api/src/modules/games/uno-expanded/domain/constants/deck-config.ts`. Mỗi mục là một mặt bài và số bản sao, được đóng băng để tránh sửa cấu hình ngoài ý muốn.
-- Hàm tạo bộ bài: `createExpandedDeck()` qua module `apps/meepleverse-api/src/modules/games/uno-expanded/index.ts`. Trả một mảng mới gồm 198 lá **có thứ tự, chưa xào/chia**, không áp dụng luật lá bài.
+- Hàm tạo bộ bài: `createExpandedDeck()` qua module `apps/meepleverse-api/src/modules/games/uno-expanded/index.ts`. Trả một mảng mới gồm 202 lá **có thứ tự, chưa xào/chia**, không áp dụng luật lá bài.
 - ID có tiền tố `uno-expanded:` và ổn định giữa các lần tạo cùng cấu hình. ID duy nhất **trong một bộ/ván**, không phải UUID toàn hệ thống; khi xử lý lệnh vẫn phải gắn matchId của ván.
 - Các lần gọi không chia sẻ object lá bài. Thay đổi một bộ đã tạo không ảnh hưởng cấu hình, bộ khác hoặc bộ Cơ bản.
-- Seven Change là một nhóm chức năng nhưng có hai kind `seven-change-left`/`seven-change-right`. Vì vậy 14 mục tương ứng 15 loại chức năng mới về nghiệp vụ, **16 kind mới trong code**; không lấy số kind làm số lá.
+- Seven Change là một nhóm chức năng nhưng có hai kind `seven-change-left`/`seven-change-right`. Vì vậy 15 mục tương ứng 16 loại chức năng mới về nghiệp vụ, **17 kind mới trong code**; không lấy số kind làm số lá.
 - Kiểm thử: `apps/meepleverse-api/tests/unit/uno-expanded/deck.test.ts`; chạy cùng `npx.cmd --yes pnpm@10.34.9 test` hoặc lọc file qua script test của API.
 - Phạm vi bước này bao gồm dữ liệu bộ bài và kiểm tra số lượng (phần tương ứng E001/E002/E005). Chưa triển khai chia bài/mở đầu/lượt/hiệu ứng, nên chưa xem các ca còn lại trong tài liệu nghiệm thu là đã đạt.
 
@@ -97,13 +98,13 @@ Số lượng là cấu hình MeepleVerse đã chọn, không khẳng định tr
 
 ### 3.1. Chọn màu và chọn mục tiêu — D02
 
-Đề xuất cho bản Mở rộng: lá đen chọn màu **khi đánh**, gửi cùng ý định đánh bài; Target/Battle chọn thêm đối thủ. Bấm hủy trước khi gửi thì không thay đổi ván.
+Đề xuất cho bản Mở rộng: lá đen chọn màu **khi đánh**, gửi cùng ý định đánh bài; Target/Battle/Card Swap chọn thêm đối thủ. Bấm hủy trước khi gửi thì không thay đổi ván.
 
 Đây là điểm có chủ đích khác Cơ bản: Cơ bản hiện cho người đánh +4 cuối chọn màu sau khi người nhận bốc phạt. Bản Mở rộng đề xuất chọn màu ngay để thống nhất nhiều loại Wild; phải review D02 trước khi code, không sửa Cơ bản theo quyết định này.
 
 Mục tiêu phải là một người khác đang thuộc ván; không được tự chọn mình. Server xác định danh tính người gửi, không tin playerId do client tự nhận.
 
-## 4. Bảng tác dụng tham khảo của 14 mục
+## 4. Bảng tác dụng tham khảo của 15 mục
 
 Mô tả ngắn ở đây lấy từ S1–S4; chi tiết ghép và trường hợp thiếu nằm ở các mục sau, không xem chúng là luật gốc đã được chứng minh.
 
@@ -123,6 +124,7 @@ Mô tả ngắn ở đây lấy từ S1–S4; chi tiết ghép và trường h�
 | 12. Wild Discard — S3 | Chọn màu để xả. |
 | 13. Random — S4/S5 | Một cách giải thích: lật một lá; ra số thì bốc thêm theo số; ra chức năng không bốc thêm theo số. S2 mô tả khác và chưa đủ rõ. |
 | 14. +6/+8 | Mức rút cố định do phạm vi dự án chọn; cách ghép với chuỗi xem D03. |
+| 15. Card Swap — S3 | Đổi toàn bộ tay bài với một đối thủ rồi chọn màu. Quy tắc lá cuối và nhận tay một lá theo mục 6.4. |
 
 ## 5. Chuỗi rút cố định — đề xuất D03
 
@@ -171,6 +173,14 @@ Ví dụ, chiều hiện tại A→B→C→D:
 - Sau chuyền, lượt tới ghế kế người kích hoạt theo chiều mới. Không chạy lại chức năng của các lá nhận được.
 - Nhận một lá do chuyền không tự bị phạt quên UNO; trạng thái UNO đã chuẩn bị trước đó hết hiệu lực.
 - Với hai người: chuyền L/R đều trao đổi hai tay bài; Skip Two chỉ cấm đối thủ và trả lượt cho người đánh. Với ba người: Skip Two trả lượt cho người đánh. Với bốn người: bỏ hai đối thủ kế, tới người thứ tư.
+
+### 6.4. Card Swap — chốt 24/11/2026
+
+- Bốn lá đen `wild-card-swap`; dùng trong lượt thường hoặc đánh chính lá vừa bốc, không đáp cộng dồn và không chen mini-game.
+- Chọn một đối thủ và màu rồi Xác nhận nguyên khối. Bỏ Swap lên bàn, đổi hai tay còn lại và tiếp tục theo màu người đánh chọn; không đổi chiều. Lượt tới ghế kế của người đánh.
+- Nhận tay một lá không bị phạt UNO. Không đánh giá một lá tạm thời giữa bước bỏ Swap và chuyển tay; không tự hô UNO.
+- Swap cuối thắng ngay, không đổi tay; không bắt chọn mục tiêu trong trường hợp này. Màu vẫn là phần của lệnh Wild.
+- Giữ bí mật bài nhận về, công khai người đổi và số lá. Xem [giao thức, UI và kiểm tra Card Swap](../development/uno-card-swap.md).
 
 ## 7. Wild Up — D07
 
@@ -306,7 +316,7 @@ Các hiệu ứng bốc hữu hạn/xả/chuyền giải quyết nguyên tử tr
 
 ## 15. Điều kiện hoàn thành bước 1
 
-- Có đủ 14 mục, bảng 198 lá và ranh giới giữa nguồn/luật đã chốt/đề xuất.
+- Có đủ 15 mục, bảng 202 lá và ranh giới giữa nguồn/luật đã chốt/đề xuất.
 - Mỗi chức năng xác định điều kiện đánh, người xử lý, tác động bài, màu/chiều/lượt sau, quyền riêng tư và tình huống thiếu bài/về đích.
 - Có bảng quyết định để review toàn bộ khoảng trống của bộ kết hợp, cùng ca nghiệm thu để bước sau không suy luật từ UI.
 - **Hoàn thành tài liệu không đồng nghĩa D01–D15 đã được duyệt.** Các bước triển khai phải giữ trạng thái phát hành Mở rộng là đang phát triển cho đến khi có luật đã duyệt và kiểm thử tương ứng.
@@ -382,3 +392,7 @@ Danh mục chuyển Mở rộng sang Chơi thử/Chơi ngay, trang game có form
 ## Cập nhật Skip Two, UNO và Battle — 22/11/2026
 
 Skip Two ở bàn hai người chỉ cấm đối thủ, trả lượt cho người đánh; bàn ba/bốn người giữ bỏ hai đối thủ kế. Quy tắc này thay phần D06 cũ cho bàn hai người. Xả màu cố định làm còn một lá mở popup xác nhận/UNO; xả tự chọn và ÷2 dùng cùng nhắc tại popup. Battle có UNO cạnh bước chọn lá so và chọn thưởng, mỗi bước chuẩn bị riêng. Kết quả đã giải quyết thu gọn sau 1,5 giây; không đóng bước chọn thưởng đang chờ. Random giữ nguyên: lá đầu lật công khai vẫn vào tay người nhận. Xem [rà soát UNO và kiểm thử](../development/uno-expanded-uno-review.md).
+
+## Card Swap — bộ 202 lá, 24/11/2026
+
+Phiên bản hiện tại `uno-expanded-v2`: 202 lá, 15 nhóm mở rộng (thêm 4 Card Swap), 156 lá mang màu và 46 lá đen. Các mục trạng thái triển khai 198 lá bên trên là lịch sử. Đã có luật server, popup đối thủ/màu, animation đổi tay úp và hướng dẫn mục 15. Tham khảo [phạm vi và kiểm tra](../development/uno-card-swap.md).

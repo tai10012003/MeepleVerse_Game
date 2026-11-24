@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { joinRoom, play, confirmColor, nextRevision } from "./helpers/expanded-room";
 
-test("expanded 9A: internal lobby deals a real 198-card deck, keeps opponent faces private and restores on reload", async ({ browser, request }, info) => {
+test("expanded 9A: internal lobby deals a real 202-card deck, keeps opponent faces private and restores on reload", async ({ browser, request }, info) => {
   await request.post("http://127.0.0.1:5101/scenario/normal"); const group = await joinRoom(browser, 4); const [a, b] = group.pages;
   try {
-    for (const page of group.pages) { await expect(page.getByTestId("expanded-hand-count")).toHaveText("7 lá"); await expect(page.getByTestId("uno-screen")).toHaveCount(0); await expect(page.locator(".expanded-opponents .expanded-card-face")).toHaveCount(0); await expect(page.locator(".expanded-draw small")).toHaveText("169 lá bốc"); }
+    for (const page of group.pages) { await expect(page.getByTestId("expanded-hand-count")).toHaveText("7 lá"); await expect(page.getByTestId("uno-screen")).toHaveCount(0); await expect(page.locator(".expanded-opponents .expanded-card-face")).toHaveCount(0); await expect(page.locator(".expanded-draw small")).toHaveText("173 lá bốc"); }
     const matchId = await a!.getByTestId("expanded-screen").getAttribute("data-match-id");
     const turnText = await a!.getByRole("status").textContent();
     const ids = await a!.locator(".expanded-hand-card").evaluateAll(nodes => nodes.map(node => (node as HTMLElement).dataset.cardId));

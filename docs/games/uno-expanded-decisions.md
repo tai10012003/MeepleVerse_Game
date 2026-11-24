@@ -9,12 +9,13 @@ Ngày: 19/11/2026. Đi cùng [đặc tả luật](uno-expanded.md).
 | C01 | Hai game riêng `uno-basic` và `uno-expanded`; không đổi luật/bộ bài Cơ bản. |
 | C02 | Kết hợp các chức năng được chọn từ Storm, Battle, Infinity; không nhập nguyên mọi lá của cả ba bộ. |
 | C03 | Dùng hướng dẫn tham khảo của từng bộ thay các ý tưởng tùy chỉnh về đấu tay đôi và Khiên xóa phạt đã trao đổi trước đó. |
-| C04 | 14 mục / 15 loại lá mới, vì mục 14 gồm +6 và +8. |
-| C05 | Bộ Mở rộng 198 lá: 112 số thuần + 32 chức năng nền + 54 mở rộng; số 0 mỗi màu 1, số 1–9 mỗi màu mỗi số 3. |
+| C04 | 15 mục / 16 loại lá mới, vì mục 14 gồm +6 và +8; mục 15 là Card Swap. |
+| C05 | Bộ Mở rộng 202 lá: 112 số thuần + 32 chức năng nền + 58 mở rộng; số 0 mỗi màu 1, số 1–9 mỗi màu mỗi số 3. |
 | C06 | Giữ 7 lá đầu ván, định hướng 2–4 người ở phạm vi hiện tại. |
 | C07 | ×2 tác động lượng bài người kế, ÷2 giảm tay người đánh; không mặc định nhân/chia tổng phạt. |
 | C08 | Shield chuyển phạt cộng dồn, không xóa mọi hình phạt. |
 | C09 | Giữ tái sử dụng nền kết nối/phòng/giao diện/âm thanh, nhưng luật và cấu hình hai phiên bản phải tách rõ. |
+| C10 | Card Swap có 4 lá; chọn đối thủ, đổi hai tay còn lại rồi chọn màu. Giữ chiều, lượt tới người kế của người đánh. Lá cuối thắng ngay không đổi; nhận tay một lá không phạt UNO. Chốt 24/11/2026. |
 
 ## 2. Đề xuất cụ thể cho các khoảng trống
 
@@ -55,7 +56,7 @@ Ngày: 19/11/2026. Đi cùng [đặc tả luật](uno-expanded.md).
 
 Bước 1 chỉ tạo đặc tả và ca nghiệm thu. Chưa thêm package, types runtime, room mới, mặt bài, UI tạo phòng, luật thật hay phát hành game.
 
-Bước 2 có thể kiểm tra độc lập cấu hình 198 lá theo C05. Các bước triển khai luật phải bám phiên bản Dxx được duyệt; nếu đổi một quyết định, cập nhật các ca nghiệm thu liên quan trước, không sửa hành vi Cơ bản theo.
+Bước 2 có thể kiểm tra độc lập cấu hình 202 lá theo C05. Các bước triển khai luật phải bám phiên bản Dxx được duyệt; nếu đổi một quyết định, cập nhật các ca nghiệm thu liên quan trước, không sửa hành vi Cơ bản theo.
 
 ## Step 5 confirmation and implementation — 2026-11-20
 

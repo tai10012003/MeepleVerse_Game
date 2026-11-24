@@ -4,13 +4,15 @@ test("card studio: every card family and legal color variant renders with access
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   await page.goto(previewPath);
   await expect(page.getByRole("heading", { name: "Thư viện mặt bài" })).toBeVisible();
-  await expect(page.locator("[data-card-group]")).toHaveCount(19);
-  await expect(page.locator(".studio-card-grid .expanded-card-face")).toHaveCount(60);
+  await expect(page.locator("[data-card-group]")).toHaveCount(20);
+  await expect(page.locator(".studio-card-grid .expanded-card-face")).toHaveCount(61);
   const artwork = await page.locator(".studio-card-grid .expanded-card-face").evaluateAll(nodes => nodes.map(node => {
-    const svg = node as SVGSVGElement; const box = svg.querySelector<SVGGraphicsElement>('[data-artwork="center"]')!.getBBox();
+    const svg = node as SVGSVGElement; // Card Swap's long sleeves are clipped to the printed card area.
+    const artwork = svg.dataset.cardKind === "wild-card-swap" ? svg.querySelector<SVGGraphicsElement>("clipPath rect") : svg.querySelector<SVGGraphicsElement>('[data-artwork="center"]');
+    const box = artwork!.getBBox();
     return { kind: svg.dataset.cardKind, label: svg.getAttribute("aria-label"), x: box.x, y: box.y, right: box.x + box.width, bottom: box.y + box.height };
   }));
-  expect(new Set(artwork.map(card => card.kind)).size).toBe(22);
+  expect(new Set(artwork.map(card => card.kind)).size).toBe(23);
   // SVG getBBox conservatively includes rotated ellipse control bounds (the shared +4 extends 3.14 units).
   for (const card of artwork) {
     expect(card.label).toBeTruthy(); expect(card.x, card.kind).toBeGreaterThanOrEqual(-4); expect(card.y, card.kind).toBeGreaterThanOrEqual(0);
@@ -33,7 +35,7 @@ test("card studio: every card family and legal color variant renders with access
   await page.getByRole("button", { name: "Phóng lớn", exact: true }).click();
   await page.locator('[data-card-group="numbers"]').screenshot({path:info.outputPath("numbers-6-9.png")});
   await page.locator('[data-card-group="up"]').screenshot({path:info.outputPath("up-arrows.png")});
-  for(const group of ["seven","skip-two","high-five","wilds","multiply","divide","draw-more"]) {
+  for(const group of ["seven","skip-two","high-five","wilds","multiply","divide","draw-more","card-swap"]) {
     await page.locator(`[data-card-group="${group}"]`).screenshot({path:info.outputPath(`${group}-artwork.png`)});
   }
   const cornerRows = await page.locator('.studio-card-grid [data-card-kind="skip-two"] [data-artwork="corner"]').evaluateAll(nodes => nodes.map(node => {
@@ -45,8 +47,8 @@ test("card studio: every card family and legal color variant renders with access
   expect(errors).toEqual([]);
   await page.screenshot({ path: info.outputPath("studio-desktop.png") });
   await page.getByRole("button", { name: "Mở rộng", exact: true }).click();
-  await expect(page.locator("[data-card-group]")).toHaveCount(14);
-  await expect(page.locator(".studio-card-grid .expanded-card-face")).toHaveCount(30);
+  await expect(page.locator("[data-card-group]")).toHaveCount(15);
+  await expect(page.locator(".studio-card-grid .expanded-card-face")).toHaveCount(31);
   await page.locator(".studio-groups").screenshot({ path: info.outputPath("expanded-all-artwork.png") });
 });
 test("card studio: filters, large cards and hand/table dimensions fit mobile and tablet", async ({ page }, info) => {
@@ -66,7 +68,7 @@ test("card studio: filters, large cards and hand/table dimensions fit mobile and
   for (const face of await red.all()) await expect(face).toHaveAttribute("data-card-color", "red");
   await expect(page.getByRole("img", { name: "Đỏ · Chuyền trái · 7 L" })).toBeVisible();
   await page.getByLabel("Màu bài", { exact: true }).selectOption("wild");
-  await expect(page.locator(".studio-card-grid .expanded-card-face")).toHaveCount(10);
+  await expect(page.locator(".studio-card-grid .expanded-card-face")).toHaveCount(11);
   await page.getByRole("button", { name: "Tay bài / trên bàn", exact: true }).click();
   await page.locator('[data-card-group="battle"]').screenshot({ path: info.outputPath("battle-corner-swords.png") });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

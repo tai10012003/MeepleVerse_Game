@@ -10,7 +10,7 @@ async function openGuide(page: Page) {
   return { trigger, dialog };
 }
 for (const viewport of viewports) {
-  test(`expanded guide: ${viewport.name} introduction explains 14 active groups and Card Swap preview`, async ({ page }, info) => {
+  test(`expanded guide: ${viewport.name} introduction explains 15 active groups including Card Swap`, async ({ page }, info) => {
     await page.setViewportSize(viewport);
     await page.goto("/");
     await page.locator('article[data-game-id="uno-expanded"]').getByRole("button", { name: label, exact: true }).click();
@@ -21,14 +21,17 @@ for (const viewport of viewports) {
     await expect(page.locator("form")).toHaveCount(1);
     await expect(page.getByRole("button", { name: "Tạo phòng UNO Mở rộng", exact: true })).toBeEnabled();
     const { trigger, dialog } = await openGuide(page);
-    await expect(dialog.getByRole("table")).toHaveAccessibleName("Thành phần bộ 198 lá");
+    await expect(dialog.getByRole("table")).toHaveAccessibleName("Thành phần bộ 202 lá");
     await expect(dialog.locator("[data-rule-group]")).toHaveCount(15);
     const preview = dialog.locator('[data-rule-group="15"]');
-    await expect(preview).toHaveAttribute("data-rule-status", "preview");
-    await expect(preview).toContainText("Chưa có trong bộ bài hiện tại");
+    await expect(preview).toHaveAttribute("data-rule-status", "active");
+    await expect(preview).toContainText("Card Swap · 4 lá");
+    await expect(preview).toContainText("Nhận tay một lá không bị phạt UNO");
+    await expect(preview).toContainText("bạn thắng ngay và không đổi bài");
+    await expect(dialog).not.toContainText("Xem trước");
     await expect(preview).toContainText("người đánh chọn màu bất kỳ");
     await preview.scrollIntoViewIfNeeded();
-    await expect(preview.getByRole("img")).toBeVisible();
+    await expect(preview.locator("svg[data-card-kind=wild-card-swap]")).toBeVisible();
     await preview.screenshot({path:info.outputPath(`card-swap-${viewport.name}.png`)});
     if (viewport.name === "laptop") {
       const face = preview.locator('[data-card-preview="card-swap"]');
@@ -36,7 +39,7 @@ for (const viewport of viewports) {
       await face.screenshot({path:info.outputPath("card-swap-artwork-large.png")});
       await face.evaluate(element => element.removeAttribute("style"));
     }
-    await expect(dialog).toContainText("112 lá số thuần + 32 chức năng nền + 54 lá mở rộng = 198 lá");
+    await expect(dialog).toContainText("112 lá số thuần + 32 chức năng nền + 58 lá mở rộng = 202 lá");
     await expect(dialog).toContainText("không xóa phạt");
     await expect(dialog).toContainText("Không nhân tổng cộng dồn");
     await expect(dialog).toContainText("9 vẫn đáp được bằng 9");

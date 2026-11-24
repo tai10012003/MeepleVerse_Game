@@ -21,15 +21,15 @@ for (const kind of ["discard-color", "wild-discard"] as const) for (const declar
   await expect(uno).toBeInViewport();await expect(dialog.getByRole("button",{name:"Xác nhận",exact:true})).toBeInViewport();
   await a!.screenshot({path:info.outputPath(`${kind}-uno-prompt.png`)});
   await dialog.getByRole("button",{name:"Xác nhận",exact:true}).click();await expect(dialog).toHaveCount(0);
-  const views=await settledExpanded(group.pages,198);expect(views[0]!.count).toBe(declareUno?1:3);expect(views[1]!.count).toBe(2);
+  const views=await settledExpanded(group.pages,202);expect(views[0]!.count).toBe(declareUno?1:3);expect(views[1]!.count).toBe(2);
   await expect(b!.locator(".expanded-opponent .expanded-card-face")).toHaveCount(0);expect(group.errors).toEqual([]);
  }finally{await group.close();}
 });
 test("expanded UNO prompt: Skip Two gives the same player a fresh turn in a two-player room",async({browser,request})=>{
  await request.post("http://127.0.0.1:5101/scenario/expanded-accept-skip-two");const group=await joinRoom(browser);
  try {
-  const before=await settledExpanded(group.pages,198);const clock=await group.pages[0]!.locator(".turn-countdown").getAttribute("data-clock-id");
-  await play(group.pages[0]!,"activate");const after=await settledExpanded(group.pages,198);
+  const before=await settledExpanded(group.pages,202);const clock=await group.pages[0]!.locator(".turn-countdown").getAttribute("data-clock-id");
+  await play(group.pages[0]!,"activate");const after=await settledExpanded(group.pages,202);
   expect(after[0]!.current).toBe(before[0]!.id);expect(after[0]!.count).toBe(before[0]!.count-1);expect(after[1]!.count).toBe(before[1]!.count);
   await expect(group.pages[0]!.locator(".turn-countdown")).not.toHaveAttribute("data-clock-id",clock!);
   expect(group.errors).toEqual([]);

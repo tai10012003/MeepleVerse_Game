@@ -18,7 +18,7 @@ export function CardGallery() {
     <section className="studio-hero" aria-labelledby="studio-title">
       <div><span className="eyebrow">Bộ bài / Ấn bản mở rộng</span><h1 id="studio-title">Quen mặt bài.<br /><em>Thêm bất ngờ.</em></h1>
         <p>Storm, Battle và Infinity trong cùng một bộ bài. Xem từng biểu tượng, từng màu và từng kích thước trước khi vào bàn.</p>
-        <div className="studio-stats"><span><strong>198</strong>lá trong bộ</span><span><strong>14</strong>nhóm mới</span><span><strong>4</strong>màu quen thuộc</span></div>
+        <div className="studio-stats"><span><strong>202</strong>lá trong bộ</span><span><strong>15</strong>nhóm mới</span><span><strong>4</strong>màu quen thuộc</span></div>
       </div>
       <div className="studio-fan" aria-label="Ba mặt bài tiêu biểu">
         <ExpandedCardFace card={{ kind: "wild-up", color: null }} /><ExpandedCardFace card={{ kind: "wild-shield", color: null }} /><ExpandedCardFace card={{ kind: "wild-target-four", color: null }} />
@@ -46,6 +46,6 @@ export function CardGallery() {
         <ExpandedCardFace card={{ kind: "tornado", color: "green" }} /><ExpandedCardFace card={{ kind: "wild-battle", color: null }} /><ExpandedCardFace card={{ kind: "discard-color", color: "yellow" }} /><ExpandedCardFace card={{ kind: "wild-divide-two", color: null }} />
       </div></div>
     </section>
-    <footer className="studio-footer"><span>MeepleVerse · UNO Mở rộng</span><span>112 lá số · 32 chức năng nền · 54 mở rộng</span><Link href="/games">Khám phá game ↗</Link></footer>
+    <footer className="studio-footer"><span>MeepleVerse · UNO Mở rộng</span><span>112 lá số · 32 chức năng nền · 58 mở rộng</span><Link href="/games">Khám phá game ↗</Link></footer>
   </main>;
 }
