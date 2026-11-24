@@ -37,7 +37,7 @@ export function planExpandedEffects(frame: ExpandedVisualFrame): ExpandedEffectP
  const oldIds = new Set(before?.self.hand.map(card => card.id));
  const draws: ExpandedEffectPlan["draws"] = [...totals].filter(([,count]) => count > 0).map(([playerId,count]) => {
   const publicCards = tornado?.playerId === playerId ? tornado.cards : reveal?.playerId === playerId ? [reveal.card] : [];
-  return { playerId, count, publicCards, revealStep: Math.min(1.2,20 / Math.max(1,publicCards.length)),
+  return { playerId, count, publicCards, revealStep: Math.min(2.5,20 / Math.max(1,publicCards.length)),
     publicKind: tornado?.playerId === playerId ? "tornado" : reveal?.playerId === playerId ? "random" : undefined,
     publicColor: tornado?.playerId === playerId ? tornado.color : undefined,
     cards: playerId === after?.self.playerId ? after.self.hand.filter(card => !oldIds.has(card.id)).slice(0,count) : [], delay: base + .12,

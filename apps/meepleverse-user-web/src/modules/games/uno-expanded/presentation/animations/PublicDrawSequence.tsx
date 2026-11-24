@@ -28,8 +28,8 @@ export function PublicDrawSequence({ draw, geometry:geo, speed, reduced }: { dra
     <motion.div key={card.id} className="flying-card public-draw-flight" data-effect="public-reveal" data-player-id={draw.playerId} data-card-id={card.id} data-public-index={index} data-public-kind={draw.publicKind} data-card-visibility="public"
       style={{width,height,perspective:800}} initial={reduced?{x:center.x-width/2,y:center.y-height/2}:{x:geo.deck.x-width/2,y:geo.deck.y-height/2,opacity:0}}
       animate={reduced?{x:center.x-width/2,y:center.y-height/2}:{x:[geo.deck.x-width/2,center.x-width/2,center.x-width/2,to.x-width/2],y:[geo.deck.y-height/2,center.y-height/2,center.y-height/2,to.y-height/2],opacity:[0,1,1,0],scale:[.85,1,1,.6]}}
-      transition={{duration:reduced?0:draw.revealStep*pace,times:[0,.18,.78,1],ease:"easeInOut"}}>
-      {reduced?<ExpandedCardFace card={card}/>:<motion.div className="public-draw-flipper" initial={{rotateY:0}} animate={{rotateY:[0,180,180,360]}} transition={{duration:draw.revealStep*pace,times:[0,.18,.78,1]}}>
+      transition={{duration:reduced?0:draw.revealStep*pace,times:[0,.12,.88,1],ease:"easeInOut"}}>
+      {reduced?<ExpandedCardFace card={card}/>:<motion.div className="public-draw-flipper" initial={{rotateY:0}} animate={{rotateY:[0,180,180,360]}} transition={{duration:draw.revealStep*pace,times:[0,.12,.88,1]}}>
         <div className="public-draw-back"><CardBack/></div><div className="public-draw-front"><ExpandedCardFace card={card}/></div>
       </motion.div>}
     </motion.div>
