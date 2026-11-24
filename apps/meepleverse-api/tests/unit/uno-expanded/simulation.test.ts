@@ -4,7 +4,7 @@ import { createExpandedGame, applyExpandedCommand, advanceExpandedEffects, getEx
 import { seeded } from "../uno/fixtures.js";
 import { conserved } from "./fixtures.js";
 describe("Expanded complete-rule simulation", () => {
-  it.each([2, 3, 4])("finishes 20 seeded %i-player games with all mini-games and conserves 198 cards after each transition", count => {
+  it.each([2, 3, 4])("finishes 20 seeded %i-player games with all mini-games and conserves 202 cards after each transition", count => {
     for (let seed = 1; seed <= 20; seed++) {
       const random = seeded(seed); let now = 0;
       let game = createExpandedGame(Array.from({ length: count }, (_, i) => "p" + i), random);
@@ -40,10 +40,10 @@ describe("Expanded complete-rule simulation", () => {
               remaining.filter(held => held.color === color).length > remaining.filter(held => held.color === best).length ? color : best, "blue");
             const selected = card.kind === "wild-divide-two" ? remaining.slice(0, Math.floor(remaining.length / 2)) : [];
             const discarded = card.kind === "discard-color" || card.kind === "wild-discard" ? remaining.filter(held => held.color === (card.color ?? chosenColor)).length : selected.length;
-            command = { type: "PLAY_CARD", cardId: card.id, declareUno: remaining.length - discarded === 1,
+            command = { type: "PLAY_CARD", cardId: card.id, declareUno: card.kind !== "wild-card-swap" && remaining.length - discarded === 1,
               ...(card.color === null ? { chosenColor } : {}),
               ...(card.kind === "wild-divide-two" ? { discardCardIds: selected.map(card => card.id) } : {}),
-              ...(card.kind === "wild-target-four" || card.kind === "wild-battle" ? { targetPlayerId: game.players[(game.currentIndex + 1) % count]!.id } : {}) };
+              ...(card.kind === "wild-target-four" || card.kind === "wild-battle" || card.kind === "wild-card-swap" ? { targetPlayerId: game.players[(game.currentIndex + 1) % count]!.id } : {}) };
           } else command = { type: game.phase === "draw-stack" ? "ACCEPT_DRAW_PENALTY" : game.phase === "drawn" ? "PASS_TURN" : "DRAW_CARD" };
         }
         game = applyExpandedCommand(game, actor.id, command, random, { now }).state;

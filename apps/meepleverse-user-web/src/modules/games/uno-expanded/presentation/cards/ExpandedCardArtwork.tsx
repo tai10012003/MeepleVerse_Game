@@ -3,7 +3,7 @@ import { ActionArtwork, NumberArtwork } from "../../../uno-common/presentation/c
 import { unreachableCard } from "../../model/card-presentation";
 import { FourColorOval, ShieldSymbol, UpSymbol, TargetSymbol, TornadoSymbol, SevenSymbol, CardCluster, DiscardSymbol, SkipSymbol } from "./CardSymbols";
 function Center({ children, size = 60 }: { children: React.ReactNode; size?: number }) { return <svg x={50 - size / 2} y={72 - size / 2} width={size} height={size} viewBox="0 0 100 100">{children}</svg>; }
-export function ExpandedCardArtwork({ card }: { card: UnoExpandedCardFace }) {
+export function ExpandedCardArtwork({ card }: { card: Exclude<UnoExpandedCardFace, { kind: "wild-card-swap" }> }) {
   switch (card.kind) {
     case "number": return <svg x="6" y="10" width="88" height="124" viewBox="0 0 100 140"><NumberArtwork value={card.value} /></svg>;
     case "skip": case "reverse": case "draw-two": case "wild": case "wild-draw-four": case "wild-draw-six": case "wild-draw-eight":

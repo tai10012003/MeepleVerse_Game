@@ -23,6 +23,6 @@ export function createExpandedGame(playerIds: readonly string[], random: RandomS
   requireExpanded(opening?.kind === "number", "INVALID_SETUP");
   if (returned.length) piles.drawPile = shuffle([...piles.drawPile, ...returned], random, invalidRandom);
   piles.discardPile = [opening];
-  return { gameId: "uno-expanded", rulesVersion: "uno-expanded-v1", revision: 0, phase: "turn",
+  return { gameId: "uno-expanded", rulesVersion: "uno-expanded-v2", revision: 0, phase: "turn",
     players, dealerIndex: dealer, currentIndex: getNextPlayer(dealer, players.length, 1), drawnCardId: null, pendingDraw: 0, blockedTurns: 0, result: null, effectSequence: 0, effect: null, direction: 1, activeColor: opening.color, ...piles };
 }

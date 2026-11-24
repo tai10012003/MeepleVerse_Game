@@ -11,17 +11,17 @@ const expectedKinds = [
   ["seven-change-left", 2], ["seven-change-right", 2], ["wild-target-four", 4],
   ["wild-multiply-two", 2], ["wild-divide-two", 4], ["wild-shield", 6],
   ["skip-two", 4], ["discard-color", 4], ["wild-discard", 2], ["wild-random", 4],
-  ["wild-draw-six", 2], ["wild-draw-eight", 2],
+  ["wild-card-swap", 4], ["wild-draw-six", 2], ["wild-draw-eight", 2],
 ] as const;
 const basicActionKinds = new Set(["skip", "reverse", "draw-two", "wild", "wild-draw-four"]);
 
 describe("UNO expanded deck configuration", () => {
-  it("contains exactly 198 physical cards, split into 112 numbers, 32 basic actions and 54 new actions", () => {
+  it("contains exactly 202 physical cards, split into 112 numbers, 32 basic actions and 58 new actions", () => {
     const deck = createExpandedDeck();
-    expect(deck).toHaveLength(198);
+    expect(deck).toHaveLength(202);
     expect(deck.filter(card => card.kind === "number")).toHaveLength(112);
     expect(deck.filter(card => basicActionKinds.has(card.kind))).toHaveLength(32);
-    expect(deck.filter(card => card.kind !== "number" && !basicActionKinds.has(card.kind))).toHaveLength(54);
+    expect(deck.filter(card => card.kind !== "number" && !basicActionKinds.has(card.kind))).toHaveLength(58);
     const counts = Object.fromEntries(expectedKinds);
     expect(Object.fromEntries([...new Set(deck.map(card => card.kind))].map(kind => [kind, deck.filter(card => card.kind === kind).length]))).toEqual(counts);
   });
@@ -29,7 +29,7 @@ describe("UNO expanded deck configuration", () => {
   it("gives every card a nonempty, edition-prefixed unique ID", () => {
     const ids = createExpandedDeck().map(card => card.id);
     expect(ids.every(id => id.startsWith("uno-expanded:") && id.length > "uno-expanded:".length)).toBe(true);
-    expect(new Set(ids).size).toBe(198);
+    expect(new Set(ids).size).toBe(202);
     const basicIds = new Set(createBasicDeck().map(card => card.id));
     expect(ids.some(id => basicIds.has(id))).toBe(false);
   });
@@ -49,9 +49,9 @@ describe("UNO expanded deck configuration", () => {
     expect(createExpandedDeck().filter(card => card.kind === kind)).toHaveLength(count);
   });
 
-  it("has exactly 156 colored cards and 42 wild cards, with no colored Wilds", () => {
+  it("has exactly 156 colored cards and 46 wild cards, with no colored Wilds", () => {
     const deck = createExpandedDeck();
-    expect(deck.filter(card => card.color === null)).toHaveLength(42);
+    expect(deck.filter(card => card.color === null)).toHaveLength(46);
     expect(deck.filter(card => card.color !== null)).toHaveLength(156);
     for (const card of deck) {
       expect(card.color === null).toBe(card.kind.startsWith("wild"));
@@ -78,7 +78,7 @@ describe("UNO expanded deck configuration", () => {
     for (let i = 0; i < first.length; i++) expect(first[i]).not.toBe(second[i]);
     first[0]!.id = "changed"; first.pop(); first.reverse();
     expect(second).toEqual(createExpandedDeck());
-    expect(second).toHaveLength(198);
+    expect(second).toHaveLength(202);
   });
 
   it("freezes recipes so modifying a returned deck cannot change future deck composition", () => {
@@ -90,7 +90,7 @@ describe("UNO expanded deck configuration", () => {
     const entry = UNO_EXPANDED_DECK_CONFIG[0]!;
     expect(Reflect.set(entry, "copies", 0)).toBe(false);
     expect(Reflect.set(entry.face, "color", "blue")).toBe(false);
-    expect(createExpandedDeck()).toHaveLength(198);
+    expect(createExpandedDeck()).toHaveLength(202);
   });
 
   it("extends shared card types without widening the Basic contract", () => {

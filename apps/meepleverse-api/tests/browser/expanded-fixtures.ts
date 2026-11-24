@@ -28,7 +28,7 @@ export function expandedBrowserFixture(ids: readonly string[], scenario: string)
     : scenario === "expanded-divide" ? [[wild("divide", "wild-divide-two"), num("keep-red", "red", 9), num("return-blue", "blue", 2)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]]
     : [[{ id: "discard", kind: "discard-color", color: "red" }, num("a-red", "red", 9)], [num("b-green", "green", 3), num("b-blue", "blue", 4)]];
   const stock = [num("draw-red", "red", 1), ...Array.from({ length: 24 }, (_, i) => num(`stock-${i}`, "yellow", i % 10))];
-  const game: UnoExpandedGame = { gameId: "uno-expanded", rulesVersion: "uno-expanded-v1", revision: 0, phase: "turn", players: ids.map((id, i) => ({ id, hand: hands[i] ?? [num(`fallback-${i}`)] })),
+  const game: UnoExpandedGame = { gameId: "uno-expanded", rulesVersion: "uno-expanded-v2", revision: 0, phase: "turn", players: ids.map((id, i) => ({ id, hand: hands[i] ?? [num(`fallback-${i}`)] })),
     dealerIndex: ids.length - 1, currentIndex: 0, direction: 1, activeColor: "red", drawPile: stock.reverse(), discardPile: [num("top", "red", 5)],
     drawnCardId: null, pendingDraw: 0, blockedTurns: 0, result: null, effectSequence: 0, effect: null };
   // Short deadlines only in trusted test fixtures; production timing and rules are unchanged.

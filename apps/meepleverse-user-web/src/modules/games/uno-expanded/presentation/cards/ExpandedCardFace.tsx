@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { UnoExpandedCardFace } from "@meepleverse/contracts/uno-expanded";
 import { CARD_INKS, expandedCardName } from "../../model/card-presentation";
+import { CardSwapPreview } from "./CardSwapPreview";
 import { ExpandedCardArtwork } from "./ExpandedCardArtwork";
 import { ExpandedCardCorner } from "./ExpandedCardCorner";
 import "./expanded-cards.css";
@@ -10,6 +11,7 @@ const NO_OVAL = new Set<UnoExpandedCardFace["kind"]>(["wild", "wild-draw-four", 
 export function ExpandedCardFace({ card, decorative = false, className = "" }: {
   card: UnoExpandedCardFace; decorative?: boolean; className?: string;
 }) {
+  if (card.kind === "wild-card-swap") return <CardSwapPreview decorative={decorative} className={className} />;
   const ink = card.color ? CARD_INKS[card.color] : "#121212";
   const outline = OUTLINED.has(card.kind);
   return <svg className={`expanded-card-face ${className}`} viewBox="0 0 100 144" focusable="false"

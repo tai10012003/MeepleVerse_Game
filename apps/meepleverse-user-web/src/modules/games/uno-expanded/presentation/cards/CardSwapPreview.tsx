@@ -50,9 +50,9 @@ function HandWithCards({ corner = false }: { corner?: boolean }) {
   </g>;
 }
 
-export function CardSwapPreview() {
+export function CardSwapPreview({ decorative = false, className = "" }: { decorative?: boolean; className?: string } = {}) {
   const clipId = "card-swap-clip-" + useId().replace(/[^a-zA-Z0-9_-]/g, "");
-  return <svg className="expanded-card-face" viewBox="0 0 100 144" role="img" aria-label="Xem trước lá Đổi tay bài: hai bàn tay trao đổi bộ bài" focusable="false" data-card-preview="card-swap">
+  return <svg className={`expanded-card-face ${className}`} viewBox="0 0 100 144" role={decorative ? undefined : "img"} aria-hidden={decorative || undefined} aria-label={decorative ? undefined : "Đổi tay bài: hai bàn tay trao đổi bộ bài"} focusable="false" data-card-preview="card-swap" data-card-kind="wild-card-swap" data-card-color="wild">
     <defs><clipPath id={clipId}><rect x="3.5" y="3.5" width="93" height="137" rx="5" /></clipPath></defs>
     <rect width="100" height="144" rx="8" fill={PAPER} />
     <rect x="3.5" y="3.5" width="93" height="137" rx="5" fill={INK} />

@@ -20,7 +20,7 @@ for (const color of COLORS) {
   else add({ kind: "seven-change-right", color, value: 7 }, 1);
 }
 for (const kind of ["wild", "wild-draw-four"] as const) add({ kind, color: null }, 4);
-for (const kind of ["wild-up", "wild-battle", "wild-target-four", "wild-divide-two", "wild-random"] as const) add({ kind, color: null }, 4);
+for (const kind of ["wild-up", "wild-battle", "wild-target-four", "wild-divide-two", "wild-random", "wild-card-swap"] as const) add({ kind, color: null }, 4);
 add({ kind: "wild-shield", color: null }, 6);
 for (const kind of ["wild-multiply-two", "wild-discard", "wild-draw-six", "wild-draw-eight"] as const) add({ kind, color: null }, 2);
 

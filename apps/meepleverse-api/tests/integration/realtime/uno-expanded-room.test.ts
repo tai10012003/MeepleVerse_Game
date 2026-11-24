@@ -54,7 +54,7 @@ describe("internal Expanded WebSocket rooms", () => {
   interface Guest { room: Room; view: UnoExpandedRoomView | null; replies: UnoExpandedActionReply[]; events: UnoExpandedGameEvents[] }
   let runtime: ReturnType<typeof createRealtimeServer>; let endpoint = "";
   const guests: Guest[] = [];
-  let scenario: "normal" | "stacking" | "effects" | "finish" | "bulk" | "skip-two" | "bulk-finish" = "normal";
+  let scenario: "normal" | "stacking" | "effects" | "finish" | "bulk" | "skip-two" | "bulk-finish" | "swap" = "normal";
   async function attach(room: Room) {
     const guest: Guest = { room, view: null, replies: [], events: [] }; guests.push(guest);
     room.reconnection.enabled = false; room.onError(() => {});
@@ -85,6 +85,11 @@ describe("internal Expanded WebSocket rooms", () => {
     runtime = createRealtimeServer({ enableExpandedRooms: true, reconnectSeconds: 0.6,
       expandedGameFactory: ids => {
         if (scenario === "normal") return createExpandedGame(ids, seeded(29));
+        if (scenario === "swap") {
+          const game = fixture([[black("swap-card", "wild-card-swap"),num("actor-secret-a"),num("actor-secret-b")],
+            ...ids.slice(1).map((_,i)=>[num(`guest-secret-${i}`)])],stock(10));
+          game.players.forEach((player,i)=>{player.id=ids[i]!;}); return game;
+        }
         if (scenario === "bulk" || scenario === "skip-two" || scenario === "bulk-finish") {
           const game = scenario === "bulk" ? fixture([
             [black("divide", "wild-divide-two"), num("secret-a"), black("secret-b"), num("keep-a"), num("keep-b")],
@@ -114,7 +119,7 @@ describe("internal Expanded WebSocket rooms", () => {
     }));
   });
   afterAll(async () => { await runtime?.server.gracefullyShutdown(false); });
-  it.each([2, 3, 4])("prepares a %i-player 198-card room with identical public state and strictly private hands", async count => {
+  it.each([2, 3, 4])("prepares a %i-player 202-card room with identical public state and strictly private hands", async count => {
     const players = await group(count); expect((await start(players[0]!)).ok).toBe(true);
     await Promise.all(players.map(fresh));
     const views = players.map(player => player.view!.game!);
@@ -124,7 +129,7 @@ describe("internal Expanded WebSocket rooms", () => {
       const view = views[index]!;
       expect(guest.view!.gameId).toBe("uno-expanded"); expect(view.phase).toBe("turn");
       expect(publicView(view)).toEqual(publicView(views[0]!));
-      expect(view.self.hand).toHaveLength(7); expect(view.drawPileCount).toBe(198 - count * 7 - 1);
+      expect(view.self.hand).toHaveLength(7); expect(view.drawPileCount).toBe(202 - count * 7 - 1);
       expect(view.topCard.kind).toBe("number"); expect(view.players.some(player => player.playerId === view.currentPlayerId)).toBe(true);
       const schema = JSON.stringify(guest.room.state.toJSON());
       await waitFor(() => guest.events.length > 0);
@@ -267,6 +272,37 @@ describe("internal Expanded WebSocket rooms", () => {
     const restored = await attach(await new Client(endpoint).reconnect(token));
     expect(restored.view!.game).toEqual(saved!.game); expect(restored.view!.matchId).toBe(saved!.matchId);
     expect(restored.view!.selfPlayerId).toBe(saved!.selfPlayerId);
+  });
+  it.each([2, 3, 4])("swaps private hands exactly once and restores them on reconnect with %i clients", async count => {
+    scenario="swap";const players=await group(count);const a=players[0]!,target=players[count-1]!;
+    await start(a);await Promise.all(players.map(fresh));
+    const actorId=a.view!.selfPlayerId,targetId=target.view!.selfPlayerId;
+    const action={type:"GAME_COMMAND" as const,matchId:a.view!.matchId!,expectedRevision:0,
+      command:{type:"PLAY_CARD" as const,cardId:"swap-card",targetPlayerId:targetId,chosenColor:"green" as const}};
+    const first=await send(a,action,"swap-once");expect(first.ok).toBe(true);
+    expect(await send(a,action,"swap-once")).toEqual(first);
+    expect((await send(a,action,"swap-stale")).code).toBe("STALE_REVISION");
+    await Promise.all(players.map(fresh));
+    expect(a.view!.game!.self.hand.map(card=>card.id)).toEqual([`guest-secret-${count-2}`]);
+    expect(target.view!.game!.self.hand.map(card=>card.id)).toEqual(["actor-secret-a","actor-secret-b"]);
+    for (const player of players) {
+      const game=player.view!.game!;
+      expect(game.revision).toBe(1);expect(game.activeColor).toBe("green");expect(game.currentPlayerId).toBe(players[1]!.view!.selfPlayerId);
+      expect(game.players.find(held=>held.playerId===actorId)!.handCount).toBe(1);
+      expect(game.players.find(held=>held.playerId===targetId)!.handCount).toBe(2);
+      const events=player.events.flatMap(batch=>batch.events);
+      expect(events.filter(event=>event.type==="HANDS_SWAPPED")).toHaveLength(1);
+      expect(events.some(event=>event.type==="UNO_PENALTY")).toBe(false);
+      const publicData=JSON.stringify({events,schema:player.room.state.toJSON()});
+      for(const owner of players) for(const card of owner.view!.game!.self.hand) {
+        expect(publicData).not.toContain(card.id);
+        if(owner!==player)expect(JSON.stringify(player.view)).not.toContain(card.id);
+      }
+    }
+    const saved=structuredClone(target.view),token=target.room.reconnectionToken;
+    target.room.connection.close(1000);await waitFor(()=>a.view?.paused);
+    const restored=await attach(await new Client(endpoint).reconnect(token));await waitFor(()=>!a.view?.paused);
+    expect(restored.view!.game).toEqual(saved!.game);expect(restored.view!.matchId).toBe(saved!.matchId);
   });
   it.each([2, 3, 4])("Skip Two publishes the correct next actor to %i real clients", async count => {
     scenario = "skip-two"; const players = await group(count); await start(players[0]!);

@@ -25,7 +25,8 @@ export function prepareHandChange(actor: UnoExpandedGame["players"][number], car
       plan = { kind: "color", color, cards: remaining.filter(held => held.color === color) };
     }
   }
-  const requiresUno = actor.hand.length >= 2 && remaining.length - plan.cards.length === 1;
+  // Swap is one transfer: receiving a one-card hand never requires an UNO declaration.
+  const requiresUno = card.kind !== "wild-card-swap" && actor.hand.length >= 2 && remaining.length - plan.cards.length === 1;
   requireExpanded(!command.declareUno || requiresUno, "INVALID_UNO_CALL");
   return { ...plan, requiresUno };
 }

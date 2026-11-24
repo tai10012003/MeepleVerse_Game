@@ -4,7 +4,7 @@ import { unreachableCard } from "../../model/card-presentation";
 import { SwordsSymbol, ShieldSymbol, UpSymbol, HandSymbol, TargetSymbol, TornadoSymbol, SevenDirectionMark } from "./CardSymbols";
 function Icon({ children, y = 0, size = 18 }: { children: React.ReactNode; y?: number; size?: number }) { return <svg x="0" y={y} width={size} height={size} viewBox="0 0 100 100">{children}</svg>; }
 function Label({ children }: { children: React.ReactNode }) { return <text x="0" y="15" className="expanded-corner-text">{children}</text>; }
-export function ExpandedCardCorner({ card }: { card: UnoExpandedCardFace }) {
+export function ExpandedCardCorner({ card }: { card: Exclude<UnoExpandedCardFace, { kind: "wild-card-swap" }> }) {
   switch (card.kind) {
     case "number": return <Label>{card.value}</Label>;
     case "skip": return <svg width="17" height="17"><SkipMark /></svg>;

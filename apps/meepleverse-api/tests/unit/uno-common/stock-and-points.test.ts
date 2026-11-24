@@ -19,7 +19,7 @@ function verifyStock<Card extends { id: string }>(deck: Card[]) {
 
 describe("shared UNO stock and default scoring", () => {
   it("draws and recycles 108 cards without taking the visible discard or duplicating IDs", () => verifyStock(createDeck()));
-  it("also conserves the 198-card deck without depending on either game's state", () => verifyStock(createExpandedDeck()));
+  it("also conserves the 202-card deck without depending on either game's state", () => verifyStock(createExpandedDeck()));
   it("keeps stock order and moves each physical card once across a refill", () => {
     const piles = { drawPile: ["stock"], discardPile: ["old-1", "old-2", "top"] };
     const hand = ["existing"];

@@ -11,7 +11,7 @@ export interface UnoExpandedResult {
 }
 export interface UnoExpandedView {
   gameId: "uno-expanded";
-  rulesVersion: "uno-expanded-v1";
+  rulesVersion: "uno-expanded-v2";
   revision: number;
   phase: UnoExpandedPhase;
   players: Array<{ playerId: string; handCount: number }>;

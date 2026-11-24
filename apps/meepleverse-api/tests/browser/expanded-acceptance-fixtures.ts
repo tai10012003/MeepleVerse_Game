@@ -2,7 +2,7 @@ import type { UnoExpandedCard as Card } from "@meepleverse/contracts/uno-expande
 import { createExpandedDeck, type UnoExpandedGame } from "../../src/modules/games/uno-expanded/index.js";
 export const ACCEPTANCE_CASES = ["tornado","random-number","random-function","multiply","divide","discard-color","wild-discard","seven-left","seven-right","skip-two","target","stack","uno","rapid","final-six","final-high-five","skip","reverse"] as const;
 export const ACCEPTANCE_SCENARIOS = ACCEPTANCE_CASES.map(name => "expanded-accept-"+name);
-/** Test-only arrangements use all 198 real card faces; nothing enters production bootstraps. */
+/** Test-only arrangements use all 202 real card faces; nothing enters production bootstraps. */
 export function expandedAcceptanceFixture(ids:readonly string[],scenario:string):UnoExpandedGame {
  const name=scenario.replace("expanded-accept-","");
  if(!ACCEPTANCE_CASES.includes(name as typeof ACCEPTANCE_CASES[number])) throw new Error("Unknown acceptance fixture");
@@ -54,9 +54,9 @@ export function expandedAcceptanceFixture(ids:readonly string[],scenario:string)
  if(name==="tornado") prefix.push(number("storm-first","green",1),black("storm-wild","wild"),number("storm-third","blue",6),number("storm-stop","red",4));
  if(name==="random-number") prefix.push(number("random-reveal","yellow",3),number("random-extra-1","green",1),number("random-extra-2","blue",3),number("random-extra-3","yellow",2));
  if(name==="random-function") prefix.push(black("random-reveal","wild-draw-eight"));
- const game:UnoExpandedGame={gameId:"uno-expanded",rulesVersion:"uno-expanded-v1",revision:0,phase:"turn",players:ids.map((id,i)=>({id,hand:hands[i]!})),dealerIndex:ids.length-1,currentIndex:0,direction:1,
+ const game:UnoExpandedGame={gameId:"uno-expanded",rulesVersion:"uno-expanded-v2",revision:0,phase:"turn",players:ids.map((id,i)=>({id,hand:hands[i]!})),dealerIndex:ids.length-1,currentIndex:0,direction:1,
   activeColor:top.color!,drawPile:[...prefix,...deck].reverse(),discardPile:[top],drawnCardId:null,pendingDraw:0,blockedTurns:0,result:null,effectSequence:0,effect:null};
  const all=[...game.drawPile,...game.discardPile,...game.players.flatMap(player=>player.hand)];
- if(all.length!==198||new Set(all.map(card=>card.id)).size!==198) throw new Error("Acceptance fixture lost physical cards");
+ if(all.length!==202||new Set(all.map(card=>card.id)).size!==202) throw new Error("Acceptance fixture lost physical cards");
  return game;
 }

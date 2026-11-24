@@ -10,7 +10,7 @@ export const left = (id: string, color: "red" | "yellow" = "red"): Card => ({ id
 export const right = (id: string, color: "green" | "blue" = "green"): Card => ({ id, kind: "seven-change-right", color, value: 7 });
 export const stock = (count: number) => Array.from({ length: count }, (_, i) => num("stock-" + i, "yellow", i % 10));
 export function fixture(hands: Card[][], next: Card[] = [], top: Card = num("top")): UnoExpandedGame {
-  return { gameId: "uno-expanded", rulesVersion: "uno-expanded-v1", revision: 0, phase: "turn",
+  return { gameId: "uno-expanded", rulesVersion: "uno-expanded-v2", revision: 0, phase: "turn",
     players: hands.map((hand, i) => ({ id: "p" + i, hand })), dealerIndex: hands.length - 1, currentIndex: 0,
     direction: 1, activeColor: top.color ?? "red", drawPile: [...next].reverse(), discardPile: [top],
     drawnCardId: null, pendingDraw: 0, blockedTurns: 0, result: null, effectSequence: 0, effect: null };

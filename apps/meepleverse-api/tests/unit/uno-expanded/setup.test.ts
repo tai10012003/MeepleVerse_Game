@@ -4,20 +4,20 @@ import { UnoExpandedRuleError } from "../../../src/modules/games/uno-expanded/do
 import { createExpandedDeck } from "../../../src/modules/games/uno-expanded/domain/rules/create-deck.js";
 import { seeded } from "../uno/fixtures.js";
 describe("Expanded preparation", () => {
-  it.each([2, 3, 4])("deals seven each, opens with a pure number and conserves 198 identities for %i seats across 100 seeds", count => {
+  it.each([2, 3, 4])("deals seven each, opens with a pure number and conserves 202 identities for %i seats across 100 seeds", count => {
     const ids = Object.freeze(Array.from({ length: count }, (_, i) => "p" + i));
     const expected = createExpandedDeck().map(card => card.id).sort();
     for (let seed = 0; seed < 100; seed++) {
       const game = createExpandedGame(ids, seeded(seed));
       expect(game.phase).toBe("turn"); expect(game.gameId).toBe("uno-expanded");
       expect(game.players.every(player => player.hand.length === 7)).toBe(true);
-      expect(game.drawPile).toHaveLength(198 - count * 7 - 1);
+      expect(game.drawPile).toHaveLength(202 - count * 7 - 1);
       expect(game.discardPile).toHaveLength(1);
       expect(game.discardPile[0]!.kind).toBe("number");
       expect(game.activeColor).toBe(game.discardPile[0]!.color);
       const all = [...game.drawPile, ...game.discardPile, ...game.players.flatMap(player => player.hand)];
       expect(all.map(card => card.id).sort()).toEqual(expected);
-      expect(new Set(all.map(card => card.id)).size).toBe(198);
+      expect(new Set(all.map(card => card.id)).size).toBe(202);
     }
   });
   it("is deterministic, accepts dealer zero, and creates independent state", () => {

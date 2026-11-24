@@ -3,7 +3,7 @@ import type { UnoExpandedCard, UnoColor, UnoExpandedPhase, UnoExpandedResult } f
 import type { UnoDirection } from "@meepleverse/contracts/uno-common";
 export interface UnoExpandedGame {
   gameId: "uno-expanded";
-  rulesVersion: "uno-expanded-v1";
+  rulesVersion: "uno-expanded-v2";
   revision: number;
   phase: UnoExpandedPhase;
   players: Array<{ id: string; hand: UnoExpandedCard[] }>;

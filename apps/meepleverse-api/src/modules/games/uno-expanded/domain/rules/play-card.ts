@@ -11,6 +11,7 @@ import { fixedDrawAmount, isSupportedCard } from "../constants/supported-cards.j
 import { canPlayExpandedCard } from "./can-play-card.js";
 import { prepareHandChange } from "./prepare-hand-change.js";
 import { applyHandChange } from "./apply-hand-change.js";
+import { swapExpandedHands } from "./swap-hands.js";
 import { passExpandedHands } from "./pass-hands.js";
 import { resolveExpandedUno } from "./resolve-uno.js";
 import { acceptExpandedDrawPenalty } from "./accept-draw-penalty.js";
@@ -26,7 +27,7 @@ export function playExpandedCard(game: UnoExpandedGame, actorId: string, command
   requireExpanded(canPlayExpandedCard(game, card), "CARD_NOT_PLAYABLE");
   requireExpanded(card.color === null ? command.chosenColor !== undefined : command.chosenColor === undefined, "INVALID_COLOR");
   let target = getNextPlayer(game.currentIndex, game.players.length, game.direction);
-  if (card.kind === "wild-target-four" || (card.kind === "wild-battle" && (actor.hand.length > 1 || command.targetPlayerId !== undefined))) {
+  if (card.kind === "wild-target-four" || ((card.kind === "wild-battle" || card.kind === "wild-card-swap") && (actor.hand.length > 1 || command.targetPlayerId !== undefined))) {
     target = game.players.findIndex(player => player.id === command.targetPlayerId && player.id !== actorId);
     requireExpanded(target !== -1, "INVALID_TARGET");
   } else requireExpanded(command.targetPlayerId === undefined, "INVALID_TARGET");
@@ -37,6 +38,13 @@ export function playExpandedCard(game: UnoExpandedGame, actorId: string, command
   events.public.push({ type: "CARD_PLAYED", playerId: actorId, card: structuredClone(card) });
   if (card.color === null) events.public.push({ type: "COLOR_CHOSEN", playerId: actorId, color: game.activeColor });
   applyHandChange(game, actorId, handChange, events);
+  if (card.kind === "wild-card-swap") {
+    if (actor.hand.length === 0) { endExpandedGame(game, actorId, events); return; }
+    swapExpandedHands(game, actorId, target, events);
+    game.phase = "turn";
+    game.currentIndex = getNextPlayer(game.currentIndex, game.players.length, game.direction);
+    return;
+  }
   if (card.kind === "seven-change-left" || card.kind === "seven-change-right") {
     // A final non-draw card wins before its remaining transfer effect; never pass an empty hand to win for someone else.
     if (actor.hand.length === 0) { endExpandedGame(game, actorId, events); return; }

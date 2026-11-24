@@ -15,6 +15,7 @@ export type UnoExpandedEvent =
   | { type: "DRAW_EFFECT_RESOLVED"; playerId: string; actorId: string; kind: "tornado" | "wild-random" | "wild-multiply-two"; count: number }
   | { type: "COLOR_DISCARDED"; playerId: string; color: UnoColor; cards: UnoExpandedCard[] }
   | { type: "HAND_REDUCED"; playerId: string; count: number }
+  | { type: "HANDS_SWAPPED"; playerId: string; targetPlayerId: string; playerHandCount: number; targetHandCount: number }
   | { type: "HANDS_PASSED"; playerId: string; direction: 1 | -1; transfers: Array<{ fromPlayerId: string; toPlayerId: string; count: number }> }
   | { type: "EFFECT_STARTED"; effectId: string; kind: "up" | "battle" | "high-five"; actorId: string }
   | { type: "EFFECT_OPENED"; effectId: string; attempt: number }
